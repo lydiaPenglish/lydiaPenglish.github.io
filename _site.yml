@@ -1,0 +1,17 @@
+name: "lydia's-website"
+output_dir: "."
+navbar:
+  title: "Lydia's Website"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    - text: "Favorites"
+      href: favorites.html
+output:
+  html_document:
+    theme: lumen
+    highlight: textmate  
+
+      

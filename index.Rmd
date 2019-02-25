@@ -1,0 +1,5 @@
+---
+title: "Home"
+---
+
+Hello, internet! Here is my very first attempt at a website. You'll find it to be undeveloped, at best.  
