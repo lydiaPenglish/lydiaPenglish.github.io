@@ -9,6 +9,8 @@ navbar:
       href: about.html
     - text: "Favorites"
       href: favorites.html
+    - text: "Images"
+      href: images.html
 output:
   html_document:
     theme: lumen
