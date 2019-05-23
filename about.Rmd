@@ -1,9 +1,0 @@
----
-title: "About This Website"
----
-
-I'm a Masters' student at Iowa State University straddling three areas: agronomy, sustainable agriculture, and ecology & evolutionary biology. I work on a project called [STRIPS](https://www.nrem.iastate.edu/research/STRIPS/) which integrates production and conservation land onto the same acreage. 
-
-I hail from the small state of Rhode Island, but consider myself a midwesterner since I've spent the last 10 years here. 
-
-[Recent-ish CV](LydiaCV_Jan2019.pdf)

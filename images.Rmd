@@ -1,7 +1,0 @@
----
-title: "Images"
----
-
-Testing images
-
-![butterly](butterfly.png)
