@@ -4,19 +4,19 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-02-12T18:02:21-06:00</lastmod>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2020-02-12T18:02:21-06:00</lastmod>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/testing/</loc>
-    <lastmod>2020-02-12T18:02:21-06:00</lastmod>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
@@ -26,16 +26,17 @@
   
   <url>
     <loc>/authors/admin/</loc>
-    <lastmod>2019-06-25T10:47:02-05:00</lastmod>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/aboutme/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/authors/</loc>
-    <lastmod>2019-06-25T10:47:02-05:00</lastmod>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -46,27 +47,32 @@
   
   <url>
     <loc>/project/pfiweeds/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/project/cychecks/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/project/echphenology/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/gallery/</loc>
-    <lastmod>2019-06-25T10:47:02-05:00</lastmod>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/blog/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/project/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -77,6 +83,7 @@
   
   <url>
     <loc>/projects/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
@@ -86,6 +93,7 @@
   
   <url>
     <loc>/project/stripsveg/</loc>
+    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
 </urlset>

@@ -1,2 +1,2 @@
 /* Source Themes Academic v4.3.1 | https://sourcethemes.com/academic/ */
-@font-face{font-family:firasans-light;font-style:normal;font-weight:400;src:local(FiraSans-Light),url(fonts/FiraSans-Light.ttf)}.aboutme-header{position:relative;height:300px;background-size:cover;background-position:50%}
+@font-face{font-family:fira sans;font-style:normal;font-weight:400;src:local(FiraSans-Light),url(fonts/FiraSans-Light.ttf)}.aboutme-header{position:relative;height:300px;background-size:cover;background-position:50%}
