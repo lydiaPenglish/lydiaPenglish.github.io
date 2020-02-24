@@ -3,44 +3,30 @@
 #     desired widget in your `content/home/` folder.
 #   The weight parameter defines the order that the links will appear in.
 
-[[main]]
-  name = "Home"
-  url = "#about"
-  weight = 10
 
 [[main]]
-  name = "Research"
-  url = "#research"
-  weight = 20
+  name = "Blog"
+  url = "blog"
+  weight = 1
 
 [[main]]
-  name = "Side Projects"
-  url = "#projects"
-  weight = 30
-
-#[[main]]
-#  name = "Publications"
-#  url = "#featured"
-#  weight = 40
-
-#[[main]]
-#  name = "Courses"
-#  url = "courses/"
-#  weight = 50
+  name = "Research projects"
+  url = "projects"
+  weight = 2
+  
+[[main]]
+  name = "Talks"
+  url = "talks"
+  weight = 5
 
 [[main]]
   name = "Gallery"
-  url = "#gallery"
-  weight = 40
+  url = "gallery"
+  weight = 4
 
 [[main]]
-  name = "Contact"
-  url = "#contact"
-  weight = 50
+  name = "About me"
+  url = "aboutme"
+  weight = 6
 
-# Linking to a PDF of your resume/CV from the menu.
-# To enable, copy your resume/CV to `static/files/cv.pdf` and uncomment the lines below.
-[[main]]
-   name = "CV"
-   url = "files/LydiaCV_June2019.pdf"
-   weight = 60
+

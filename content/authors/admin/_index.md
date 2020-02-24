@@ -24,9 +24,9 @@ social:
 - icon: envelope
   icon_pack: fas
   link: '#contact'
-# - icon: twitter
-#   icon_pack: fab
-#   link: https://twitter.com/GeorgeCushen
+- icon: twitter
+  icon_pack: fab
+  link: https://twitter.com/lydi_english
 # - icon: google-scholar
 #   icon_pack: ai
 #   link: https://scholar.google.co.uk/citations?user=sIwtMXoAAAAJ
@@ -39,5 +39,5 @@ user_groups:
 - Visitors
 ---
 
-Lydia English is a graduate research assistant in the department of Agronomy at Iowa State University. She currently works for Matt Liebman, PhD. She is interested in diversifying agricultural landscapes by incorporating ecology into farming practices. 
+Lydia English is a graduate research assistant in the department of Agronomy at Iowa State University. She currently works for [Dr. Matt Liebman](http://www.wallacechair.iastate.edu/). She is interested in diversifying agricultural landscapes by extending crop rotations and incorporating native habitat into farmscapes. She is affiliated with the [STRIPS project](https://www.nrem.iastate.edu/research/STRIPS/) at Iowa State University. 
  
