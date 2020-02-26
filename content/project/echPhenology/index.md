@@ -11,6 +11,12 @@ image:
   caption: "photo from http://echinaceaproject.org/"
   focal_point: "Center"
   preview_only: false
+  
+links:
+- icon: github
+  icon_pack: fab
+  name: Source Code
+  url: https://github.com/lydiaPenglish/echPhenology 
 
 ---
   
