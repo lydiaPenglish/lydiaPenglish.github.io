@@ -15,6 +15,7 @@ interests:
 - Sustainable Agriculture
 - Community Ecology
 - Data Visualization 
+- Crafting
 name: Lydia English
 organizations:
 - name: Iowa State University

@@ -17,7 +17,17 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/project/pfiweeds/</guid>
-      <description>&lt;p&gt;Information about this project with Gina&lt;/p&gt;
+      <description>
+
+&lt;p&gt;Acknowledgements: This project is &lt;strong&gt;way&lt;/strong&gt; bigger than me. The primary investigator is Gina Nichols in conjuction with Stefan Gailans and Sarah Carlson at Practical Farmers of Iowa. Further support was provided by Matt Liebman.&lt;/p&gt;
+
+&lt;p&gt;Disclaimer: Thoughts are my own.&lt;/p&gt;
+
+&lt;h4 id=&#34;a-short-preamble&#34;&gt;A short preamble:&lt;/h4&gt;
+
+&lt;p&gt;In Iowa, the major cropping system is a two-year rotation of corn and soybeans. These two species are warm-season crops, which means they primarily grow during the warm months: May - October. While the whole state seems to green up during the summer, during the off season (November - April (ish)), the soil is largely bare. It&amp;rsquo;s not hard to imagine that having no vegetation for at least half the year + precipitation will result in massive amounts of erosion and nutrient runoff.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Enter cover crops.&lt;/strong&gt; Sown in the fall and killed (&amp;ldquo;terminated&amp;rdquo;) in the spring, cover crops are meant to provide continuous cover on the landscape. Besides holding the physical soil in place with their roots, cover crops can also take up excess, available nutrients that might otherwise leave the field.&lt;/p&gt;
 </description>
     </item>
     
@@ -27,9 +37,29 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/project/cychecks/</guid>
-      <description>&lt;p&gt;CyChecks is a project&amp;hellip; blah, blah, blah&lt;/p&gt;
+      <description>
+
+&lt;p&gt;Acknowledgements: This work would &lt;strong&gt;not&lt;/strong&gt; be possible without the hardworking Gina Nichols and Jarad Niemi.&lt;/p&gt;
+
+&lt;h4 id=&#34;preamble&#34;&gt;Preamble:&lt;/h4&gt;
+
+&lt;p&gt;CyChecks began as a required assignment in STAT 585 at Iowa State University (ISU). As groups, we were tasked with creating a package that had data and useful functions. My collaborator and peer, Gina Nichols, had the great idea of looking at salary data from our very own university to see if there are any obvious pay disparities. Gina and I are housed in the Agromony department, which seems to have a lot of male faculty but little female representation, despite having a largely female biased graduate program (cite?). We&amp;rsquo;re able to examine salaries because ISU is a land grant school and is, in part, paid for by the taxpayer. We completed the group project with some other people, which was the original &lt;a href=&#34;https://github.com/vanichols/CyChecks&#34; target=&#34;_blank&#34;&gt;CyChecks&lt;/a&gt;. &lt;a href=&#34;https://en.wikipedia.org/wiki/Cy_the_Cardinal&#34; target=&#34;_blank&#34;&gt;Cy&lt;/a&gt; is ISU&amp;rsquo;s mascot, and Checks because&amp;hellip;well you get it.&lt;/p&gt;
+
+&lt;p&gt;The class ended in the spring of 2019, but Gina and I wanted to continue our analysis, mostly because we didn&amp;rsquo;t have enough time to comb through everything we would have liked for the class project. So was born CyChecks2, which is a cleaner version of the original.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;ve focused our analysis on gender because that&amp;rsquo;s what&amp;rsquo;s included in the public dataset. We realize there is likely an interplay between gender and rate (CITE article), however we are limited in our ability to address this interaction given the data we have. Similarly we realize that our research is considering gender as a binary and is ignoring anyone who decided to omit their gender for any reason.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;If you&amp;rsquo;re interested in the hiccups of wrangling public salary data and HR department information then check out the section at the bottom&lt;/em&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;what-we-found&#34;&gt;What we found&lt;/h4&gt;
 
 &lt;p&gt;Our Shiny app can be found &lt;a href=&#34;https://vanichols.shinyapps.io/myapp/&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;h4 id=&#34;wrangling-issues&#34;&gt;Wrangling issues&lt;/h4&gt;
+
+&lt;p&gt;You guys, this was a little bit of a doozy. The reason is that the salary database did not indicate any employee&amp;rsquo;s department within the university. And while directory data in theory is public (you can google anyone to see where they work at Iowa State), that data is not easily scrape-able. Therefore to gain access to this data we had to wade through the backchannels of ISU HR, who were super kind and helpful in giving us the information we wanted.&lt;/p&gt;
+
+&lt;p&gt;Once equipped with the necessary directory information one might think a simple join would be great, however it&amp;rsquo;s not that easy&amp;hellip;&lt;/p&gt;
 </description>
     </item>
     
@@ -49,7 +79,11 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/project/stripsveg/</guid>
-      <description>&lt;p&gt;Here&amp;rsquo;s information about my thesis project&lt;/p&gt;
+      <description>
+
+&lt;p&gt;Acknowledgements: This project would first and foremost not be possible without the many farmers and landowners (26!) who let me come on to their property and tromp around their fields. This project would also have been harder and more isolating without the many people who sat on plastic buckets and recorded data while out in the field with me. Lastly, thanks to Katherine Goode for statistical advice, my lab group for their guidance, and my committee for keeping me on task.&lt;/p&gt;
+
+&lt;h4 id=&#34;preamble&#34;&gt;Preamble:&lt;/h4&gt;
 </description>
     </item>
     

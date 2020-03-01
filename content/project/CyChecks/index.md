@@ -15,7 +15,9 @@ links:
 
 ---
 
-### Background
+Acknowledgements: This work would **not** be possible without the hardworking Gina Nichols and Jarad Niemi. 
+
+#### Preamble: 
 
 CyChecks began as a required assignment in STAT 585 at Iowa State University (ISU). As groups, we were tasked with creating a package that had data and useful functions. My collaborator and peer, Gina Nichols, had the great idea of looking at salary data from our very own university to see if there are any obvious pay disparities. Gina and I are housed in the Agromony department, which seems to have a lot of male faculty but little female representation, despite having a largely female biased graduate program (cite?). We're able to examine salaries because ISU is a land grant school and is, in part, paid for by the taxpayer. We completed the group project with some other people, which was the original [CyChecks](https://github.com/vanichols/CyChecks). [Cy](https://en.wikipedia.org/wiki/Cy_the_Cardinal) is ISU's mascot, and Checks because...well you get it. 
 
@@ -23,10 +25,14 @@ The class ended in the spring of 2019, but Gina and I wanted to continue our ana
 
 We've focused our analysis on gender because that's what's included in the public dataset. We realize there is likely an interplay between gender and rate (CITE article), however we are limited in our ability to address this interaction given the data we have. Similarly we realize that our research is considering gender as a binary and is ignoring anyone who decided to omit their gender for any reason. 
 
-*If you're interested in some other hiccups that arose when trying to wrangle public salary data skip to the bottom... *
+_If you're interested in the hiccups of wrangling public salary data and HR department information then check out the section at the bottom_
 
-### What we found
+#### What we found
 
 Our Shiny app can be found [here](https://vanichols.shinyapps.io/myapp/)
 
-### Wrangling issues
+#### Wrangling issues
+
+You guys, this was a little bit of a doozy. The reason is that the salary database did not indicate any employee's department within the university. And while directory data in theory is public (you can google anyone to see where they work at Iowa State), that data is not easily scrape-able. Therefore to gain access to this data we had to wade through the backchannels of ISU HR, who were super kind and helpful in giving us the information we wanted. 
+
+Once equipped with the necessary directory information one might think a simple join would be great, however it's not that easy...

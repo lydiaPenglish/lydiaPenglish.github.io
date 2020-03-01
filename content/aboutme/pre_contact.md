@@ -2,9 +2,9 @@
 widget = "blank"
 headless = true
 active = true
-weight = 10
+weight = 50
 
-title = "About Me"
+title = "Contact Me"
 
 [design]
 columns = "1"
@@ -12,15 +12,11 @@ columns = "1"
 [design.background]
 text_color_light = true
 
-[design.spacing]
-padding = ["30px", "0", "30px", "0"]
-
 [advanced]
 # Referencing my custom CSS
-css_style = "background-image:url('/img/headers/salton_sea.JPG');"
+css_style = "background-image:url('/img/headers/salton_sea2.JPG');"
 
 # where it's located in my css file...
 css_class = "aboutme-header"
 +++
-
-   
+  
