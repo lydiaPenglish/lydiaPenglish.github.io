@@ -3,20 +3,54 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/gallery/</loc>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/prairie_colors/a-prairie-color-palette/</loc>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/</loc>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/diy/</loc>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/</loc>
-    <lastmod>2020-02-26T15:00:49-06:00</lastmod>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/post/testing/</loc>
-    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
+    <loc>/tags/prairie/</loc>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/categories/r/</loc>
+    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <priority>0</priority>
   </url>
   
   <url>
@@ -26,7 +60,7 @@
   
   <url>
     <loc>/authors/admin/</loc>
-    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
   </url>
   
   <url>
@@ -36,23 +70,18 @@
   
   <url>
     <loc>/authors/</loc>
-    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/</loc>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/project/pfiweeds/</loc>
-    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
   </url>
   
   <url>
     <loc>/project/cychecks/</loc>
-    <lastmod>2020-02-26T15:00:49-06:00</lastmod>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
   </url>
   
   <url>
@@ -61,13 +90,8 @@
   </url>
   
   <url>
-    <loc>/blog/</loc>
-    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/project/</loc>
-    <lastmod>2020-02-26T15:00:49-06:00</lastmod>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -82,13 +106,8 @@
   </url>
   
   <url>
-    <loc>/tags/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/project/stripsveg/</loc>
-    <lastmod>2020-02-24T17:17:08-06:00</lastmod>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
   </url>
   
 </urlset>

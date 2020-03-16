@@ -6,7 +6,7 @@
 
 [[main]]
   name = "Blog"
-  url = "blog"
+  url = "post"
   weight = 1
 
 [[main]]
@@ -20,7 +20,7 @@
   weight = 5
 
 [[main]]
-  name = "Gallery"
+  name = "Plant Photos"
   url = "gallery"
   weight = 4
 

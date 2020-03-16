@@ -1,64 +1,74 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>R on Lydia English</title>
+    <title>r on Lydia English</title>
     <link>/categories/r/</link>
-    <description>Recent content in R on Lydia English</description>
+    <description>Recent content in r on Lydia English</description>
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2020</copyright>
-    <lastBuildDate>Thu, 23 Jul 2015 21:13:14 -0500</lastBuildDate>
+    <lastBuildDate>Mon, 16 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>Hello R Markdown</title>
-      <link>/research/2015-07-23-r-rmarkdown/</link>
-      <pubDate>Thu, 23 Jul 2015 21:13:14 -0500</pubDate>
+      <title>A prairie color palette</title>
+      <link>/post/prairie_colors/a-prairie-color-palette/</link>
+      <pubDate>Mon, 16 Mar 2020 00:00:00 +0000</pubDate>
       
-      <guid>/research/2015-07-23-r-rmarkdown/</guid>
+      <guid>/post/prairie_colors/a-prairie-color-palette/</guid>
       <description>
 
 
-&lt;div id=&#34;r-markdown&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;R Markdown&lt;/h1&gt;
-&lt;p&gt;This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see &lt;a href=&#34;http://rmarkdown.rstudio.com&#34; class=&#34;uri&#34;&gt;http://rmarkdown.rstudio.com&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;You can embed an R code chunk like this:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(cars)
-##      speed           dist       
-##  Min.   : 4.0   Min.   :  2.00  
-##  1st Qu.:12.0   1st Qu.: 26.00  
-##  Median :15.0   Median : 36.00  
-##  Mean   :15.4   Mean   : 42.98  
-##  3rd Qu.:19.0   3rd Qu.: 56.00  
-##  Max.   :25.0   Max.   :120.00
-fit &amp;lt;- lm(dist ~ speed, data = cars)
-fit
-## 
-## Call:
-## lm(formula = dist ~ speed, data = cars)
-## 
-## Coefficients:
-## (Intercept)        speed  
-##     -17.579        3.932&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I’ve been inspired by other R packages that have created color palettes &lt;a href=&#34;https://nschiett.github.io/fishualize/index.html&#34;&gt;based on living organisms&lt;/a&gt;. Naturally I decided to try to make a color palette using prairie species. I didn’t do anything fancy when chosing colors. I merely used the &lt;a href=&#34;http://instant-eyedropper.com/&#34;&gt;instant eyedropped&lt;/a&gt; to hover over different pixels in the photo and wrote down the hex codes. Obviously colors will vary based on lighting and shading. All the colors and the photos can be found in the photo gallery, if a photo is taken from somewhere else then I’ve noted it as such.&lt;/p&gt;
+&lt;p&gt;For all the botany nerds out there I’ve decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point.&lt;/p&gt;
+&lt;div id=&#34;i.-the-bean-family-fabaceae&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;i. The bean family (Fabaceae)&lt;/h4&gt;
+&lt;p&gt;I started with Purple Prairie Clover (&lt;em&gt;Dalea purpurea&lt;/em&gt;), which was an obvious choice for me since it has a lovely contrasting purple/orange color profile.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dalpu_colors &amp;lt;- c(&amp;quot;#5F1343&amp;quot;, &amp;quot;#A41393&amp;quot;, &amp;quot;#C669D5&amp;quot;,  &amp;quot;#E98018&amp;quot;, &amp;quot;#667056&amp;quot;,
+                  &amp;quot;#2E4D24&amp;quot;)
+dalpu_raw &amp;lt;- readJPEG(&amp;quot;dalpu.JPG&amp;quot;)
+dalpu     &amp;lt;- rasterGrob(dalpu_raw, interpolate = TRUE)
+
+dalpu_gg &amp;lt;- make_col_plot()
+
+grid.arrange(dalpu, dalpu_gg, ncol = 2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;I moved onto Leadplant (&lt;em&gt;Amorpha canescens&lt;/em&gt;) which has a similar color palette to purple prairie clover. Predominantly purple coloring with orange anthers. However, leadplant also has beautiful red styles and the overall color of the plant is a lovely gray-green. Both purple prairie clover and leadplant are in the bean family (Fabaceae).&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;amoca_colors &amp;lt;- c(&amp;quot;#361554&amp;quot;, &amp;quot;#7A4FB6&amp;quot;, &amp;quot;#C7B1F2&amp;quot;, &amp;quot;#E99725&amp;quot;, 
+                  &amp;quot;#8B1C38&amp;quot;, &amp;quot;#778A77&amp;quot;)
+image(1:6, 1, as.matrix(1:6), col = amoca_colors,
+      ylab = &amp;quot;&amp;quot;, xlab = &amp;quot;&amp;quot;, xaxt = &amp;quot;n&amp;quot;, yaxt = &amp;quot;n&amp;quot;, bty = &amp;quot;n&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&#34;including-plots&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Including Plots&lt;/h1&gt;
-&lt;p&gt;You can also embed plots. See Figure &lt;a href=&#34;#fig:pie&#34;&gt;1&lt;/a&gt; for example:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mar = c(0, 1, 0, 1))
-pie(
-  c(280, 60, 20),
-  c(&amp;#39;Sky&amp;#39;, &amp;#39;Sunny side of pyramid&amp;#39;, &amp;#39;Shady side of pyramid&amp;#39;),
-  col = c(&amp;#39;#0292D8&amp;#39;, &amp;#39;#F7EA39&amp;#39;, &amp;#39;#C4B632&amp;#39;),
-  init.angle = -50, border = NA
-)&lt;/code&gt;&lt;/pre&gt;
-&lt;div class=&#34;figure&#34;&gt;&lt;span id=&#34;fig:pie&#34;&gt;&lt;/span&gt;
-&lt;img src=&#34;/post/2015-07-23-r-rmarkdown_files/figure-html/pie-1.png&#34; alt=&#34;A fancy pie chart.&#34; width=&#34;672&#34; /&gt;
-&lt;p class=&#34;caption&#34;&gt;
-Figure 1: A fancy pie chart.
-&lt;/p&gt;
+&lt;div id=&#34;ii.-the-milkweed-family-asclepiadaceae&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;ii. The milkweed family (Asclepiadaceae)&lt;/h4&gt;
+&lt;p&gt;Next I chose buttefly milkweed (&lt;em&gt;Asclepias tuberosa&lt;/em&gt;) which is one of the few orange prairie flowers. Being a milkweed species it prized for the sustenance it provides Monach butterflies larvae.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;asctu_colors &amp;lt;- c(&amp;quot;#F64850&amp;quot;, &amp;quot;#AA230F&amp;quot;, &amp;quot;#FD5D0E&amp;quot;, &amp;quot;#F9AB1A&amp;quot;, &amp;quot;#EFBB56&amp;quot;, 
+                   &amp;quot;#ECE982&amp;quot;, &amp;quot;#B9E437&amp;quot;, &amp;quot;#5F942B&amp;quot;)
+image(1:8, 1, as.matrix(1:8), col = asctu_colors,
+      ylab = &amp;quot;&amp;quot;, xlab = &amp;quot;&amp;quot;, xaxt = &amp;quot;n&amp;quot;, yaxt = &amp;quot;n&amp;quot;, bty = &amp;quot;n&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;I thought I should do another milkweed, so I chose swamp milkweed - which is lovely dark pink.&lt;/p&gt;
 &lt;/div&gt;
+&lt;div id=&#34;iii.-the-daily-family-asteraceae&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;iii. The daily family (Asteraceae)&lt;/h4&gt;
+&lt;p&gt;I knew I wanted to make some color palette from something in the Asteraeae (Daisy) family. Sweet coneflower (&lt;em&gt;Rudbeckia subtermosa&lt;/em&gt;) is related to brown- and black-eyed Susan.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rudsu_colors &amp;lt;- c(&amp;quot;#8D3D46&amp;quot;, &amp;quot;#4B2A17&amp;quot;, &amp;quot;#F4AB00&amp;quot;, &amp;quot;#FEDD00&amp;quot;, &amp;quot;#D3BE17&amp;quot;, 
+                   &amp;quot;#8FA844&amp;quot;, &amp;quot;#4C7A3D&amp;quot;)
+image(1:7, 1, as.matrix(1:7), col = rudsu_colors,
+      ylab = &amp;quot;&amp;quot;, xlab = &amp;quot;&amp;quot;, xaxt = &amp;quot;n&amp;quot;, yaxt = &amp;quot;n&amp;quot;, bty = &amp;quot;n&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;iv.-the-grass-family-poaceae&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;iv. The grass family (Poaceae)&lt;/h4&gt;
+&lt;p&gt;Big bluestem&lt;/p&gt;
+&lt;p&gt;Side oats gramma grass&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;next-steps&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Next steps:&lt;/h4&gt;
+&lt;p&gt;This is all well and good and has been fun for me, but to take these color palettes to the next level would require me to make more official scales: qualitative, sequential, diverging, accent. I also need to make sure all these colors translate well to different types of color-blindness. Perhaps I’ll put it in an R package someday…&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>

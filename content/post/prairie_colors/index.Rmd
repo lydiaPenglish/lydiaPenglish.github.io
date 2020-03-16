@@ -1,0 +1,111 @@
+---
+title: A prairie color palette
+author: Lydia English
+date: '2020-03-16'
+slug: a-prairie-color-palette
+categories:
+  - r
+tags:
+  - prairie
+  - DIY
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-03-16T14:39:22-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+I've been inspired by other R packages that have created color palettes [based on living organisms](https://nschiett.github.io/fishualize/index.html). Naturally I decided to try to make a color palette using prairie species. I didn't do anything fancy when chosing colors. I merely used the [instant eyedropped](http://instant-eyedropper.com/) to hover over different pixels in the photo and wrote down the hex codes. Obviously colors will vary based on lighting and shading. All the colors and the photos can be found in the photo gallery, if a photo is taken from somewhere else then I've noted it as such. 
+
+For all the botany nerds out there I've decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point. 
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(jpeg)
+library(grid)
+library(gridExtra)
+theme_set(theme_minimal())
+```
+```{r, include=FALSE}
+
+make_col_plot <- function(prairiePal = dalpu_colors){
+  df <- data.frame(x = 1:length(prairiePal), y = 1)
+  g1 <- ggplot(df, aes(x, y))+
+    geom_tile(fill = prairiePal)+
+    labs(x = NULL,
+       y = NULL)+
+  guides(fill = NULL)+
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank())
+  
+  return(g1)
+}
+```
+
+
+#### i. The bean family (Fabaceae)
+
+I started with Purple Prairie Clover (*Dalea purpurea*), which was an obvious choice for me since it has a lovely contrasting purple/orange color profile.  
+
+```{r}
+dalpu_colors <- c("#5F1343", "#A41393", "#C669D5",  "#E98018", "#667056",
+                  "#2E4D24")
+dalpu_raw <- readJPEG("dalpu.JPG")
+dalpu     <- rasterGrob(dalpu_raw, interpolate = TRUE)
+
+dalpu_gg <- make_col_plot()
+
+grid.arrange(dalpu, dalpu_gg, ncol = 2)
+```
+
+
+I moved onto Leadplant (*Amorpha canescens*) which has a similar color palette to purple prairie clover. Predominantly purple coloring with orange anthers. However, leadplant also has beautiful red styles and the overall color of the plant is a lovely gray-green. Both purple prairie clover and leadplant are in the bean family (Fabaceae). 
+
+```{r}
+amoca_colors <- c("#361554", "#7A4FB6", "#C7B1F2", "#E99725", 
+                  "#8B1C38", "#778A77")
+image(1:6, 1, as.matrix(1:6), col = amoca_colors,
+      ylab = "", xlab = "", xaxt = "n", yaxt = "n", bty = "n")
+```
+
+
+#### ii. The milkweed family (Asclepiadaceae)
+
+Next I chose buttefly milkweed (*Asclepias tuberosa*) which is one of the few orange prairie flowers. Being a milkweed species it prized for the sustenance it provides Monach butterflies larvae.  
+
+```{r}
+asctu_colors <- c("#F64850", "#AA230F", "#FD5D0E", "#F9AB1A", "#EFBB56", 
+                   "#ECE982", "#B9E437", "#5F942B")
+image(1:8, 1, as.matrix(1:8), col = asctu_colors,
+      ylab = "", xlab = "", xaxt = "n", yaxt = "n", bty = "n")
+```
+
+I thought I should do another milkweed, so I chose swamp milkweed - which is lovely dark pink. 
+
+#### iii. The daily family (Asteraceae)
+
+I knew I wanted to make some color palette from something in the Asteraeae (Daisy) family. Sweet coneflower (*Rudbeckia subtermosa*) is related to brown- and black-eyed Susan. 
+
+```{r}
+rudsu_colors <- c("#8D3D46", "#4B2A17", "#F4AB00", "#FEDD00", "#D3BE17", 
+                   "#8FA844", "#4C7A3D")
+image(1:7, 1, as.matrix(1:7), col = rudsu_colors,
+      ylab = "", xlab = "", xaxt = "n", yaxt = "n", bty = "n")
+```
+
+#### iv. The grass family (Poaceae) 
+
+Big bluestem
+
+
+Side oats gramma grass
+
+
+#### Next steps: 
+
+This is all well and good and has been fun for me, but to take these color palettes to the next level would require me to make more official scales: qualitative, sequential, diverging, accent. I also need to make sure all these colors translate well to different types of color-blindness. Perhaps I'll put it in an R package someday...
