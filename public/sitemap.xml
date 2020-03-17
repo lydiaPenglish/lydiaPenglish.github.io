@@ -4,52 +4,47 @@
   
   <url>
     <loc>/gallery/</loc>
-    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
   </url>
   
   <url>
     <loc>/post/prairie_colors/a-prairie-color-palette/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
   </url>
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/diy/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/post/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/tags/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/prairie/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2020-03-16T14:39:22-05:00</lastmod>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -87,6 +82,11 @@
   <url>
     <loc>/project/echphenology/</loc>
     <lastmod>2020-02-26T15:00:49-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
   </url>
   
   <url>

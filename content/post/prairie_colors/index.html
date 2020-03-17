@@ -22,52 +22,44 @@ projects: []
 
 
 
-<p>I’ve been inspired by other R packages that have created color palettes <a href="https://nschiett.github.io/fishualize/index.html">based on living organisms</a>. Naturally I decided to try to make a color palette using prairie species. I didn’t do anything fancy when chosing colors. I merely used the <a href="http://instant-eyedropper.com/">instant eyedropped</a> to hover over different pixels in the photo and wrote down the hex codes. Obviously colors will vary based on lighting and shading. All the colors and the photos can be found in the photo gallery, if a photo is taken from somewhere else then I’ve noted it as such.</p>
+<p>I’ve been inspired by other R packages that have created color palettes <a href="https://nschiett.github.io/fishualize/index.html">based on living organisms</a>. Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn’t do anything fancy when chosing colors. I merely used the <a href="http://instant-eyedropper.com/">instant eyedropped</a> tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I’ve noted it as such.</p>
 <p>For all the botany nerds out there I’ve decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point.</p>
 <div id="i.-the-bean-family-fabaceae" class="section level4">
 <h4>i. The bean family (Fabaceae)</h4>
 <p>I started with Purple Prairie Clover (<em>Dalea purpurea</em>), which was an obvious choice for me since it has a lovely contrasting purple/orange color profile.</p>
-<pre class="r"><code>dalpu_colors &lt;- c(&quot;#5F1343&quot;, &quot;#A41393&quot;, &quot;#C669D5&quot;,  &quot;#E98018&quot;, &quot;#667056&quot;,
-                  &quot;#2E4D24&quot;)
-dalpu_raw &lt;- readJPEG(&quot;dalpu.JPG&quot;)
-dalpu     &lt;- rasterGrob(dalpu_raw, interpolate = TRUE)
-
-dalpu_gg &lt;- make_col_plot()
-
-grid.arrange(dalpu, dalpu_gg, ncol = 2)</code></pre>
+<p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<p>I moved onto Leadplant (<em>Amorpha canescens</em>) which has a similar color palette to purple prairie clover. Predominantly purple flowers with orange anthers. However, leadplant also has beautiful red stamens and the overall color of the plant is a lovely gray-green. It is one of my favorite plants.</p>
 <p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
-<p>I moved onto Leadplant (<em>Amorpha canescens</em>) which has a similar color palette to purple prairie clover. Predominantly purple coloring with orange anthers. However, leadplant also has beautiful red styles and the overall color of the plant is a lovely gray-green. Both purple prairie clover and leadplant are in the bean family (Fabaceae).</p>
-<pre class="r"><code>amoca_colors &lt;- c(&quot;#361554&quot;, &quot;#7A4FB6&quot;, &quot;#C7B1F2&quot;, &quot;#E99725&quot;, 
-                  &quot;#8B1C38&quot;, &quot;#778A77&quot;)
-image(1:6, 1, as.matrix(1:6), col = amoca_colors,
-      ylab = &quot;&quot;, xlab = &quot;&quot;, xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, bty = &quot;n&quot;)</code></pre>
-<p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 </div>
 <div id="ii.-the-milkweed-family-asclepiadaceae" class="section level4">
 <h4>ii. The milkweed family (Asclepiadaceae)</h4>
-<p>Next I chose buttefly milkweed (<em>Asclepias tuberosa</em>) which is one of the few orange prairie flowers. Being a milkweed species it prized for the sustenance it provides Monach butterflies larvae.</p>
-<pre class="r"><code>asctu_colors &lt;- c(&quot;#F64850&quot;, &quot;#AA230F&quot;, &quot;#FD5D0E&quot;, &quot;#F9AB1A&quot;, &quot;#EFBB56&quot;, 
-                   &quot;#ECE982&quot;, &quot;#B9E437&quot;, &quot;#5F942B&quot;)
-image(1:8, 1, as.matrix(1:8), col = asctu_colors,
-      ylab = &quot;&quot;, xlab = &quot;&quot;, xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, bty = &quot;n&quot;)</code></pre>
+<p>Milkweeds are becoming increasingly popular in priarie restorations due to the fact that they provide essential forage and habitat for Monarch butterly larvae.
+Buttefly milkweed (<em>Asclepias tuberosa</em>) which is one of the few orange prairie flowers. I was actually able to grab a lot of colors from this photo since, for instance, the budding flowers have a nice coral hue. This palette is a lot louder than the other two - hello bright and beautiful orange!</p>
+<p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>I thought I should do another milkweed, so I chose showy milkweed, which has a more color palette that is more similar to the common milkweed we all know. Showy milkweed is just more, well, showy than the common variety.</p>
 <p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>I thought I should do another milkweed, so I chose swamp milkweed - which is lovely dark pink.</p>
 </div>
 <div id="iii.-the-daily-family-asteraceae" class="section level4">
 <h4>iii. The daily family (Asteraceae)</h4>
-<p>I knew I wanted to make some color palette from something in the Asteraeae (Daisy) family. Sweet coneflower (<em>Rudbeckia subtermosa</em>) is related to brown- and black-eyed Susan.</p>
-<pre class="r"><code>rudsu_colors &lt;- c(&quot;#8D3D46&quot;, &quot;#4B2A17&quot;, &quot;#F4AB00&quot;, &quot;#FEDD00&quot;, &quot;#D3BE17&quot;, 
-                   &quot;#8FA844&quot;, &quot;#4C7A3D&quot;)
-image(1:7, 1, as.matrix(1:7), col = rudsu_colors,
-      ylab = &quot;&quot;, xlab = &quot;&quot;, xaxt = &quot;n&quot;, yaxt = &quot;n&quot;, bty = &quot;n&quot;)</code></pre>
+<p>I knew I had to make some color palettes from species in the Asteraeae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (<em>Rudbeckia subtermosa</em>), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets.</p>
 <p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<p>The other asteraceae flower I chose was Rosinweed (<em>Silphium integrefolium</em>) which has a more traditional sunflower appearance (although it is <em>not</em> in the sunflower genus <em>Helianthus</em>).</p>
+<p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 </div>
 <div id="iv.-the-grass-family-poaceae" class="section level4">
 <h4>iv. The grass family (Poaceae)</h4>
-<p>Big bluestem</p>
-<p>Side oats gramma grass</p>
+<p>Grasses flower too!</p>
+<p>Big bluestem is arguably the most quintessential of the prairie plants. It’s one of the plants that gave the tallgrass prairie the “tall” part of its name. It easily dwafts me (a meager 5ft I might add) by mid summer. It’s also commonly called turkey foot because of the way it’s inflorescence is structured. The inflorenscenses are a maroon-purple color and anthers are both orange and yellow. There is also orange on the stem, often near the nodes.</p>
+<p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
+<p>Side oats gramma grass (<em>Bouteloua curtipendula</em> one of the funner scientific names to pronouce) is a shorter grass species that has a lovely spike of florets that hang down along one axis. I haven’t gotten a good photo of Side oats while its flowering so I snagged a photo from Prairie Moon Nursery’s [website] (<a href="https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html" class="uri">https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html</a>). When flowering, Side oats has some beauitfully red anthers and pollen.</p>
+<p><img src="/post/prairie_colors/index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 </div>
 <div id="next-steps" class="section level4">
 <h4>Next steps:</h4>
-<p>This is all well and good and has been fun for me, but to take these color palettes to the next level would require me to make more official scales: qualitative, sequential, diverging, accent. I also need to make sure all these colors translate well to different types of color-blindness. Perhaps I’ll put it in an R package someday…</p>
+<p>This is all well and good and has been fun for me. Here are some things I haven’t done that seem like good ideas to continue this project…</p>
+<ul>
+<li>Check for color blindness. The Side Oats palette especially (hello red and green!) seems like it wouldn’t be appropriate for multiple forms of colorblindness but I need to run my colors through a check to ensure that is correct.</li>
+<li>Create qualitat, sequential, diversing, and accent scales. Some of these palettes already would function well in that regard, but a more concerted effort should be made.</li>
+<li>Put into an R package so others can easily use. Open to name suggestions…</li>
+</ul>
 </div>

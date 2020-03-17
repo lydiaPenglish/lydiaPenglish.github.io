@@ -20,7 +20,7 @@ image:
 projects: []
 ---
 
-I've been inspired by other R packages that have created color palettes [based on living organisms](https://nschiett.github.io/fishualize/index.html). Naturally I decided to try to make a color palette using prairie species. I didn't do anything fancy when chosing colors. I merely used the [instant eyedropped](http://instant-eyedropper.com/) to hover over different pixels in the photo and wrote down the hex codes. Obviously colors will vary based on lighting and shading. All the colors and the photos can be found in the photo gallery, if a photo is taken from somewhere else then I've noted it as such. 
+I've been inspired by other R packages that have created color palettes [based on living organisms](https://nschiett.github.io/fishualize/index.html). Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn't do anything fancy when chosing colors. I merely used the [instant eyedropped](http://instant-eyedropper.com/) tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I've noted it as such. 
 
 For all the botany nerds out there I've decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point. 
 
@@ -30,8 +30,6 @@ library(jpeg)
 library(grid)
 library(gridExtra)
 theme_set(theme_minimal())
-```
-```{r, include=FALSE}
 
 make_col_plot <- function(prairiePal = dalpu_colors){
   df <- data.frame(x = 1:length(prairiePal), y = 1)
@@ -52,60 +50,106 @@ make_col_plot <- function(prairiePal = dalpu_colors){
 
 I started with Purple Prairie Clover (*Dalea purpurea*), which was an obvious choice for me since it has a lovely contrasting purple/orange color profile.  
 
-```{r}
+```{r, echo = FALSE}
 dalpu_colors <- c("#5F1343", "#A41393", "#C669D5",  "#E98018", "#667056",
                   "#2E4D24")
-dalpu_raw <- readJPEG("dalpu.JPG")
-dalpu     <- rasterGrob(dalpu_raw, interpolate = TRUE)
-
-dalpu_gg <- make_col_plot()
+dalpu     <- rasterGrob(readJPEG("dalpu.JPG"), interpolate = TRUE)
+dalpu_gg  <- make_col_plot()
 
 grid.arrange(dalpu, dalpu_gg, ncol = 2)
 ```
 
 
-I moved onto Leadplant (*Amorpha canescens*) which has a similar color palette to purple prairie clover. Predominantly purple coloring with orange anthers. However, leadplant also has beautiful red styles and the overall color of the plant is a lovely gray-green. Both purple prairie clover and leadplant are in the bean family (Fabaceae). 
+I moved onto Leadplant (*Amorpha canescens*) which has a similar color palette to purple prairie clover. Predominantly purple flowers with orange anthers. However, leadplant also has beautiful red stamens and the overall color of the plant is a lovely gray-green. It is one of my favorite plants. 
 
-```{r}
+```{r, echo = FALSE}
 amoca_colors <- c("#361554", "#7A4FB6", "#C7B1F2", "#E99725", 
                   "#8B1C38", "#778A77")
-image(1:6, 1, as.matrix(1:6), col = amoca_colors,
-      ylab = "", xlab = "", xaxt = "n", yaxt = "n", bty = "n")
+amoca     <- rasterGrob(readJPEG("amoca.jpg"), interpolate = TRUE)
+amoca_gg  <- make_col_plot(prairiePal = amoca_colors)
+
+grid.arrange(amoca, amoca_gg, ncol = 2)
 ```
 
 
 #### ii. The milkweed family (Asclepiadaceae)
 
-Next I chose buttefly milkweed (*Asclepias tuberosa*) which is one of the few orange prairie flowers. Being a milkweed species it prized for the sustenance it provides Monach butterflies larvae.  
+Milkweeds are becoming increasingly popular in priarie restorations due to the fact that they provide essential forage and habitat for Monarch butterly larvae. 
+Buttefly milkweed (*Asclepias tuberosa*) is one of the few orange prairie flowers. I was actually able to grab a lot of colors from this photo since, for instance, the budding flowers have a nice coral hue and the inner flower structure is creamy yellow. This palette is also a lot louder than the other two - hello bright and beautiful orange!   
 
-```{r}
+```{r, echo = FALSE}
 asctu_colors <- c("#F64850", "#AA230F", "#FD5D0E", "#F9AB1A", "#EFBB56", 
                    "#ECE982", "#B9E437", "#5F942B")
-image(1:8, 1, as.matrix(1:8), col = asctu_colors,
-      ylab = "", xlab = "", xaxt = "n", yaxt = "n", bty = "n")
+asctu     <- rasterGrob(readJPEG("asctu.jpg"), interpolate = TRUE)
+asctu_gg  <- make_col_plot(prairiePal = asctu_colors)
+
+grid.arrange(asctu, asctu_gg, ncol = 2)
 ```
 
-I thought I should do another milkweed, so I chose swamp milkweed - which is lovely dark pink. 
+I thought I should do another milkweed, so I chose showy milkweed, which has a more color palette that is more similar to the common milkweed we all know. Showy milkweed is just more, well, showy than the common variety. 
+
+```{r, echo = FALSE}
+ascsp_colors <- c("#77162F", "#AE506B", "#D0A9BB", "#C6B9B0", "#8AA467", "#4B873A", "#205713")
+ascsp     <- rasterGrob(readJPEG("ascsp.jpg"), interpolate = TRUE)
+ascsp_gg  <- make_col_plot(prairiePal = ascsp_colors)
+
+grid.arrange(ascsp, ascsp_gg, ncol = 2)
+```
 
 #### iii. The daily family (Asteraceae)
 
-I knew I wanted to make some color palette from something in the Asteraeae (Daisy) family. Sweet coneflower (*Rudbeckia subtermosa*) is related to brown- and black-eyed Susan. 
+I knew I had to make some color palettes from species in the Asteraeae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (*Rudbeckia subtermosa*), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets. 
 
-```{r}
+```{r, echo = FALSE}
 rudsu_colors <- c("#8D3D46", "#4B2A17", "#F4AB00", "#FEDD00", "#D3BE17", 
                    "#8FA844", "#4C7A3D")
-image(1:7, 1, as.matrix(1:7), col = rudsu_colors,
-      ylab = "", xlab = "", xaxt = "n", yaxt = "n", bty = "n")
+rudsu     <- rasterGrob(readJPEG("rudsu.jpg"))
+rudsu_gg  <- make_col_plot(prairiePal = rudsu_colors)
+
+grid.arrange(rudsu, rudsu_gg, ncol = 2)
+```
+
+The other asteraceae flower I chose was Rosinweed (*Silphium integrefolium*) which has a more traditional sunflower appearance (although it is *not* in the sunflower genus *Helianthus*). 
+
+```{r, echo = FALSE}
+silin_colors <- c("#74532C", "#DE9E06", "#E9B907", "#FED806", "#A1B150", 
+                   "#819C3F")
+silin     <- rasterGrob(readJPEG("silin.jpg"))
+silin_gg  <- make_col_plot(prairiePal = silin_colors)
+
+grid.arrange(silin, silin_gg, ncol = 2)
 ```
 
 #### iv. The grass family (Poaceae) 
 
-Big bluestem
+Grasses flower too! 
 
+Big bluestem is arguably the most quintessential of the prairie plants. It's one of the plants that gave the tallgrass prairie the "tall" part of its name. It easily dwafts me (a meager 5ft I might add) by mid summer. It's also commonly called turkey foot because of the way its inflorescences are structured. The inflorenscenses are a maroon-purple color and anthers are both orange and yellow. There is also orange on the stem, often near the nodes. I found it interesting that this color palette is similar to Sweet Coneflower's but is just naturally more muted.   
 
-Side oats gramma grass
+```{r, echo = FALSE}
+andge_colors <- c("#8E5A68", "#BD7353", "#FAAD62", "#FFF07E", "#C8D75F",  
+                  "#99AE55")
+andge     <- rasterGrob(readJPEG("andge.jpg"))
+andge_gg  <- make_col_plot(prairiePal = andge_colors)
+
+grid.arrange(andge, andge_gg, ncol = 2)
+```
+
+Side oats gramma grass (*Bouteloua curtipendula* - one of the funner scientific names to pronouce I may add) is a shorter grass species that has a lovely spike of florets that hang down along one axis. I haven't gotten a good photo of Side oats while it's flowering so I snagged a photo from Prairie Moon Nursery's [website](https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html). When flowering, Side oats has some beauitfully red anthers and pollen. 
+
+```{r, echo = FALSE}
+boucu_colors <- c("#E15B38", "#A5646A", "#6C7258", "#8FB440")
+boucu     <- rasterGrob(readJPEG("boucu.jpg"))
+boucu_gg  <- make_col_plot(prairiePal = boucu_colors)
+
+grid.arrange(boucu, boucu_gg, ncol = 2)
+```
 
 
 #### Next steps: 
 
-This is all well and good and has been fun for me, but to take these color palettes to the next level would require me to make more official scales: qualitative, sequential, diverging, accent. I also need to make sure all these colors translate well to different types of color-blindness. Perhaps I'll put it in an R package someday...
+This is all well & good and has been fun for me BUT it's important to note there are some things I haven't done that seem like good ideas to continue this project...
+
+- Check for color blindness. The Side Oats palette especially (hello red and green!) seems like it wouldn't be appropriate for multiple forms of colorblindness but I need to run my colors through a check to be sure of which color combos are robust or not. 
+- Create qualitative, sequential, diverging, and accent scales. Some of these palettes already would function well in that regard, but I need to make a more concerted effort to ensure every type of color palette is available to the user.
+- Put these colors into an R package so others can easily use them! I'm open to name suggestions...
