@@ -14,7 +14,7 @@ image:
   
 ### Acknowledgements: 
 
-This project is **way** bigger than me. The primary investigator is Gina Nichols in conjuction with Stefan Gailans and Sarah Carlson at Practical Farmers of Iowa. Further support was provided by Matt Liebman. 
+This project is **way** bigger than me. The primary investigator is Gina Nichols in conjunction with Stefan Gailans and Sarah Carlson at Practical Farmers of Iowa. Further support was provided by Matt Liebman. 
 
 Disclaimer: Thoughts are my own.
 

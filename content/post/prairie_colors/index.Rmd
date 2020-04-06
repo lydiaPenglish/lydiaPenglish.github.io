@@ -4,9 +4,9 @@ author: Lydia English
 date: '2020-03-16'
 slug: a-prairie-color-palette
 categories:
-  - DIY
+  - colors, flowers
 tags:
-  - prairie
+  - Prairie
   - R
 subtitle: ''
 summary: ''
@@ -20,7 +20,7 @@ image:
 projects: []
 ---
 
-I've been inspired by other R packages that have created color palettes [based on living organisms](https://nschiett.github.io/fishualize/index.html). Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn't do anything fancy when chosing colors. I merely used the [instant eyedropped](http://instant-eyedropper.com/) tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I've noted it as such. 
+I've been inspired by other R packages that have created color palettes [based on living organisms](https://nschiett.github.io/fishualize/index.html). Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn't do anything fancy when choosing colors. I merely used the [instant eyedropped](http://instant-eyedropper.com/) tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I've noted it as such. 
 
 For all the botany nerds out there I've decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point. 
 
@@ -74,8 +74,8 @@ grid.arrange(amoca, amoca_gg, ncol = 2)
 
 #### ii. The milkweed family (Asclepiadaceae)
 
-Milkweeds are becoming increasingly popular in priarie restorations due to the fact that they provide essential forage and habitat for Monarch butterly larvae. 
-Buttefly milkweed (*Asclepias tuberosa*) is one of the few orange prairie flowers. I was actually able to grab a lot of colors from this photo since, for instance, the budding flowers have a nice coral hue and the inner flower structure is creamy yellow. This palette is also a lot louder than the other two - hello bright and beautiful orange!   
+Milkweeds are becoming increasingly popular in prairie restorations due to the fact that they provide essential forage and habitat for Monarch butterfly larvae. 
+Butterfly milkweed (*Asclepias tuberosa*) is one of the few orange prairie flowers. I was actually able to grab a lot of colors from this photo since, for instance, the budding flowers have a nice coral hue and the inner flower structure is creamy yellow. This palette is also a lot louder than the other two - hello bright and beautiful orange!   
 
 ```{r, echo = FALSE}
 asctu_colors <- c("#F64850", "#AA230F", "#FD5D0E", "#F9AB1A", "#EFBB56", 
@@ -98,7 +98,7 @@ grid.arrange(ascsp, ascsp_gg, ncol = 2)
 
 #### iii. The daily family (Asteraceae)
 
-I knew I had to make some color palettes from species in the Asteraeae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (*Rudbeckia subtermosa*), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets. 
+I knew I had to make some color palettes from species in the Asteraceae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (*Rudbeckia subtermosa*), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets. 
 
 ```{r, echo = FALSE}
 rudsu_colors <- c("#8D3D46", "#4B2A17", "#F4AB00", "#FEDD00", "#D3BE17", 
@@ -124,7 +124,7 @@ grid.arrange(silin, silin_gg, ncol = 2)
 
 Grasses flower too! 
 
-Big bluestem is arguably the most quintessential of the prairie plants. It's one of the plants that gave the tallgrass prairie the "tall" part of its name. It easily dwafts me (a meager 5ft I might add) by mid summer. It's also commonly called turkey foot because of the way its inflorescences are structured. The inflorenscenses are a maroon-purple color and anthers are both orange and yellow. There is also orange on the stem, often near the nodes. I found it interesting that this color palette is similar to Sweet Coneflower's but is just naturally more muted.   
+Big bluestem is arguably the most quintessential of the prairie plants. It's one of the plants that gave the tallgrass prairie the "tall" part of its name. It easily dwarfs me (a meager 5ft I might add) by mid summer. It's also commonly called turkey foot because of the way its inflorescences are structured. The inflorescences are a maroon-purple color and anthers are both orange and yellow. There is also orange on the stem, often near the nodes. I found it interesting that this color palette is similar to Sweet Coneflower's but is just naturally more muted.   
 
 ```{r, echo = FALSE}
 andge_colors <- c("#8E5A68", "#BD7353", "#FAAD62", "#FFF07E", "#C8D75F",  
@@ -135,7 +135,7 @@ andge_gg  <- make_col_plot(prairiePal = andge_colors)
 grid.arrange(andge, andge_gg, ncol = 2)
 ```
 
-Side oats gramma grass (*Bouteloua curtipendula* - one of the funner scientific names to pronouce I may add) is a shorter grass species that has a lovely spike of florets that hang down along one axis. I haven't gotten a good photo of Side oats while it's flowering so I snagged a photo from Prairie Moon Nursery's [website](https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html). When flowering, Side oats has some beauitfully red anthers and pollen. 
+Side oats grama grass (*Bouteloua curtipendula* - one of the funner scientific names to pronounce I may add) is a shorter grass species that has a lovely spike of florets that hang down along one axis. I haven't gotten a good photo of Side oats while it's flowering so I snagged a photo from Prairie Moon Nursery's [website](https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html). When flowering, Side oats has some beautifully red anthers and pollen. 
 
 ```{r, echo = FALSE}
 boucu_colors <- c("#E15B38", "#A5646A", "#6C7258", "#8FB440")
