@@ -7,61 +7,66 @@
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2020</copyright>
-    <lastBuildDate>Mon, 16 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 25 Mar 2020 00:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
-      <title>A prairie color palette</title>
-      <link>/post/prairie_colors/a-prairie-color-palette/</link>
-      <pubDate>Mon, 16 Mar 2020 00:00:00 +0000</pubDate>
+      <title>Checking our palette for colorblindness</title>
+      <link>/post/checking-our-palette-for-colorblindness/</link>
+      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/prairie_colors/a-prairie-color-palette/</guid>
+      <guid>/post/checking-our-palette-for-colorblindness/</guid>
       <description>
 
 
-&lt;p&gt;I’ve been inspired by other R packages that have created color palettes &lt;a href=&#34;https://nschiett.github.io/fishualize/index.html&#34;&gt;based on living organisms&lt;/a&gt;. Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn’t do anything fancy when chosing colors. I merely used the &lt;a href=&#34;http://instant-eyedropper.com/&#34;&gt;instant eyedropped&lt;/a&gt; tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I’ve noted it as such.&lt;/p&gt;
-&lt;p&gt;For all the botany nerds out there I’ve decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point.&lt;/p&gt;
-&lt;div id=&#34;i.-the-bean-family-fabaceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;i. The bean family (Fabaceae)&lt;/h4&gt;
-&lt;p&gt;I started with Purple Prairie Clover (&lt;em&gt;Dalea purpurea&lt;/em&gt;), which was an obvious choice for me since it has a lovely contrasting purple/orange color profile.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;I moved onto Leadplant (&lt;em&gt;Amorpha canescens&lt;/em&gt;) which has a similar color palette to purple prairie clover. Predominantly purple flowers with orange anthers. However, leadplant also has beautiful red stamens and the overall color of the plant is a lovely gray-green. It is one of my favorite plants.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;ii.-the-milkweed-family-asclepiadaceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;ii. The milkweed family (Asclepiadaceae)&lt;/h4&gt;
-&lt;p&gt;Milkweeds are becoming increasingly popular in priarie restorations due to the fact that they provide essential forage and habitat for Monarch butterly larvae.
-Buttefly milkweed (&lt;em&gt;Asclepias tuberosa&lt;/em&gt;) which is one of the few orange prairie flowers. I was actually able to grab a lot of colors from this photo since, for instance, the budding flowers have a nice coral hue. This palette is a lot louder than the other two - hello bright and beautiful orange!&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;I thought I should do another milkweed, so I chose showy milkweed, which has a more color palette that is more similar to the common milkweed we all know. Showy milkweed is just more, well, showy than the common variety.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;iii.-the-daily-family-asteraceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;iii. The daily family (Asteraceae)&lt;/h4&gt;
-&lt;p&gt;I knew I had to make some color palettes from species in the Asteraeae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (&lt;em&gt;Rudbeckia subtermosa&lt;/em&gt;), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The other asteraceae flower I chose was Rosinweed (&lt;em&gt;Silphium integrefolium&lt;/em&gt;) which has a more traditional sunflower appearance (although it is &lt;em&gt;not&lt;/em&gt; in the sunflower genus &lt;em&gt;Helianthus&lt;/em&gt;).&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;iv.-the-grass-family-poaceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;iv. The grass family (Poaceae)&lt;/h4&gt;
-&lt;p&gt;Grasses flower too!&lt;/p&gt;
-&lt;p&gt;Big bluestem is arguably the most quintessential of the prairie plants. It’s one of the plants that gave the tallgrass prairie the “tall” part of its name. It easily dwafts me (a meager 5ft I might add) by mid summer. It’s also commonly called turkey foot because of the way it’s inflorescence is structured. The inflorenscenses are a maroon-purple color and anthers are both orange and yellow. There is also orange on the stem, often near the nodes.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Side oats gramma grass (&lt;em&gt;Bouteloua curtipendula&lt;/em&gt; one of the funner scientific names to pronouce) is a shorter grass species that has a lovely spike of florets that hang down along one axis. I haven’t gotten a good photo of Side oats while its flowering so I snagged a photo from Prairie Moon Nursery’s [website] (&lt;a href=&#34;https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html&#34; class=&#34;uri&#34;&gt;https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html&lt;/a&gt;). When flowering, Side oats has some beauitfully red anthers and pollen.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;next-steps&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Next steps:&lt;/h4&gt;
-&lt;p&gt;This is all well and good and has been fun for me. Here are some things I haven’t done that seem like good ideas to continue this project…&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Check for color blindness. The Side Oats palette especially (hello red and green!) seems like it wouldn’t be appropriate for multiple forms of colorblindness but I need to run my colors through a check to ensure that is correct.&lt;/li&gt;
-&lt;li&gt;Create qualitat, sequential, diversing, and accent scales. Some of these palettes already would function well in that regard, but a more concerted effort should be made.&lt;/li&gt;
-&lt;li&gt;Put into an R package so others can easily use. Open to name suggestions…&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
+&lt;p&gt;In my last post, I made some color palettes based on off prairie plants.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dalpu_colors &amp;lt;- c(&amp;quot;#5F1343&amp;quot;, &amp;quot;#A41393&amp;quot;, &amp;quot;#C669D5&amp;quot;,  &amp;quot;#E98018&amp;quot;, &amp;quot;#667056&amp;quot;,
+                  &amp;quot;#2E4D24&amp;quot;)
+fig_dalpu &amp;lt;- make_col_plot(prairiePal = dalpu_colors)
+colorblindr::cvd_grid(fig_dalpu)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#ok! 
+amoca_colors &amp;lt;- c(&amp;quot;#361554&amp;quot;, &amp;quot;#7A4FB6&amp;quot;, &amp;quot;#C7B1F2&amp;quot;, &amp;quot;#E99725&amp;quot;, 
+                  &amp;quot;#8B1C38&amp;quot;, &amp;quot;#778A77&amp;quot;)
+fig_amoca &amp;lt;- make_col_plot(prairiePal = amoca_colors)
+colorblindr::cvd_grid(fig_amoca)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ascsp_colors &amp;lt;- c(&amp;quot;#77162F&amp;quot;, &amp;quot;#AE506B&amp;quot;, &amp;quot;#D0A9BB&amp;quot;, &amp;quot;#C6B9B0&amp;quot;, &amp;quot;#8AA467&amp;quot;, &amp;quot;#4B873A&amp;quot;, &amp;quot;#205713&amp;quot;)
+fig_ascsp &amp;lt;- make_col_plot(prairiePal = ascsp_colors)
+colorblindr::cvd_grid(fig_ascsp)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-3.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;asctu_colors &amp;lt;- c(&amp;quot;#F64850&amp;quot;, &amp;quot;#AA230F&amp;quot;, &amp;quot;#FD5D0E&amp;quot;, &amp;quot;#F9AB1A&amp;quot;, &amp;quot;#EFBB56&amp;quot;, 
+                   &amp;quot;#ECE982&amp;quot;, &amp;quot;#B9E437&amp;quot;, &amp;quot;#5F942B&amp;quot;)
+fig_asctu &amp;lt;- make_col_plot(prairiePal = asctu_colors)
+colorblindr::cvd_grid(fig_asctu)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-4.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rudsu_colors &amp;lt;- c(&amp;quot;#8D3D46&amp;quot;, &amp;quot;#4B2A17&amp;quot;, &amp;quot;#F4AB00&amp;quot;, &amp;quot;#FEDD00&amp;quot;, &amp;quot;#D3BE17&amp;quot;, 
+                   &amp;quot;#8FA844&amp;quot;, &amp;quot;#4C7A3D&amp;quot;)
+fig_rudsu &amp;lt;- make_col_plot(prairiePal = rudsu_colors)
+colorblindr::cvd_grid(fig_rudsu)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-5.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;silin_colors &amp;lt;- c(&amp;quot;#74532C&amp;quot;, &amp;quot;#DE9E06&amp;quot;, &amp;quot;#E9B907&amp;quot;, &amp;quot;#FED806&amp;quot;, &amp;quot;#A1B150&amp;quot;, 
+                   &amp;quot;#819C3F&amp;quot;)
+fig_silin &amp;lt;- make_col_plot(prairiePal = silin_colors)
+colorblindr::cvd_grid(fig_silin)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-6.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;andge_colors &amp;lt;- c(&amp;quot;#8E5A68&amp;quot;, &amp;quot;#BD7353&amp;quot;, &amp;quot;#FAAD62&amp;quot;, &amp;quot;#FFF07E&amp;quot;, &amp;quot;#C8D75F&amp;quot;,  
+                  &amp;quot;#99AE55&amp;quot;)
+fig_andge &amp;lt;- make_col_plot(prairiePal = andge_colors)
+colorblindr::cvd_grid(fig_andge)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-7.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;boucu_colors &amp;lt;- c(&amp;quot;#E15B38&amp;quot;, &amp;quot;#A5646A&amp;quot;, &amp;quot;#6C7258&amp;quot;, &amp;quot;#8FB440&amp;quot;)
+fig_boucu &amp;lt;- make_col_plot(prairiePal = boucu_colors)
+colorblindr::cvd_grid(fig_boucu)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-8.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# interpolate colors
+make_col_plot(prairiePal = silin_colors)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;silin_cont &amp;lt;- grDevices::colorRampPalette(silin_colors)(60)
+scales::show_col(silin_cont)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 </description>
     </item>
     

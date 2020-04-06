@@ -4,10 +4,10 @@ author: Lydia English
 date: '2020-03-16'
 slug: a-prairie-color-palette
 categories:
-  - r
+  - DIY
 tags:
   - prairie
-  - DIY
+  - R
 subtitle: ''
 summary: ''
 authors: []

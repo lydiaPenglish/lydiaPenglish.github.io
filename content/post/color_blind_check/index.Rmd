@@ -1,0 +1,89 @@
+---
+title: Checking our palette for colorblindness
+author: Lydia English
+date: '2020-03-25'
+slug: checking-our-palette-for-colorblindness
+categories:
+  - r
+tags:
+  - prairie
+  - DIY
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-03-25T15:52:59-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+draft: true
+projects: []
+---
+
+In my last post, I made some color palettes based on off prairie plants. 
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(colorblindr)
+library(grid)
+library(gridExtra)
+theme_set(theme_minimal())
+
+make_col_plot <- function(prairiePal = dalpu_colors){
+  df <- data.frame(x = 1:length(prairiePal), y = 1)
+  g1 <- ggplot(df, aes(x, y))+
+    geom_tile(fill = prairiePal)+
+    labs(x = NULL,
+       y = NULL)+
+  guides(fill = NULL)+
+  theme(axis.text = element_blank(),
+        panel.grid = element_blank())
+  
+  return(g1)
+}
+```
+
+
+```{r}
+dalpu_colors <- c("#5F1343", "#A41393", "#C669D5",  "#E98018", "#667056",
+                  "#2E4D24")
+fig_dalpu <- make_col_plot(prairiePal = dalpu_colors)
+colorblindr::cvd_grid(fig_dalpu)
+#ok! 
+amoca_colors <- c("#361554", "#7A4FB6", "#C7B1F2", "#E99725", 
+                  "#8B1C38", "#778A77")
+fig_amoca <- make_col_plot(prairiePal = amoca_colors)
+colorblindr::cvd_grid(fig_amoca)
+ascsp_colors <- c("#77162F", "#AE506B", "#D0A9BB", "#C6B9B0", "#8AA467", "#4B873A", "#205713")
+fig_ascsp <- make_col_plot(prairiePal = ascsp_colors)
+colorblindr::cvd_grid(fig_ascsp)
+asctu_colors <- c("#F64850", "#AA230F", "#FD5D0E", "#F9AB1A", "#EFBB56", 
+                   "#ECE982", "#B9E437", "#5F942B")
+fig_asctu <- make_col_plot(prairiePal = asctu_colors)
+colorblindr::cvd_grid(fig_asctu)
+rudsu_colors <- c("#8D3D46", "#4B2A17", "#F4AB00", "#FEDD00", "#D3BE17", 
+                   "#8FA844", "#4C7A3D")
+fig_rudsu <- make_col_plot(prairiePal = rudsu_colors)
+colorblindr::cvd_grid(fig_rudsu)
+silin_colors <- c("#74532C", "#DE9E06", "#E9B907", "#FED806", "#A1B150", 
+                   "#819C3F")
+fig_silin <- make_col_plot(prairiePal = silin_colors)
+colorblindr::cvd_grid(fig_silin)
+andge_colors <- c("#8E5A68", "#BD7353", "#FAAD62", "#FFF07E", "#C8D75F",  
+                  "#99AE55")
+fig_andge <- make_col_plot(prairiePal = andge_colors)
+colorblindr::cvd_grid(fig_andge)
+boucu_colors <- c("#E15B38", "#A5646A", "#6C7258", "#8FB440")
+fig_boucu <- make_col_plot(prairiePal = boucu_colors)
+colorblindr::cvd_grid(fig_boucu)
+```
+
+
+```{r}
+# interpolate colors
+make_col_plot(prairiePal = silin_colors)
+silin_cont <- grDevices::colorRampPalette(silin_colors)(60)
+scales::show_col(silin_cont)
+
+```

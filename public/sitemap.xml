@@ -1,51 +1,95 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
     <loc>/gallery/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/prairie_colors/a-prairie-color-palette/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
+    <lastmod>2020-03-17T12:30:43-05:00</lastmod>
   </url>
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
-    <priority>0</priority>
+    <lastmod>2020-03-25T15:52:59-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/diy/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
-    <priority>0</priority>
+    <loc>/categories/community-ecology/</loc>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/project/echphenology/</loc>
+    <lastmod>2020-02-26T15:00:49-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/flowering-phenology/</loc>
+    <lastmod>2020-02-26T15:00:49-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/grad-school/</loc>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
-    <priority>0</priority>
+    <lastmod>2020-03-25T15:52:59-05:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/prairie/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
-    <priority>0</priority>
+    <lastmod>2020-03-25T15:52:59-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/prairie-strips/</loc>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/project/</loc>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/r/</loc>
+    <lastmod>2020-03-17T12:30:43-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-03-25T15:52:59-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/project/stripsveg/</loc>
+    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/checking-our-palette-for-colorblindness/</loc>
+    <lastmod>2020-03-25T15:52:59-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/diy/</loc>
+    <lastmod>2020-03-25T15:52:59-05:00</lastmod>
   </url>
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2020-03-16T17:01:24-05:00</lastmod>
-    <priority>0</priority>
+    <lastmod>2020-03-25T15:52:59-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/a-prairie-color-palette/</loc>
+    <lastmod>2020-03-17T12:30:43-05:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/diy/</loc>
+    <lastmod>2020-03-17T12:30:43-05:00</lastmod>
   </url>
   
   <url>
@@ -59,14 +103,17 @@
   </url>
   
   <url>
+    <loc>/project/cychecks/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/aboutme/</loc>
     <lastmod>2020-02-24T17:17:08-06:00</lastmod>
   </url>
   
   <url>
     <loc>/authors/</loc>
-    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -75,29 +122,12 @@
   </url>
   
   <url>
-    <loc>/project/cychecks/</loc>
-    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/project/echphenology/</loc>
-    <lastmod>2020-02-26T15:00:49-06:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/post/</loc>
     <lastmod>2020-03-16T17:01:24-05:00</lastmod>
   </url>
   
   <url>
-    <loc>/project/</loc>
-    <lastmod>2020-03-01T10:18:25-06:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/publication_types/</loc>
-    <priority>0</priority>
   </url>
   
   <url>
@@ -106,8 +136,12 @@
   </url>
   
   <url>
-    <loc>/project/stripsveg/</loc>
+    <loc>/categories/sustainable-agricultural/</loc>
     <lastmod>2020-03-01T10:18:25-06:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/talks/</loc>
   </url>
   
 </urlset>

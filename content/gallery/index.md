@@ -261,7 +261,7 @@ caption = "Swamp Milkweed (Asclepias incarnata)"
   
 +++
 
-If you haven't already figured it out yet, I like plants! And over the years I've taken photos of some. I don't need to hoard these photos to myself, they're for sharing! Therefore enjoy this gallery of beautiful flowers. Click on each photo to see the species' name. You'll quickly see that I'm far from a professional photographer - these photos were primarily taken on an iPhone and most of them are from farms across the state of Iowa.   
+If you haven't already figured it out yet, I like plants! And over the years I've taken photos of a few. I don't need to hoard these photos to myself, they're for sharing! Therefore enjoy this gallery of beautiful flowers. Click on each photo to see the species' name. You'll quickly see that I'm far from a professional photographer - these photos were primarily taken on an iPhone and most of them are from farms across the state of Iowa.   
 
 
 {{< gallery >}}  

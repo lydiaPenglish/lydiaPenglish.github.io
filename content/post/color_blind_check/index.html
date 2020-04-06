@@ -1,0 +1,71 @@
+---
+title: Checking our palette for colorblindness
+author: Lydia English
+date: '2020-03-25'
+slug: checking-our-palette-for-colorblindness
+categories:
+  - r
+tags:
+  - prairie
+  - DIY
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-03-25T15:52:59-05:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+draft: TRUE  
+projects: []
+---
+
+
+
+<p>In my last post, I made some color palettes based on off prairie plants.</p>
+<pre class="r"><code>dalpu_colors &lt;- c(&quot;#5F1343&quot;, &quot;#A41393&quot;, &quot;#C669D5&quot;,  &quot;#E98018&quot;, &quot;#667056&quot;,
+                  &quot;#2E4D24&quot;)
+fig_dalpu &lt;- make_col_plot(prairiePal = dalpu_colors)
+colorblindr::cvd_grid(fig_dalpu)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-1.png" width="672" /></p>
+<pre class="r"><code>#ok! 
+amoca_colors &lt;- c(&quot;#361554&quot;, &quot;#7A4FB6&quot;, &quot;#C7B1F2&quot;, &quot;#E99725&quot;, 
+                  &quot;#8B1C38&quot;, &quot;#778A77&quot;)
+fig_amoca &lt;- make_col_plot(prairiePal = amoca_colors)
+colorblindr::cvd_grid(fig_amoca)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-2.png" width="672" /></p>
+<pre class="r"><code>ascsp_colors &lt;- c(&quot;#77162F&quot;, &quot;#AE506B&quot;, &quot;#D0A9BB&quot;, &quot;#C6B9B0&quot;, &quot;#8AA467&quot;, &quot;#4B873A&quot;, &quot;#205713&quot;)
+fig_ascsp &lt;- make_col_plot(prairiePal = ascsp_colors)
+colorblindr::cvd_grid(fig_ascsp)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-3.png" width="672" /></p>
+<pre class="r"><code>asctu_colors &lt;- c(&quot;#F64850&quot;, &quot;#AA230F&quot;, &quot;#FD5D0E&quot;, &quot;#F9AB1A&quot;, &quot;#EFBB56&quot;, 
+                   &quot;#ECE982&quot;, &quot;#B9E437&quot;, &quot;#5F942B&quot;)
+fig_asctu &lt;- make_col_plot(prairiePal = asctu_colors)
+colorblindr::cvd_grid(fig_asctu)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-4.png" width="672" /></p>
+<pre class="r"><code>rudsu_colors &lt;- c(&quot;#8D3D46&quot;, &quot;#4B2A17&quot;, &quot;#F4AB00&quot;, &quot;#FEDD00&quot;, &quot;#D3BE17&quot;, 
+                   &quot;#8FA844&quot;, &quot;#4C7A3D&quot;)
+fig_rudsu &lt;- make_col_plot(prairiePal = rudsu_colors)
+colorblindr::cvd_grid(fig_rudsu)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-5.png" width="672" /></p>
+<pre class="r"><code>silin_colors &lt;- c(&quot;#74532C&quot;, &quot;#DE9E06&quot;, &quot;#E9B907&quot;, &quot;#FED806&quot;, &quot;#A1B150&quot;, 
+                   &quot;#819C3F&quot;)
+fig_silin &lt;- make_col_plot(prairiePal = silin_colors)
+colorblindr::cvd_grid(fig_silin)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-6.png" width="672" /></p>
+<pre class="r"><code>andge_colors &lt;- c(&quot;#8E5A68&quot;, &quot;#BD7353&quot;, &quot;#FAAD62&quot;, &quot;#FFF07E&quot;, &quot;#C8D75F&quot;,  
+                  &quot;#99AE55&quot;)
+fig_andge &lt;- make_col_plot(prairiePal = andge_colors)
+colorblindr::cvd_grid(fig_andge)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-7.png" width="672" /></p>
+<pre class="r"><code>boucu_colors &lt;- c(&quot;#E15B38&quot;, &quot;#A5646A&quot;, &quot;#6C7258&quot;, &quot;#8FB440&quot;)
+fig_boucu &lt;- make_col_plot(prairiePal = boucu_colors)
+colorblindr::cvd_grid(fig_boucu)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-8.png" width="672" /></p>
+<pre class="r"><code># interpolate colors
+make_col_plot(prairiePal = silin_colors)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-1.png" width="672" /></p>
+<pre class="r"><code>silin_cont &lt;- grDevices::colorRampPalette(silin_colors)(60)
+scales::show_col(silin_cont)</code></pre>
+<p><img src="/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-2.png" width="672" /></p>

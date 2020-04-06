@@ -7,7 +7,7 @@
     <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator>
     <language>en-us</language>
     <copyright>&amp;copy; 2020</copyright>
-    <lastBuildDate>Mon, 16 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 03 Apr 2020 00:00:00 +0000</lastBuildDate>
     
 	    <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
@@ -18,7 +18,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/gallery/</guid>
-      <description>&lt;p&gt;Here are some photos of (mostly) prairie plants that I have taken over the past decade. Click on each photo to see the species name. I&amp;rsquo;m far from a professional - these photos were primarily taken on an iPhone.&lt;/p&gt;
+      <description>&lt;p&gt;If you haven&amp;rsquo;t already figured it out yet, I like plants! And over the years I&amp;rsquo;ve taken photos of a few. I don&amp;rsquo;t need to hoard these photos to myself, they&amp;rsquo;re for sharing! Therefore enjoy this gallery of beautiful flowers. Click on each photo to see the species&amp;rsquo; name. You&amp;rsquo;ll quickly see that I&amp;rsquo;m far from a professional photographer - these photos were primarily taken on an iPhone and most of them are from farms across the state of Iowa.&lt;/p&gt;
 
 
 
@@ -487,7 +487,7 @@
     
     
   &lt;a data-fancybox=&#34;gallery-gallery&#34; href=&#34;/gallery/gallery/artlu.JPG&#34; data-caption=&#34;Prairie sage (Artemisia ludoviciana)&#34;&gt;
-  &lt;img src=&#34;/gallery/gallery/artlu_hufeaa030a2431a211c6ac52bcaff40d60_2796925_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
+  &lt;img src=&#34;/gallery/gallery/artlu_hu11d5f9740edf9df686150592839497a7_4270526_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
   &lt;/a&gt;
   
     
@@ -3199,7 +3199,7 @@
     
     
   &lt;a data-fancybox=&#34;gallery-gallery&#34; href=&#34;/gallery/gallery/oenbi.JPG&#34; data-caption=&#34;Evening primrose (Oenothera biennis)&#34;&gt;
-  &lt;img src=&#34;/gallery/gallery/oenbi_hu423045d4559ea17948587c8c4d94e0d9_724025_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
+  &lt;img src=&#34;/gallery/gallery/oenbi_huc509f93278ff829f8187932780303ddb_1364364_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
   &lt;/a&gt;
   
     
@@ -3990,7 +3990,7 @@
     
     
   &lt;a data-fancybox=&#34;gallery-gallery&#34; href=&#34;/gallery/gallery/rudhi.JPG&#34; data-caption=&#34;Black-eyed Susan (Rudbeckia hirta)&#34;&gt;
-  &lt;img src=&#34;/gallery/gallery/rudhi_hu9c7e1facf3c591f9659071ff81941286_2038662_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
+  &lt;img src=&#34;/gallery/gallery/rudhi_hu15c0474f701b587d782f56f525f9de79_3412286_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
   &lt;/a&gt;
   
     
@@ -5346,7 +5346,7 @@
     
     
   &lt;a data-fancybox=&#34;gallery-gallery&#34; href=&#34;/gallery/gallery/verha.JPG&#34; data-caption=&#34;Blue vervain (Verbena hastata)&#34;&gt;
-  &lt;img src=&#34;/gallery/gallery/verha_hu0f794d0908c76c976b234813814fe783_720290_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
+  &lt;img src=&#34;/gallery/gallery/verha_hu87fe0b22d5c4e4e1e5e77c163a79c624_2077108_0x190_resize_q90_lanczos.JPG&#34; alt=&#34;&#34;&gt;
   &lt;/a&gt;
   
     
@@ -5808,56 +5808,12 @@
     </item>
     
     <item>
-      <title>A prairie color palette</title>
-      <link>/post/prairie_colors/a-prairie-color-palette/</link>
-      <pubDate>Mon, 16 Mar 2020 00:00:00 +0000</pubDate>
+      <title>Projects</title>
+      <link>/project/</link>
+      <pubDate>Fri, 03 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/prairie_colors/a-prairie-color-palette/</guid>
-      <description>
-
-
-&lt;p&gt;I’ve been inspired by other R packages that have created color palettes &lt;a href=&#34;https://nschiett.github.io/fishualize/index.html&#34;&gt;based on living organisms&lt;/a&gt;. Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn’t do anything fancy when chosing colors. I merely used the &lt;a href=&#34;http://instant-eyedropper.com/&#34;&gt;instant eyedropped&lt;/a&gt; tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I’ve noted it as such.&lt;/p&gt;
-&lt;p&gt;For all the botany nerds out there I’ve decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point.&lt;/p&gt;
-&lt;div id=&#34;i.-the-bean-family-fabaceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;i. The bean family (Fabaceae)&lt;/h4&gt;
-&lt;p&gt;I started with Purple Prairie Clover (&lt;em&gt;Dalea purpurea&lt;/em&gt;), which was an obvious choice for me since it has a lovely contrasting purple/orange color profile.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;I moved onto Leadplant (&lt;em&gt;Amorpha canescens&lt;/em&gt;) which has a similar color palette to purple prairie clover. Predominantly purple flowers with orange anthers. However, leadplant also has beautiful red stamens and the overall color of the plant is a lovely gray-green. It is one of my favorite plants.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;ii.-the-milkweed-family-asclepiadaceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;ii. The milkweed family (Asclepiadaceae)&lt;/h4&gt;
-&lt;p&gt;Milkweeds are becoming increasingly popular in priarie restorations due to the fact that they provide essential forage and habitat for Monarch butterly larvae.
-Buttefly milkweed (&lt;em&gt;Asclepias tuberosa&lt;/em&gt;) which is one of the few orange prairie flowers. I was actually able to grab a lot of colors from this photo since, for instance, the budding flowers have a nice coral hue. This palette is a lot louder than the other two - hello bright and beautiful orange!&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;I thought I should do another milkweed, so I chose showy milkweed, which has a more color palette that is more similar to the common milkweed we all know. Showy milkweed is just more, well, showy than the common variety.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;iii.-the-daily-family-asteraceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;iii. The daily family (Asteraceae)&lt;/h4&gt;
-&lt;p&gt;I knew I had to make some color palettes from species in the Asteraeae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (&lt;em&gt;Rudbeckia subtermosa&lt;/em&gt;), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;The other asteraceae flower I chose was Rosinweed (&lt;em&gt;Silphium integrefolium&lt;/em&gt;) which has a more traditional sunflower appearance (although it is &lt;em&gt;not&lt;/em&gt; in the sunflower genus &lt;em&gt;Helianthus&lt;/em&gt;).&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;iv.-the-grass-family-poaceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;iv. The grass family (Poaceae)&lt;/h4&gt;
-&lt;p&gt;Grasses flower too!&lt;/p&gt;
-&lt;p&gt;Big bluestem is arguably the most quintessential of the prairie plants. It’s one of the plants that gave the tallgrass prairie the “tall” part of its name. It easily dwafts me (a meager 5ft I might add) by mid summer. It’s also commonly called turkey foot because of the way it’s inflorescence is structured. The inflorenscenses are a maroon-purple color and anthers are both orange and yellow. There is also orange on the stem, often near the nodes.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Side oats gramma grass (&lt;em&gt;Bouteloua curtipendula&lt;/em&gt; one of the funner scientific names to pronouce) is a shorter grass species that has a lovely spike of florets that hang down along one axis. I haven’t gotten a good photo of Side oats while its flowering so I snagged a photo from Prairie Moon Nursery’s [website] (&lt;a href=&#34;https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html&#34; class=&#34;uri&#34;&gt;https://www.prairiemoon.com/bouteloua-curtipendula-side-oats-grama-prairie-moon-nursery.html&lt;/a&gt;). When flowering, Side oats has some beauitfully red anthers and pollen.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;next-steps&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Next steps:&lt;/h4&gt;
-&lt;p&gt;This is all well and good and has been fun for me. Here are some things I haven’t done that seem like good ideas to continue this project…&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Check for color blindness. The Side Oats palette especially (hello red and green!) seems like it wouldn’t be appropriate for multiple forms of colorblindness but I need to run my colors through a check to ensure that is correct.&lt;/li&gt;
-&lt;li&gt;Create qualitat, sequential, diversing, and accent scales. Some of these palettes already would function well in that regard, but a more concerted effort should be made.&lt;/li&gt;
-&lt;li&gt;Put into an R package so others can easily use. Open to name suggestions…&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/div&gt;
-</description>
+      <guid>/project/</guid>
+      <description></description>
     </item>
     
     <item>
@@ -5871,6 +5827,15 @@ Buttefly milkweed (&lt;em&gt;Asclepias tuberosa&lt;/em&gt;) which is one of the 
     </item>
     
     <item>
+      <title></title>
+      <link></link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid></guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>About Me</title>
       <link>/aboutme/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -5880,87 +5845,21 @@ Buttefly milkweed (&lt;em&gt;Asclepias tuberosa&lt;/em&gt;) which is one of the 
     </item>
     
     <item>
-      <title>Cover crops &amp; Weeds</title>
-      <link>/project/pfiweeds/</link>
+      <title>Posts</title>
+      <link>/post/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/project/pfiweeds/</guid>
-      <description>
-
-&lt;p&gt;Acknowledgements: This project is &lt;strong&gt;way&lt;/strong&gt; bigger than me. The primary investigator is Gina Nichols in conjuction with Stefan Gailans and Sarah Carlson at Practical Farmers of Iowa. Further support was provided by Matt Liebman.&lt;/p&gt;
-
-&lt;p&gt;Disclaimer: Thoughts are my own.&lt;/p&gt;
-
-&lt;h4 id=&#34;a-short-preamble&#34;&gt;A short preamble:&lt;/h4&gt;
-
-&lt;p&gt;In Iowa, the major cropping system is a two-year rotation of corn and soybeans. These two species are warm-season crops, which means they primarily grow during the warm months: May - October. While the whole state seems to green up during the summer, during the off season (November - April (ish)), the soil is largely bare. It&amp;rsquo;s not hard to imagine that having no vegetation for at least half the year + precipitation will result in massive amounts of erosion and nutrient runoff.&lt;/p&gt;
-
-&lt;p&gt;&lt;strong&gt;Enter cover crops.&lt;/strong&gt; Sown in the fall and killed (&amp;ldquo;terminated&amp;rdquo;) in the spring, cover crops are meant to provide continuous cover on the landscape. Besides holding the physical soil in place with their roots, cover crops can also take up excess, available nutrients that might otherwise leave the field.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>CyChecks</title>
-      <link>/project/cychecks/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project/cychecks/</guid>
-      <description>
-
-&lt;p&gt;Acknowledgements: This work would &lt;strong&gt;not&lt;/strong&gt; be possible without the hardworking Gina Nichols and Jarad Niemi.&lt;/p&gt;
-
-&lt;h4 id=&#34;preamble&#34;&gt;Preamble:&lt;/h4&gt;
-
-&lt;p&gt;CyChecks began as a required assignment in STAT 585 at Iowa State University (ISU). As groups, we were tasked with creating a package that had data and useful functions. My collaborator and peer, Gina Nichols, had the great idea of looking at salary data from our very own university to see if there are any obvious pay disparities. Gina and I are housed in the Agromony department, which seems to have a lot of male faculty but little female representation, despite having a largely female biased graduate program (cite?). We&amp;rsquo;re able to examine salaries because ISU is a land grant school and is, in part, paid for by the taxpayer. We completed the group project with some other people, which was the original &lt;a href=&#34;https://github.com/vanichols/CyChecks&#34; target=&#34;_blank&#34;&gt;CyChecks&lt;/a&gt;. &lt;a href=&#34;https://en.wikipedia.org/wiki/Cy_the_Cardinal&#34; target=&#34;_blank&#34;&gt;Cy&lt;/a&gt; is ISU&amp;rsquo;s mascot, and Checks because&amp;hellip;well you get it.&lt;/p&gt;
-
-&lt;p&gt;The class ended in the spring of 2019, but Gina and I wanted to continue our analysis, mostly because we didn&amp;rsquo;t have enough time to comb through everything we would have liked for the class project. So was born CyChecks2, which is a cleaner version of the original.&lt;/p&gt;
-
-&lt;p&gt;We&amp;rsquo;ve focused our analysis on gender because that&amp;rsquo;s what&amp;rsquo;s included in the public dataset. We realize there is likely an interplay between gender and rate (CITE article), however we are limited in our ability to address this interaction given the data we have. Similarly we realize that our research is considering gender as a binary and is ignoring anyone who decided to omit their gender for any reason.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;If you&amp;rsquo;re interested in the hiccups of wrangling public salary data and HR department information then check out the section at the bottom&lt;/em&gt;&lt;/p&gt;
-
-&lt;h4 id=&#34;what-we-found&#34;&gt;What we found&lt;/h4&gt;
-
-&lt;p&gt;Our Shiny app can be found &lt;a href=&#34;https://vanichols.shinyapps.io/myapp/&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;&lt;/p&gt;
-
-&lt;h4 id=&#34;wrangling-issues&#34;&gt;Wrangling issues&lt;/h4&gt;
-
-&lt;p&gt;You guys, this was a little bit of a doozy. The reason is that the salary database did not indicate any employee&amp;rsquo;s department within the university. And while directory data in theory is public (you can google anyone to see where they work at Iowa State), that data is not easily scrape-able. Therefore to gain access to this data we had to wade through the backchannels of ISU HR, who were super kind and helpful in giving us the information we wanted.&lt;/p&gt;
-
-&lt;p&gt;Once equipped with the necessary directory information one might think a simple join would be great, however it&amp;rsquo;s not that easy&amp;hellip;&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Echinacea phenology</title>
-      <link>/project/echphenology/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project/echphenology/</guid>
-      <description>&lt;p&gt;Information about echinacea phenology research&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Research Projects</title>
-      <link>/projects/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/projects/</guid>
+      <guid>/post/</guid>
       <description></description>
     </item>
     
     <item>
-      <title>Vegetation in prairie strips</title>
-      <link>/project/stripsveg/</link>
+      <title>Talks</title>
+      <link>/talks/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/project/stripsveg/</guid>
-      <description>
-
-&lt;p&gt;Acknowledgements: This project would first and foremost not be possible without the many farmers and landowners (26!) who let me come on to their property and tromp around their fields. This project would also have been harder and more isolating without the many people who sat on plastic buckets and recorded data while out in the field with me. Lastly, thanks to Katherine Goode for statistical advice, my lab group for their guidance, and my committee for keeping me on task.&lt;/p&gt;
-
-&lt;h4 id=&#34;preamble&#34;&gt;Preamble:&lt;/h4&gt;
+      <guid>/talks/</guid>
+      <description>&lt;p&gt;Sorry, no talks yet!&lt;/p&gt;
 </description>
     </item>
     

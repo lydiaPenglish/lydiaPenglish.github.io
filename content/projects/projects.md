@@ -25,20 +25,17 @@ name = "All"
 tag = "*"
   
 [[content.filter_button]]
-name = "College"
-tag = "College"
+name = "R"
+tag = "R"
   
 [[content.filter_button]]
-name = "Personal"
-tag = "Personal"
+name = "Prairie"
+tag = "Prairie"
   
 [[content.filter_button]]
-name = "Pro Bono"
-tag = "Pro Bono"
+name = "Grad school"
+tag = "Grad school"
   
-[[content.filter_button]]
-name = "Professional"
-tag = "Professional"
   
 [design]
   # Choose how many columns the section has. Valid values: 1 or 2.
@@ -81,4 +78,6 @@ css_style = ""
   # CSS class.
 css_class = ""
 +++
+
+FYI: All these projects are still work in progress. They will be updated as results are published. 
     
