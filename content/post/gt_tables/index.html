@@ -1,0 +1,2331 @@
+---
+title: Making tables with gt
+author: Lydia English
+date: '2020-04-13'
+slug: gt-tables
+categories:
+  - agriculture
+  - tables
+tags:
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-04-17T14:26:14-05:00'
+featured: yes
+image:
+  caption: 'gt corn table'
+  focal_point: 'top'
+  preview_only: no
+draft: true  
+projects: []
+---
+
+
+
+<p>Making tables in R is something I’ve dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table…I try making table in R…I successfully make a table but I can’t figure out how to format it exactly to my liking…I get frustrated…I abandon my R table and go to Microsoft word. I have no beef with the other R packages intended for table making and I’m sure with more finesse they could give me what I’m looking for. However, I’m excited to try out <code>gt</code> because it is <a href="https://gt.rstudio.com/">“the grammar of tables”</a> and was designed to mirror the layered style of creating <code>ggplot2</code> figures.</p>
+<p>I used this self-imposed table-making opportunity to play around with gathering data from the USDA’s National Agricultural Statistics Service (NASS). I used their <a href="https://quickstats.nass.usda.gov/">quickstats</a> page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it’s not sweet corn). If you want to see the raw data, you can find it on my github.</p>
+<p><em>(NB: There were gaps where data were available so I picked time points roughly 4-5 years apart)</em></p>
+<p>First things first, I had to do a little data cleaning to get rid of some unwanted text and columns in the data-frame.</p>
+<pre class="r"><code>chem_apps &lt;- 
+  read_csv(&quot;chem_data.csv&quot;) %&gt;%
+  mutate(param    = str_remove_all(`Data Item`, 
+                                    &quot;CORN - APPLICATIONS, MEASURED IN &quot;),
+         app_type = str_remove_all(Domain,
+                                   &quot;CHEMICAL, &quot;),
+         name     = str_extract(`Domain Category`,
+                                   &quot;(?&lt;=\\().+(?=\\))&quot;),
+         Value    = str_replace_all(Value, &quot;\\(D\\)&quot;, &quot;NA&quot;),
+         Value    = str_remove_all(Value, &quot;\\,&quot;),
+         Value    = as.numeric(Value)) %&gt;%
+  select(Year, param, app_type, name, Value)
+head(chem_apps)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##    Year param app_type  name                             Value
+##   &lt;dbl&gt; &lt;chr&gt; &lt;chr&gt;     &lt;chr&gt;                            &lt;dbl&gt;
+## 1  2018 LB    HERBICIDE 2,4-D, 2-EHE = 30063                NA
+## 2  2018 LB    HERBICIDE 2,4-D, DIMETH. SALT = 30019         NA
+## 3  2018 LB    HERBICIDE 2,4-DB, DIMETH. SALT = 30819        NA
+## 4  2018 LB    HERBICIDE ACETOCHLOR = 121601            8823000
+## 5  2018 LB    HERBICIDE ATRAZINE = 80803               6621000
+## 6  2018 LB    HERBICIDE BAPMA SALT OF DICAMBA = 100094      NA</code></pre>
+<p>Next step: build a basic table with <code>gt</code>. Here I’ve filtered my data-frame and rearranged it slightly and then gone right into using <code>gt</code>, all with pipe operators. It’s quite easy to add a title and subtitle, as well as a source note. It’s also easy to use Markdown formatting by putting your title within the <code>md()</code> function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!</p>
+<pre class="r"><code>tab_v1 &lt;- 
+  chem_apps %&gt;%
+# Get data just on total chemical usage
+  filter(name == &quot;TOTAL&quot; | name == &quot;NITROGEN&quot; &amp; param == &quot;LB&quot;) %&gt;%
+# convert into a wider dataframe that is more table-ready  
+  pivot_wider(id_cols = c(Year, Value), 
+              names_from = app_type, 
+              values_from = Value) %&gt;%
+# now add in gt 
+  gt() %&gt;%
+# Title
+  tab_header(title    = md(&quot;**Chemical Use on Cornfields in Iowa**&quot;), 
+             subtitle = &quot;Total pounds of applied herbicide and fertilizer&quot;) %&gt;%
+# Source note  
+  tab_source_note(source_note = &quot;Source: USDA NASS&quot;) %&gt;%
+# Format numbers to have commas   
+  fmt_number(columns = vars(HERBICIDE,FERTILIZER), 
+             use_seps = TRUE,
+             decimals = 0) %&gt;%
+  opt_row_striping(row_striping = FALSE)
+tab_v1</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#isuyxesekr .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#isuyxesekr .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#isuyxesekr .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#isuyxesekr .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#isuyxesekr .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#isuyxesekr .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#isuyxesekr .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#isuyxesekr .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#isuyxesekr .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#isuyxesekr .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#isuyxesekr .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#isuyxesekr .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#isuyxesekr .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#isuyxesekr .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#isuyxesekr .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#isuyxesekr .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#isuyxesekr .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#isuyxesekr .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#isuyxesekr .gt_left {
+  text-align: left;
+}
+
+#isuyxesekr .gt_center {
+  text-align: center;
+}
+
+#isuyxesekr .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#isuyxesekr .gt_font_normal {
+  font-weight: normal;
+}
+
+#isuyxesekr .gt_font_bold {
+  font-weight: bold;
+}
+
+#isuyxesekr .gt_font_italic {
+  font-style: italic;
+}
+
+#isuyxesekr .gt_super {
+  font-size: 65%;
+}
+
+#isuyxesekr .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="isuyxesekr" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="3" class="gt_heading gt_title gt_font_normal" style><strong>Chemical Use on Cornfields in Iowa</strong></th>
+    </tr>
+    <tr>
+      <th colspan="3" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Total pounds of applied herbicide and fertilizer</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Year</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">HERBICIDE</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">FERTILIZER</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_right">2018</td>
+      <td class="gt_row gt_right">32,371,000</td>
+      <td class="gt_row gt_right">1,784,300,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2014</td>
+      <td class="gt_row gt_right">30,240,000</td>
+      <td class="gt_row gt_right">1,842,200,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2010</td>
+      <td class="gt_row gt_right">26,195,000</td>
+      <td class="gt_row gt_right">1,806,600,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2005</td>
+      <td class="gt_row gt_right">24,726,000</td>
+      <td class="gt_row gt_right">1,653,200,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2000</td>
+      <td class="gt_row gt_right">24,518,000</td>
+      <td class="gt_row gt_right">1,533,000,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">1995</td>
+      <td class="gt_row gt_right">32,957,000</td>
+      <td class="gt_row gt_right">1,364,600,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">1990</td>
+      <td class="gt_row gt_right">NA</td>
+      <td class="gt_row gt_right">1,561,000,000</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="3">Source: USDA NASS</td>
+    </tr>
+  </tfoot>
+  
+</table></div>
+<p>The default gt table has its rows alternatively striped and while I don’t mind that aesthetically, half the strips go black under the dark mode of my website (ha!), so I also removed the striping for all of my tables in this post.</p>
+<p>Let’s add a footnote because this table doesn’t include all types of fertilizer.</p>
+<pre class="r"><code>tab_v1 %&gt;%
+  tab_footnote(footnote = md(&quot;Nitrogen Fertilizer *only*&quot;),
+               locations = cells_column_labels(&quot;FERTILIZER&quot;))</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#ehmjqynocj .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ehmjqynocj .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ehmjqynocj .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ehmjqynocj .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ehmjqynocj .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ehmjqynocj .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ehmjqynocj .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ehmjqynocj .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ehmjqynocj .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ehmjqynocj .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ehmjqynocj .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ehmjqynocj .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ehmjqynocj .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ehmjqynocj .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#ehmjqynocj .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ehmjqynocj .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ehmjqynocj .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ehmjqynocj .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ehmjqynocj .gt_left {
+  text-align: left;
+}
+
+#ehmjqynocj .gt_center {
+  text-align: center;
+}
+
+#ehmjqynocj .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ehmjqynocj .gt_font_normal {
+  font-weight: normal;
+}
+
+#ehmjqynocj .gt_font_bold {
+  font-weight: bold;
+}
+
+#ehmjqynocj .gt_font_italic {
+  font-style: italic;
+}
+
+#ehmjqynocj .gt_super {
+  font-size: 65%;
+}
+
+#ehmjqynocj .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="ehmjqynocj" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="3" class="gt_heading gt_title gt_font_normal" style><strong>Chemical Use on Cornfields in Iowa</strong></th>
+    </tr>
+    <tr>
+      <th colspan="3" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Total pounds of applied herbicide and fertilizer</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Year</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">HERBICIDE</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">FERTILIZER<sup class="gt_footnote_marks">1</sup></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_right">2018</td>
+      <td class="gt_row gt_right">32,371,000</td>
+      <td class="gt_row gt_right">1,784,300,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2014</td>
+      <td class="gt_row gt_right">30,240,000</td>
+      <td class="gt_row gt_right">1,842,200,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2010</td>
+      <td class="gt_row gt_right">26,195,000</td>
+      <td class="gt_row gt_right">1,806,600,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2005</td>
+      <td class="gt_row gt_right">24,726,000</td>
+      <td class="gt_row gt_right">1,653,200,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">2000</td>
+      <td class="gt_row gt_right">24,518,000</td>
+      <td class="gt_row gt_right">1,533,000,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">1995</td>
+      <td class="gt_row gt_right">32,957,000</td>
+      <td class="gt_row gt_right">1,364,600,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_right">1990</td>
+      <td class="gt_row gt_right">NA</td>
+      <td class="gt_row gt_right">1,561,000,000</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="3">Source: USDA NASS</td>
+    </tr>
+  </tfoot>
+  <tfoot>
+    <tr class="gt_footnotes">
+      <td colspan="3">
+        <p class="gt_footnote">
+          <sup class="gt_footnote_marks">
+            <em>1</em>
+          </sup>
+           
+          Nitrogen Fertilizer <em>only</em>
+          <br />
+        </p>
+      </td>
+    </tr>
+  </tfoot>
+</table></div>
+<p>Let’s just look at the values in this table for a moment: it doesn’t look like total herbicide or fertilizer use has changed all that much from the 1990s to the near present. OK! Perhaps we should examine certain chemicals instead of total chemical use to make this table more interesting. The first part of this chunk is a different subset of the data and the second part of the chunk is where I made it into a table.</p>
+<pre class="r"><code>chem_subset &lt;- 
+  chem_apps %&gt;%
+# filtering for specific herbicides and fertilizer  
+  filter(str_detect(name, &quot;^DICAMBA&quot;)|str_detect(name, &quot;^GLYPHOSATE&quot;)|name == &quot;NITROGEN&quot;|name == &quot;PHOSPHATE&quot;) %&gt;%
+  filter(param == &quot;LB&quot;) %&gt;%
+# again, making into a wider format  
+  pivot_wider(id_cols = Year, 
+              names_from = name, 
+              values_from = Value) %&gt;%
+# getting totals for formulations  
+  mutate(DICAMBA    = rowSums(select(., starts_with(&quot;DICAMBA&quot;)), na.rm = TRUE),
+         GLYPHOSATE = rowSums(select(., starts_with(&quot;GLYPHOSATE&quot;)), na.rm = TRUE)) 
+
+# Table time! 
+chem_subset %&gt;%
+  select(Year, NITROGEN, PHOSPHATE, DICAMBA, GLYPHOSATE) %&gt;%
+  gt(rowname_col = &quot;Year&quot;) %&gt;%
+  tab_header(title    = md(&quot;**Chemical Use on Cornfields in Iowa**&quot;), 
+             subtitle = &quot;Total pounds of applied herbicide and fertilizer&quot;)%&gt;%
+  tab_stubhead(label = &quot;Year&quot;) %&gt;%
+  tab_spanner(label = &quot;Fertilizer&quot;, columns = c(&quot;NITROGEN&quot;, &quot;PHOSPHATE&quot;)) %&gt;%
+  tab_spanner(label = &quot;Herbicide&quot;, columns = c(&quot;DICAMBA&quot;, &quot;GLYPHOSATE&quot;)) %&gt;%
+  fmt_number(columns = everything(), 
+             use_seps = TRUE,
+             decimals = 0) %&gt;%
+  tab_footnote(footnote = &quot;Includes all formulations with the active ingredient&quot;,
+               locations = cells_column_labels(c(&quot;DICAMBA&quot;, &quot;GLYPHOSATE&quot;))) %&gt;%
+  tab_source_note(source_note = &quot;Source: USDA NASS&quot;) %&gt;%
+  opt_row_striping(row_striping = FALSE)</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#cgrjbvippq .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#cgrjbvippq .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#cgrjbvippq .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#cgrjbvippq .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#cgrjbvippq .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#cgrjbvippq .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#cgrjbvippq .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#cgrjbvippq .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#cgrjbvippq .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#cgrjbvippq .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#cgrjbvippq .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#cgrjbvippq .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#cgrjbvippq .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#cgrjbvippq .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#cgrjbvippq .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cgrjbvippq .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cgrjbvippq .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#cgrjbvippq .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#cgrjbvippq .gt_left {
+  text-align: left;
+}
+
+#cgrjbvippq .gt_center {
+  text-align: center;
+}
+
+#cgrjbvippq .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#cgrjbvippq .gt_font_normal {
+  font-weight: normal;
+}
+
+#cgrjbvippq .gt_font_bold {
+  font-weight: bold;
+}
+
+#cgrjbvippq .gt_font_italic {
+  font-style: italic;
+}
+
+#cgrjbvippq .gt_super {
+  font-size: 65%;
+}
+
+#cgrjbvippq .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="cgrjbvippq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="5" class="gt_heading gt_title gt_font_normal" style><strong>Chemical Use on Cornfields in Iowa</strong></th>
+    </tr>
+    <tr>
+      <th colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Total pounds of applied herbicide and fertilizer</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1">Year</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">Fertilizer</span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="2">
+        <span class="gt_column_spanner">Herbicide</span>
+      </th>
+    </tr>
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">NITROGEN</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">PHOSPHATE</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">DICAMBA<sup class="gt_footnote_marks">1</sup></th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">GLYPHOSATE<sup class="gt_footnote_marks">1</sup></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_left gt_stub">2018</td>
+      <td class="gt_row gt_right">1,784,300,000</td>
+      <td class="gt_row gt_right">698,200,000</td>
+      <td class="gt_row gt_right">323,000</td>
+      <td class="gt_row gt_right">9,759,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2014</td>
+      <td class="gt_row gt_right">1,842,200,000</td>
+      <td class="gt_row gt_right">600,500,000</td>
+      <td class="gt_row gt_right">91,000</td>
+      <td class="gt_row gt_right">10,047,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2010</td>
+      <td class="gt_row gt_right">1,806,600,000</td>
+      <td class="gt_row gt_right">620,300,000</td>
+      <td class="gt_row gt_right">11,000</td>
+      <td class="gt_row gt_right">9,390,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2005</td>
+      <td class="gt_row gt_right">1,653,200,000</td>
+      <td class="gt_row gt_right">579,000,000</td>
+      <td class="gt_row gt_right">164,000</td>
+      <td class="gt_row gt_right">2,230,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2000</td>
+      <td class="gt_row gt_right">1,533,000,000</td>
+      <td class="gt_row gt_right">503,200,000</td>
+      <td class="gt_row gt_right">988,000</td>
+      <td class="gt_row gt_right">479,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">1995</td>
+      <td class="gt_row gt_right">1,364,600,000</td>
+      <td class="gt_row gt_right">534,500,000</td>
+      <td class="gt_row gt_right">1,373,000</td>
+      <td class="gt_row gt_right">158,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">1990</td>
+      <td class="gt_row gt_right">1,561,000,000</td>
+      <td class="gt_row gt_right">609,000,000</td>
+      <td class="gt_row gt_right">833,000</td>
+      <td class="gt_row gt_right">0</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="5">Source: USDA NASS</td>
+    </tr>
+  </tfoot>
+  <tfoot>
+    <tr class="gt_footnotes">
+      <td colspan="5">
+        <p class="gt_footnote">
+          <sup class="gt_footnote_marks">
+            <em>1</em>
+          </sup>
+           
+          Includes all formulations with the active ingredient
+          <br />
+        </p>
+      </td>
+    </tr>
+  </tfoot>
+</table></div>
+<p>This table adds a couple new elements:</p>
+<ul>
+<li><p>Years are a stubhead, which is sort of equivalent to transitioning a column to a rowname in a table. In order to transition a column to a stubhead you must specify the column in the initial <code>gt()</code> call. In other words, I don’t <em>believe</em> you can make a column into stubhead by adding another layer to your table.</p></li>
+<li><p>Column spanners ‘Fertilizer’ and ‘Herbicide’ now label multiple column names.</p></li>
+</ul>
+<p>The numbers in this table suggest that both N &amp; P fertilizer use hasn’t changed much since 1990. This checks out with our initial observation. However there are changes in herbicide usage (mostly because I picked herbicides that I know have changed usage over the years..). Glyphosate use went from 0 lbs in 1990 to over 10 million pounds in 2014. This mirrors the release of ‘Round-up Ready’ corn in 1996-ish (glyphosate is the active killing ingredient in Round-Up) and its widespread adoption. Dicamba (which again is merely the active killing ingredient) is not a new herbicide, but it has gotten renewed press and scrutiny since it has come back onto the market due to the proclivity of the herbicide to volatilize, drift, and damage surrounding crop field. News stories <a href="https://www.nytimes.com/2017/09/21/business/monsanto-dicamba-weed-killer.html">here</a> and <a href="https://www.npr.org/sections/thesalt/2019/07/19/742836972/rogue-weedkiller-vapors-are-threatening-soybean-science">here</a>. This table doesn’t show the type of Dicamba use trend I predicted, but, importantly, I lumped all the herbicides together that use Glyphosate or Dicamba as their active ingredient (peep that footnote). There are actually a myriad of formulations that have been developed over the years that use these active ingredients. The logical next step is a table with all the different formulations separated…</p>
+<pre class="r"><code>chem_subset2 &lt;-   
+  chem_apps %&gt;%
+  filter(str_detect(name, &quot;^DICAMBA&quot;)|str_detect(name, &quot;^GLYPHOSATE&quot;)) %&gt;%
+  filter(param == &quot;LB&quot;) %&gt;%
+  pivot_wider(id_cols = Year, 
+              names_from = name, 
+              values_from = Value) %&gt;%
+  janitor::remove_empty(which = &quot;cols&quot;) %&gt;%
+  replace(., is.na(.), 0)
+
+chem_subset2 %&gt;%
+  gt(rowname_col = &quot;Year&quot;) %&gt;%
+  tab_header(title    = md(&quot;**Herbicide Use on Cornfields in Iowa**&quot;), 
+             subtitle = &quot;Total pounds of applied herbicide&quot;)%&gt;%
+  tab_stubhead(label = &quot;Year&quot;) %&gt;%
+  cols_move(columns = c(&quot;DICAMBA, DIMET. SALT = 29802&quot;,
+                        &quot;DICAMBA, POT. SALT = 129043&quot;),
+            after   = &quot;DICAMBA, SODIUM SALT = 29806&quot;) %&gt;%
+  fmt_number(columns = everything(), 
+             use_seps = TRUE,
+             decimals = 0) %&gt;%
+  tab_spanner(label = md(&quot;**DICAMBA**&quot;), columns = c(&quot;DICAMBA = 29801&quot;,
+                                             &quot;DICAMBA, DIGLY. SALT = 128931&quot;,
+                                             &quot;DICAMBA, SODIUM SALT = 29806&quot;, 
+                                             &quot;DICAMBA, DIMET. SALT = 29802&quot;,  
+                                             &quot;DICAMBA, POT. SALT = 129043&quot;)) %&gt;%
+  tab_spanner(label = md(&quot;**GLYPHOSATE**&quot;), columns = c(&quot;GLYPHOSATE = 417300&quot;,
+                                                &quot;GLYPHOSATE DIM. SALT = 103608&quot;,
+                                                &quot;GLYPHOSATE ISO. SALT = 103601&quot;,
+                                                &quot;GLYPHOSATE POT. SALT = 103613&quot;))%&gt;%
+  tab_source_note(source_note = &quot;Source: USDA NASS&quot;) %&gt;%
+# adding color to certain cells!  
+  tab_style(style = list(
+                      cell_fill(color = &quot;darkgreen&quot;),
+                      cell_text(color = &quot;white&quot;)),
+            locations = cells_body(columns = &quot;DICAMBA, DIGLY. SALT = 128931&quot;,
+                                   rows    = Year == 2018)) %&gt;%
+  tab_style(style = list(
+                      cell_fill(color = &quot;darkred&quot;),
+                      cell_text(color = &quot;white&quot;)),
+            locations = cells_body(columns = &quot;DICAMBA = 29801&quot;,
+                                   rows    = Year &lt; 2005 &amp; Year &gt; 1989)) %&gt;%
+  opt_row_striping(row_striping = FALSE)</code></pre>
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#eyncrpdsgs .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#eyncrpdsgs .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#eyncrpdsgs .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#eyncrpdsgs .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#eyncrpdsgs .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#eyncrpdsgs .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#eyncrpdsgs .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#eyncrpdsgs .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#eyncrpdsgs .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#eyncrpdsgs .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#eyncrpdsgs .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#eyncrpdsgs .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#eyncrpdsgs .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#eyncrpdsgs .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#eyncrpdsgs .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eyncrpdsgs .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eyncrpdsgs .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#eyncrpdsgs .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#eyncrpdsgs .gt_left {
+  text-align: left;
+}
+
+#eyncrpdsgs .gt_center {
+  text-align: center;
+}
+
+#eyncrpdsgs .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#eyncrpdsgs .gt_font_normal {
+  font-weight: normal;
+}
+
+#eyncrpdsgs .gt_font_bold {
+  font-weight: bold;
+}
+
+#eyncrpdsgs .gt_font_italic {
+  font-style: italic;
+}
+
+#eyncrpdsgs .gt_super {
+  font-size: 65%;
+}
+
+#eyncrpdsgs .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="eyncrpdsgs" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="10" class="gt_heading gt_title gt_font_normal" style><strong>Herbicide Use on Cornfields in Iowa</strong></th>
+    </tr>
+    <tr>
+      <th colspan="10" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style>Total pounds of applied herbicide</th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="2" colspan="1">Year</th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="5">
+        <span class="gt_column_spanner"><strong>DICAMBA</strong></span>
+      </th>
+      <th class="gt_center gt_columns_top_border gt_column_spanner_outer" rowspan="1" colspan="4">
+        <span class="gt_column_spanner"><strong>GLYPHOSATE</strong></span>
+      </th>
+    </tr>
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">DICAMBA = 29801</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">DICAMBA, DIGLY. SALT = 128931</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">DICAMBA, SODIUM SALT = 29806</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">DICAMBA, DIMET. SALT = 29802</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">DICAMBA, POT. SALT = 129043</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">GLYPHOSATE = 417300</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">GLYPHOSATE DIM. SALT = 103608</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">GLYPHOSATE ISO. SALT = 103601</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_center" rowspan="1" colspan="1">GLYPHOSATE POT. SALT = 103613</th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_left gt_stub">2018</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right" style="background-color: #006400; color: white;">227,000</td>
+      <td class="gt_row gt_right">96,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">1,831,000</td>
+      <td class="gt_row gt_right">727,000</td>
+      <td class="gt_row gt_right">2,678,000</td>
+      <td class="gt_row gt_right">4,523,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2014</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">91,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">1,530,000</td>
+      <td class="gt_row gt_right">1,058,000</td>
+      <td class="gt_row gt_right">3,500,000</td>
+      <td class="gt_row gt_right">3,959,000</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2010</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">11,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">519,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">8,871,000</td>
+      <td class="gt_row gt_right">0</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2005</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">18,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">146,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">2,230,000</td>
+      <td class="gt_row gt_right">0</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2000</td>
+      <td class="gt_row gt_right" style="background-color: #8B0000; color: white;">540,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">23,000</td>
+      <td class="gt_row gt_right">425,000</td>
+      <td class="gt_row gt_right">479,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">1995</td>
+      <td class="gt_row gt_right" style="background-color: #8B0000; color: white;">1,373,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">158,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">1990</td>
+      <td class="gt_row gt_right" style="background-color: #8B0000; color: white;">833,000</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+      <td class="gt_row gt_right">0</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="10">Source: USDA NASS</td>
+    </tr>
+  </tfoot>
+  
+</table></div>
+<p>Oy! This is getting messy now. I won’t pretend to understand the differences between these herbicide formulations. I did, however, find <a href="https://www.uaex.edu/media-resources/news/november2016/11-21-2016-Ark-Dicamba-Primer.aspx">this article</a> helpful. As expected, one formulation of Dicamba (highlighted in dark red) has been phased out of usage, while another formulation (highlighted in dark green) has been phased in quite recently. The article I just linked confirms that the newer formulations of Dicamba (labeled commercially as “Clarity” or “Xtend”) have heavier salts added to them (“DIGLY. SALT” = diglycolamine salt) so that the herbicide doesn’t volatilize as easily and cause damage by drift. The point being - looking at formulations can be confusing and insightful. It also gave me a good excuse to try out highlighting different cells.</p>
+<p>Alright let’s wrap up this post by looking at some basic corn stats:</p>
+<pre class="r"><code>acre_dat &lt;- 
+  read_csv(&quot;acres_data.csv&quot;) %&gt;%
+  select(Year, Period, `Data Item`, Value) %&gt;%
+  filter(Period == &quot;YEAR&quot; | Period == &quot;MARKETING YEAR&quot;) %&gt;%
+  pivot_wider(id_cols = Year, names_from = `Data Item`, values_from = Value) %&gt;%
+  janitor::clean_names()  # should have done this on the last dataset...
+
+corn_url &lt;- &quot;https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png&quot;
+
+last_tab &lt;- 
+  gt(acre_dat, rowname_col = &quot;year&quot;) %&gt;%
+  cols_label(
+    corn_grain_price_received_measured_in_bu = &quot;Price&quot;,
+    corn_acres_planted = &quot;Acres planted&quot;,
+    corn_grain_production_measured_in = &quot;Total production&quot;,
+    corn_grain_yield_measured_in_bu_acre = &quot;Yield (bu/acre)&quot;
+  ) %&gt;%
+  cols_move_to_end(columns = &quot;corn_grain_price_received_measured_in_bu&quot;) %&gt;%
+  tab_header(title = md(&quot;**Acreage, Yield, and Price of Iowa Corn**&quot;),
+             subtitle = html(web_image(url = corn_url) %&gt;% rep (4))) %&gt;%
+  tab_source_note(source_note = &quot;Source: USDA NASS&quot;) %&gt;%
+  tab_stubhead(label = &quot;Year&quot;) %&gt;%
+  tab_footnote(footnote = &quot;per bushel (equivalent to 64 pints)&quot;,
+               locations = cells_column_labels(&quot;corn_grain_price_received_measured_in_bu&quot;)) %&gt;%
+  fmt_currency(columns = vars(corn_grain_price_received_measured_in_bu,
+                              corn_grain_production_measured_in),
+               currency = &quot;USD&quot;,
+               decimals = 2) %&gt;%
+  fmt_number(columns = vars(corn_acres_planted),
+             use_seps = TRUE,
+             decimals = 0) %&gt;%
+  grand_summary_rows(columns = vars(corn_grain_price_received_measured_in_bu,
+                                    corn_acres_planted,
+                                    corn_grain_production_measured_in,
+                                    corn_grain_yield_measured_in_bu_acre),
+                     fns = list(Average = ~mean(.))) %&gt;%
+  opt_table_outline(style = &quot;solid&quot;, color = &quot;darkgreen&quot;) %&gt;%
+  opt_row_striping(row_striping = FALSE)
+
+last_tab </code></pre>
+<p><style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#ygzphahypf .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 3px;
+  border-top-color: darkgreen;
+  border-right-style: solid;
+  border-right-width: 3px;
+  border-right-color: darkgreen;
+  border-bottom-style: solid;
+  border-bottom-width: 3px;
+  border-bottom-color: darkgreen;
+  border-left-style: solid;
+  border-left-width: 3px;
+  border-left-color: darkgreen;
+}
+
+#ygzphahypf .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ygzphahypf .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ygzphahypf .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ygzphahypf .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ygzphahypf .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ygzphahypf .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ygzphahypf .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ygzphahypf .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ygzphahypf .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ygzphahypf .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ygzphahypf .gt_from_md > :first-child {
+  margin-top: 0;
+}
+
+#ygzphahypf .gt_from_md > :last-child {
+  margin-bottom: 0;
+}
+
+#ygzphahypf .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ygzphahypf .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#ygzphahypf .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ygzphahypf .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ygzphahypf .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ygzphahypf .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ygzphahypf .gt_left {
+  text-align: left;
+}
+
+#ygzphahypf .gt_center {
+  text-align: center;
+}
+
+#ygzphahypf .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ygzphahypf .gt_font_normal {
+  font-weight: normal;
+}
+
+#ygzphahypf .gt_font_bold {
+  font-weight: bold;
+}
+
+#ygzphahypf .gt_font_italic {
+  font-style: italic;
+}
+
+#ygzphahypf .gt_super {
+  font-size: 65%;
+}
+
+#ygzphahypf .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<div id="ygzphahypf" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+  <thead class="gt_header">
+    <tr>
+      <th colspan="5" class="gt_heading gt_title gt_font_normal" style><strong>Acreage, Yield, and Price of Iowa Corn</strong></th>
+    </tr>
+    <tr>
+      <th colspan="5" class="gt_heading gt_subtitle gt_font_normal gt_bottom_border" style><img src="https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png" style="height:30px;"> <img src="https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png" style="height:30px;"> <img src="https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png" style="height:30px;"> <img src="https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png" style="height:30px;"></th>
+    </tr>
+  </thead>
+  <thead class="gt_col_headings">
+    <tr>
+      <th class="gt_col_heading gt_columns_bottom_border gt_left" rowspan="1" colspan="1">Year</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Acres planted</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Total production</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Yield (bu/acre)</th>
+      <th class="gt_col_heading gt_columns_bottom_border gt_right" rowspan="1" colspan="1">Price<sup class="gt_footnote_marks">1</sup></th>
+    </tr>
+  </thead>
+  <tbody class="gt_table_body">
+    <tr>
+      <td class="gt_row gt_left gt_stub">2018</td>
+      <td class="gt_row gt_right">13,200,000</td>
+      <td class="gt_row gt_right">$8,971,410,000.00</td>
+      <td class="gt_row gt_right">196</td>
+      <td class="gt_row gt_right">$3.59</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2014</td>
+      <td class="gt_row gt_right">13,700,000</td>
+      <td class="gt_row gt_right">$8,783,054,000.00</td>
+      <td class="gt_row gt_right">178</td>
+      <td class="gt_row gt_right">$3.71</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2010</td>
+      <td class="gt_row gt_right">13,400,000</td>
+      <td class="gt_row gt_right">$11,261,498,000.00</td>
+      <td class="gt_row gt_right">165</td>
+      <td class="gt_row gt_right">$5.23</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2005</td>
+      <td class="gt_row gt_right">12,800,000</td>
+      <td class="gt_row gt_right">$4,195,250,000.00</td>
+      <td class="gt_row gt_right">173</td>
+      <td class="gt_row gt_right">$1.94</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">2000</td>
+      <td class="gt_row gt_right">12,300,000</td>
+      <td class="gt_row gt_right">$3,024,000,000.00</td>
+      <td class="gt_row gt_right">144</td>
+      <td class="gt_row gt_right">$1.75</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">1995</td>
+      <td class="gt_row gt_right">11,900,000</td>
+      <td class="gt_row gt_right">$4,565,760,000.00</td>
+      <td class="gt_row gt_right">123</td>
+      <td class="gt_row gt_right">$3.20</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_left gt_stub">1990</td>
+      <td class="gt_row gt_right">12,800,000</td>
+      <td class="gt_row gt_right">$3,452,904,000.00</td>
+      <td class="gt_row gt_right">126</td>
+      <td class="gt_row gt_right">$2.21</td>
+    </tr>
+    <tr>
+      <td class="gt_row gt_stub gt_right gt_grand_summary_row gt_first_grand_summary_row">Average</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">12,871,428.57</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">6,321,982,285.71</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">157.86</td>
+      <td class="gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row">3.09</td>
+    </tr>
+  </tbody>
+  <tfoot class="gt_sourcenotes">
+    <tr>
+      <td class="gt_sourcenote" colspan="5">Source: USDA NASS</td>
+    </tr>
+  </tfoot>
+  <tfoot>
+    <tr class="gt_footnotes">
+      <td colspan="5">
+        <p class="gt_footnote">
+          <sup class="gt_footnote_marks">
+            <em>1</em>
+          </sup>
+           
+          per bushel (equivalent to 64 pints)
+          <br />
+        </p>
+      </td>
+    </tr>
+  </tfoot>
+</table></div>
+New features in this table:</p>
+<ul>
+<li><p>I added a darkgreen border to the whole table</p></li>
+<li><p>I added a grand summary line at the bottom that takes the average of all columns. I couldn’t figure out how to get some of the columns with dollar signs and some without…?</p></li>
+<li><p>I added a tiny corn image to the title! Which looked great when I saved the table as png (as you can see from image in this post), but then when markdown rendered this post my tiny corn got its own line and awkward spacing….alas!</p></li>
+</ul>
+<p><code># gtsave(last_tab, filename = "corn_table.png")</code></p>
+<p>Again, let’s just take a quick moment to look at these numbers. Corn acreage has increased since 1990, peaking in 2014. Prices per bushel and total production ($) are highest in 2010 (thanks renewable fuel standard!), so it makes sense we’d see a delayed boom in production acres in 2014 And yield continues to steadily increase.</p>
+<div id="verdict-on-gt" class="section level4">
+<h4>Verdict on gt</h4>
+<p>I like it! I’m still getting used to the syntax, but it seems pretty straightforward and easy to pick up on. The help files are well written. I do wish I could place the title at the bottom of the table, since that’s where the figure caption needs to be for academic publishing, but that’s also OK. I will definitely be using it again.</p>
+</div>

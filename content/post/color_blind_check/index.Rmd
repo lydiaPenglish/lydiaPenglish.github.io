@@ -2,16 +2,16 @@
 title: Checking our palette for colorblindness
 author: Lydia English
 date: '2020-03-25'
-slug: checking-our-palette-for-colorblindness
+slug: checking-colorblindness
 categories:
   - r
 tags:
   - prairie
   - DIY
-subtitle: ''
+subtitle: 'Ensuring that I pick friendly flower hues'
 summary: ''
 authors: []
-lastmod: '2020-03-25T15:52:59-05:00'
+lastmod: '2020-04-16T15:52:59-05:00'
 featured: no
 image:
   caption: ''
@@ -21,17 +21,21 @@ draft: true
 projects: []
 ---
 
-In my last post, I made some color palettes based on off prairie plants. 
+In my [last post](/2020/03/16/a-prairie-color-palette/), I had some fun and made prototypes of color palettes based on off prairie plants. If I ever get around to making these color palettes into something more, like a package, I'd want to ensure they are color-blind friendly.  
+
+This led me to try out Claire McWhite and Claus Wilke's [package](https://github.com/clauswilke/colorblindr) `colorblindr` on my palettes. One of the functionalities of `colorblindr` is that it can display plots as they would appear to a colorblind person. The package wasn't on CRAN at the time of this posting, but you can download it from github _(FYI at the time of this posting I couldn't get the package to download on my computer (?? idk) so I cloned it from github and built it on my own device)_ 
+
+For the sake of this blog post I wanted to view my original palette next to the colorblind version of the palette. I focused my efforts on making sure my palettes would work for red-green colorblindness (Protanopia/Deuteranopia) since those seem to be the most common forms of colorblindness. Therefore I edited the `cvd_grid` function to only display those two grids.  
+#### Here's how my color palettes look:
 
 ```{r setup, include = FALSE}
 library(tidyverse)
 library(colorblindr)
-library(grid)
-library(gridExtra)
+library(patchwork)
 theme_set(theme_minimal())
 
 make_col_plot <- function(prairiePal = dalpu_colors){
-  df <- data.frame(x = 1:length(prairiePal), y = 1)
+  df <- data.frame(x = 1:length(prairiePal), y = 6)
   g1 <- ggplot(df, aes(x, y))+
     geom_tile(fill = prairiePal)+
     labs(x = NULL,
@@ -42,48 +46,97 @@ make_col_plot <- function(prairiePal = dalpu_colors){
   
   return(g1)
 }
+
+# editing cvd_grid function so it only returns 2 plots
+cvd_grid <- function(plot = last_plot(), severity = 1){
+  deut <- function(c) deutan(c, severity)
+  p1 <- edit_colors(plot, deut)
+  
+  prot <- function(c) protan(c, severity)
+  p2 <- edit_colors(plot, prot)
+  
+  cowplot::plot_grid(p1, p2, scale = 0.9, hjust = 0, vjust = 1,
+                     labels = c("Deutanomaly", "Protanomaly"),
+                     label_x = 0.01, label_y = 0.99, label_size = 12, label_fontface = "bold")
+}
+
 ```
 
+These first two palettes, which are based off of plants in the bean family and are more discrete in nature seem to be OK for colorblind folks. Cool!
 
-```{r}
+```{r, echo = FALSE}
 dalpu_colors <- c("#5F1343", "#A41393", "#C669D5",  "#E98018", "#667056",
                   "#2E4D24")
 fig_dalpu <- make_col_plot(prairiePal = dalpu_colors)
-colorblindr::cvd_grid(fig_dalpu)
-#ok! 
+cb_dalpu <- cvd_grid(fig_dalpu)
+fig_dalpu + ggtitle("Original") + cb_dalpu + plot_layout(widths = c(1, 2))
+```
+
+
+```{r, echo = FALSE}
 amoca_colors <- c("#361554", "#7A4FB6", "#C7B1F2", "#E99725", 
                   "#8B1C38", "#778A77")
 fig_amoca <- make_col_plot(prairiePal = amoca_colors)
-colorblindr::cvd_grid(fig_amoca)
-ascsp_colors <- c("#77162F", "#AE506B", "#D0A9BB", "#C6B9B0", "#8AA467", "#4B873A", "#205713")
-fig_ascsp <- make_col_plot(prairiePal = ascsp_colors)
-colorblindr::cvd_grid(fig_ascsp)
+cb_amoca <- cvd_grid(fig_amoca)
+
+fig_amoca + ggtitle("Original") + cb_amoca + plot_layout(widths = c(1, 2))
+```
+This butterfly milkweed inspired palette is less than optimal in colorblind vision. The light green and light orange seems problematic - it shall be altered! 
+
+```{r, echo = FALSE}
 asctu_colors <- c("#F64850", "#AA230F", "#FD5D0E", "#F9AB1A", "#EFBB56", 
                    "#ECE982", "#B9E437", "#5F942B")
 fig_asctu <- make_col_plot(prairiePal = asctu_colors)
-colorblindr::cvd_grid(fig_asctu)
+cb_asctu <- cvd_grid(fig_asctu)
+fig_asctu + ggtitle("Original") + cb_asctu + plot_layout(widths = c(1, 2))
+```
+
+As a sequential palette, the showy milkweed seems OK! The light pinks are a little hard to differentiate, but they are also kind of hard to differentiate for a non-color blind person. 
+
+```{r, echo = FALSE}
+ascsp_colors <- c("#77162F", "#AE506B", "#D0A9BB", "#C6B9B0", "#8AA467", "#4B873A", "#205713")
+fig_ascsp <- make_col_plot(prairiePal = ascsp_colors)
+cb_ascsp <- cvd_grid(fig_ascsp)
+fig_ascsp + ggtitle("Original") + cb_ascsp + plot_layout(widths = c(1, 2))
+```
+
+This sweet cone-flower palette was originally my favorite, but similar to the butterfly milkweed palette above, the light orange and green are hard to differentiate. Perhaps I'll make this a discrete palette instead of sequential... 
+
+```{r, echo = FALSE}
 rudsu_colors <- c("#8D3D46", "#4B2A17", "#F4AB00", "#FEDD00", "#D3BE17", 
                    "#8FA844", "#4C7A3D")
 fig_rudsu <- make_col_plot(prairiePal = rudsu_colors)
-colorblindr::cvd_grid(fig_rudsu)
+cb_rudsu <- cvd_grid(fig_rudsu)
+fig_rudsu + ggtitle("Original") + cb_rudsu + plot_layout(widths = c(1, 2))
+```
+
+While I love the idea of there being a sunflower palette, I'm not sure if this works. Also, yellow doesn't usually show up well on project screens, especially on a white background. 
+
+```{r, echo = FALSE}
 silin_colors <- c("#74532C", "#DE9E06", "#E9B907", "#FED806", "#A1B150", 
                    "#819C3F")
 fig_silin <- make_col_plot(prairiePal = silin_colors)
-colorblindr::cvd_grid(fig_silin)
+cb_silin <- cvd_grid(fig_silin)
+fig_silin + ggtitle("Original") + cb_silin + plot_layout(widths = c(1, 2))
+```
+
+Surprisingly the first of the grass palettes looks decent. 
+
+```{r, echo = FALSE}
 andge_colors <- c("#8E5A68", "#BD7353", "#FAAD62", "#FFF07E", "#C8D75F",  
                   "#99AE55")
 fig_andge <- make_col_plot(prairiePal = andge_colors)
-colorblindr::cvd_grid(fig_andge)
+cb_andge <- cvd_grid(fig_andge)
+fig_andge + ggtitle("Original") + cb_andge + plot_layout(widths = c(1, 2))
+```
+
+I had no hopes for this palette since it is based on red and green. It's honestly better than I was expecting but still not good enough to export into a package. Oh well! 
+
+```{r, echo = FALSE}
 boucu_colors <- c("#E15B38", "#A5646A", "#6C7258", "#8FB440")
 fig_boucu <- make_col_plot(prairiePal = boucu_colors)
-colorblindr::cvd_grid(fig_boucu)
+cb_boucu <- cvd_grid(fig_boucu)
+fig_boucu + ggtitle("Original") + cb_boucu + plot_layout(widths = c(1, 2))
 ```
 
-
-```{r}
-# interpolate colors
-make_col_plot(prairiePal = silin_colors)
-silin_cont <- grDevices::colorRampPalette(silin_colors)(60)
-scales::show_col(silin_cont)
-
-```
+Using `colorblindr` has given me some good insight into which colors don't work well in the same palette (mostly oranges and greens). As I move forward with this project and create any new palettes I'll make sure to continue to use it. 

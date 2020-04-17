@@ -12,73 +12,2365 @@
     
     
     <item>
-      <title>Checking our palette for colorblindness</title>
-      <link>/post/checking-our-palette-for-colorblindness/</link>
-      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+      <title>Making tables with gt</title>
+      <link>/2020/04/13/gt-tables/</link>
+      <pubDate>Mon, 13 Apr 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/checking-our-palette-for-colorblindness/</guid>
+      <guid>/2020/04/13/gt-tables/</guid>
       <description>
 
 
-&lt;p&gt;In my last post, I made some color palettes based on off prairie plants.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dalpu_colors &amp;lt;- c(&amp;quot;#5F1343&amp;quot;, &amp;quot;#A41393&amp;quot;, &amp;quot;#C669D5&amp;quot;,  &amp;quot;#E98018&amp;quot;, &amp;quot;#667056&amp;quot;,
-                  &amp;quot;#2E4D24&amp;quot;)
-fig_dalpu &amp;lt;- make_col_plot(prairiePal = dalpu_colors)
-colorblindr::cvd_grid(fig_dalpu)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Making tables in R is something I’ve dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table…I try making table in R…I successfully make a table but I can’t figure out how to format it exactly to my liking…I get frustrated…I abandon my R table and go to Microsoft word. I have no beef with the other R packages intended for table making and I’m sure with more finesse they could give me what I’m looking for. However, I’m excited to try out &lt;code&gt;gt&lt;/code&gt; because it is &lt;a href=&#34;https://gt.rstudio.com/&#34;&gt;“the grammar of tables”&lt;/a&gt; and was designed to mirror the layered style of creating &lt;code&gt;ggplot2&lt;/code&gt; figures.&lt;/p&gt;
+&lt;p&gt;I used this self-imposed table-making opportunity to play around with gathering data from the USDA’s National Agricultural Statistics Service (NASS). I used their &lt;a href=&#34;https://quickstats.nass.usda.gov/&#34;&gt;quickstats&lt;/a&gt; page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it’s not sweet corn). If you want to see the raw data, you can find it on my github.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;(NB: There were gaps where data were available so I picked time points roughly 4-5 years apart)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;First things first, I had to do a little data cleaning to get rid of some unwanted text and columns in the data-frame.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;chem_apps &amp;lt;- 
+  read_csv(&amp;quot;chem_data.csv&amp;quot;) %&amp;gt;%
+  mutate(param    = str_remove_all(`Data Item`, 
+                                    &amp;quot;CORN - APPLICATIONS, MEASURED IN &amp;quot;),
+         app_type = str_remove_all(Domain,
+                                   &amp;quot;CHEMICAL, &amp;quot;),
+         name     = str_extract(`Domain Category`,
+                                   &amp;quot;(?&amp;lt;=\\().+(?=\\))&amp;quot;),
+         Value    = str_replace_all(Value, &amp;quot;\\(D\\)&amp;quot;, &amp;quot;NA&amp;quot;),
+         Value    = str_remove_all(Value, &amp;quot;\\,&amp;quot;),
+         Value    = as.numeric(Value)) %&amp;gt;%
+  select(Year, param, app_type, name, Value)
+head(chem_apps)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 5
+##    Year param app_type  name                             Value
+##   &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt;     &amp;lt;chr&amp;gt;                            &amp;lt;dbl&amp;gt;
+## 1  2018 LB    HERBICIDE 2,4-D, 2-EHE = 30063                NA
+## 2  2018 LB    HERBICIDE 2,4-D, DIMETH. SALT = 30019         NA
+## 3  2018 LB    HERBICIDE 2,4-DB, DIMETH. SALT = 30819        NA
+## 4  2018 LB    HERBICIDE ACETOCHLOR = 121601            8823000
+## 5  2018 LB    HERBICIDE ATRAZINE = 80803               6621000
+## 6  2018 LB    HERBICIDE BAPMA SALT OF DICAMBA = 100094      NA&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next step: build a basic table with &lt;code&gt;gt&lt;/code&gt;. Here I’ve filtered my data-frame and rearranged it slightly and then gone right into using &lt;code&gt;gt&lt;/code&gt;, all with pipe operators. It’s quite easy to add a title and subtitle, as well as a source note. It’s also easy to use Markdown formatting by putting your title within the &lt;code&gt;md()&lt;/code&gt; function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;tab_v1 &amp;lt;- 
+  chem_apps %&amp;gt;%
+# Get data just on total chemical usage
+  filter(name == &amp;quot;TOTAL&amp;quot; | name == &amp;quot;NITROGEN&amp;quot; &amp;amp; param == &amp;quot;LB&amp;quot;) %&amp;gt;%
+# convert into a wider dataframe that is more table-ready  
+  pivot_wider(id_cols = c(Year, Value), 
+              names_from = app_type, 
+              values_from = Value) %&amp;gt;%
+# now add in gt 
+  gt() %&amp;gt;%
+# Title
+  tab_header(title    = md(&amp;quot;**Chemical Use on Cornfields in Iowa**&amp;quot;), 
+             subtitle = &amp;quot;Total pounds of applied herbicide and fertilizer&amp;quot;) %&amp;gt;%
+# Source note  
+  tab_source_note(source_note = &amp;quot;Source: USDA NASS&amp;quot;) %&amp;gt;%
+# Format numbers to have commas   
+  fmt_number(columns = vars(HERBICIDE,FERTILIZER), 
+             use_seps = TRUE,
+             decimals = 0) %&amp;gt;%
+  opt_row_striping(row_striping = FALSE)
+tab_v1&lt;/code&gt;&lt;/pre&gt;
+&lt;style&gt;html {
+  font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
+}
+
+#isuyxesekr .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#isuyxesekr .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#isuyxesekr .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#isuyxesekr .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#isuyxesekr .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#isuyxesekr .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#isuyxesekr .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#isuyxesekr .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#isuyxesekr .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#isuyxesekr .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#isuyxesekr .gt_from_md &gt; :first-child {
+  margin-top: 0;
+}
+
+#isuyxesekr .gt_from_md &gt; :last-child {
+  margin-bottom: 0;
+}
+
+#isuyxesekr .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#isuyxesekr .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#isuyxesekr .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#isuyxesekr .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#isuyxesekr .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#isuyxesekr .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#isuyxesekr .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#isuyxesekr .gt_left {
+  text-align: left;
+}
+
+#isuyxesekr .gt_center {
+  text-align: center;
+}
+
+#isuyxesekr .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#isuyxesekr .gt_font_normal {
+  font-weight: normal;
+}
+
+#isuyxesekr .gt_font_bold {
+  font-weight: bold;
+}
+
+#isuyxesekr .gt_font_italic {
+  font-style: italic;
+}
+
+#isuyxesekr .gt_super {
+  font-size: 65%;
+}
+
+#isuyxesekr .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+&lt;/style&gt;
+&lt;div id=&#34;isuyxesekr&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+  &lt;thead class=&#34;gt_header&#34;&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;3&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Chemical Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;3&#34; class=&#34;gt_heading gt_subtitle gt_font_normal gt_bottom_border&#34; style&gt;Total pounds of applied herbicide and fertilizer&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;thead class=&#34;gt_col_headings&#34;&gt;
+    &lt;tr&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;Year&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;HERBICIDE&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;FERTILIZER&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody class=&#34;gt_table_body&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2018&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;32,371,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,784,300,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2014&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;30,240,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,842,200,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2010&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;26,195,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,806,600,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2005&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;24,726,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,653,200,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;24,518,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,533,000,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1995&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;32,957,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,364,600,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1990&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;NA&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,561,000,000&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot class=&#34;gt_sourcenotes&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_sourcenote&#34; colspan=&#34;3&#34;&gt;Source: USDA NASS&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+  
+&lt;/table&gt;&lt;/div&gt;
+&lt;p&gt;The default gt table has its rows alternatively striped and while I don’t mind that aesthetically, half the strips go black under the dark mode of my website (ha!), so I also removed the striping for all of my tables in this post.&lt;/p&gt;
+&lt;p&gt;Let’s add a footnote because this table doesn’t include all types of fertilizer.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;tab_v1 %&amp;gt;%
+  tab_footnote(footnote = md(&amp;quot;Nitrogen Fertilizer *only*&amp;quot;),
+               locations = cells_column_labels(&amp;quot;FERTILIZER&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;style&gt;html {
+  font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
+}
+
+#ehmjqynocj .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ehmjqynocj .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ehmjqynocj .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ehmjqynocj .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ehmjqynocj .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ehmjqynocj .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ehmjqynocj .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ehmjqynocj .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ehmjqynocj .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ehmjqynocj .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ehmjqynocj .gt_from_md &gt; :first-child {
+  margin-top: 0;
+}
+
+#ehmjqynocj .gt_from_md &gt; :last-child {
+  margin-bottom: 0;
+}
+
+#ehmjqynocj .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ehmjqynocj .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#ehmjqynocj .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ehmjqynocj .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ehmjqynocj .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ehmjqynocj .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ehmjqynocj .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ehmjqynocj .gt_left {
+  text-align: left;
+}
+
+#ehmjqynocj .gt_center {
+  text-align: center;
+}
+
+#ehmjqynocj .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ehmjqynocj .gt_font_normal {
+  font-weight: normal;
+}
+
+#ehmjqynocj .gt_font_bold {
+  font-weight: bold;
+}
+
+#ehmjqynocj .gt_font_italic {
+  font-style: italic;
+}
+
+#ehmjqynocj .gt_super {
+  font-size: 65%;
+}
+
+#ehmjqynocj .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+&lt;/style&gt;
+&lt;div id=&#34;ehmjqynocj&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+  &lt;thead class=&#34;gt_header&#34;&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;3&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Chemical Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;3&#34; class=&#34;gt_heading gt_subtitle gt_font_normal gt_bottom_border&#34; style&gt;Total pounds of applied herbicide and fertilizer&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;thead class=&#34;gt_col_headings&#34;&gt;
+    &lt;tr&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;Year&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;HERBICIDE&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;FERTILIZER&lt;sup class=&#34;gt_footnote_marks&#34;&gt;1&lt;/sup&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody class=&#34;gt_table_body&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2018&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;32,371,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,784,300,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2014&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;30,240,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,842,200,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2010&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;26,195,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,806,600,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2005&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;24,726,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,653,200,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;24,518,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,533,000,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1995&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;32,957,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,364,600,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1990&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;NA&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,561,000,000&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot class=&#34;gt_sourcenotes&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_sourcenote&#34; colspan=&#34;3&#34;&gt;Source: USDA NASS&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+  &lt;tfoot&gt;
+    &lt;tr class=&#34;gt_footnotes&#34;&gt;
+      &lt;td colspan=&#34;3&#34;&gt;
+        &lt;p class=&#34;gt_footnote&#34;&gt;
+          &lt;sup class=&#34;gt_footnote_marks&#34;&gt;
+            &lt;em&gt;1&lt;/em&gt;
+          &lt;/sup&gt;
+           
+          Nitrogen Fertilizer &lt;em&gt;only&lt;/em&gt;
+          &lt;br /&gt;
+        &lt;/p&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;&lt;/div&gt;
+&lt;p&gt;Let’s just look at the values in this table for a moment: it doesn’t look like total herbicide or fertilizer use has changed all that much from the 1990s to the near present. OK! Perhaps we should examine certain chemicals instead of total chemical use to make this table more interesting. The first part of this chunk is a different subset of the data and the second part of the chunk is where I made it into a table.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;chem_subset &amp;lt;- 
+  chem_apps %&amp;gt;%
+# filtering for specific herbicides and fertilizer  
+  filter(str_detect(name, &amp;quot;^DICAMBA&amp;quot;)|str_detect(name, &amp;quot;^GLYPHOSATE&amp;quot;)|name == &amp;quot;NITROGEN&amp;quot;|name == &amp;quot;PHOSPHATE&amp;quot;) %&amp;gt;%
+  filter(param == &amp;quot;LB&amp;quot;) %&amp;gt;%
+# again, making into a wider format  
+  pivot_wider(id_cols = Year, 
+              names_from = name, 
+              values_from = Value) %&amp;gt;%
+# getting totals for formulations  
+  mutate(DICAMBA    = rowSums(select(., starts_with(&amp;quot;DICAMBA&amp;quot;)), na.rm = TRUE),
+         GLYPHOSATE = rowSums(select(., starts_with(&amp;quot;GLYPHOSATE&amp;quot;)), na.rm = TRUE)) 
+
+# Table time! 
+chem_subset %&amp;gt;%
+  select(Year, NITROGEN, PHOSPHATE, DICAMBA, GLYPHOSATE) %&amp;gt;%
+  gt(rowname_col = &amp;quot;Year&amp;quot;) %&amp;gt;%
+  tab_header(title    = md(&amp;quot;**Chemical Use on Cornfields in Iowa**&amp;quot;), 
+             subtitle = &amp;quot;Total pounds of applied herbicide and fertilizer&amp;quot;)%&amp;gt;%
+  tab_stubhead(label = &amp;quot;Year&amp;quot;) %&amp;gt;%
+  tab_spanner(label = &amp;quot;Fertilizer&amp;quot;, columns = c(&amp;quot;NITROGEN&amp;quot;, &amp;quot;PHOSPHATE&amp;quot;)) %&amp;gt;%
+  tab_spanner(label = &amp;quot;Herbicide&amp;quot;, columns = c(&amp;quot;DICAMBA&amp;quot;, &amp;quot;GLYPHOSATE&amp;quot;)) %&amp;gt;%
+  fmt_number(columns = everything(), 
+             use_seps = TRUE,
+             decimals = 0) %&amp;gt;%
+  tab_footnote(footnote = &amp;quot;Includes all formulations with the active ingredient&amp;quot;,
+               locations = cells_column_labels(c(&amp;quot;DICAMBA&amp;quot;, &amp;quot;GLYPHOSATE&amp;quot;))) %&amp;gt;%
+  tab_source_note(source_note = &amp;quot;Source: USDA NASS&amp;quot;) %&amp;gt;%
+  opt_row_striping(row_striping = FALSE)&lt;/code&gt;&lt;/pre&gt;
+&lt;style&gt;html {
+  font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
+}
+
+#cgrjbvippq .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#cgrjbvippq .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#cgrjbvippq .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#cgrjbvippq .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#cgrjbvippq .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#cgrjbvippq .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#cgrjbvippq .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#cgrjbvippq .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#cgrjbvippq .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#cgrjbvippq .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#cgrjbvippq .gt_from_md &gt; :first-child {
+  margin-top: 0;
+}
+
+#cgrjbvippq .gt_from_md &gt; :last-child {
+  margin-bottom: 0;
+}
+
+#cgrjbvippq .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#cgrjbvippq .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#cgrjbvippq .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cgrjbvippq .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#cgrjbvippq .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#cgrjbvippq .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#cgrjbvippq .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#cgrjbvippq .gt_left {
+  text-align: left;
+}
+
+#cgrjbvippq .gt_center {
+  text-align: center;
+}
+
+#cgrjbvippq .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#cgrjbvippq .gt_font_normal {
+  font-weight: normal;
+}
+
+#cgrjbvippq .gt_font_bold {
+  font-weight: bold;
+}
+
+#cgrjbvippq .gt_font_italic {
+  font-style: italic;
+}
+
+#cgrjbvippq .gt_super {
+  font-size: 65%;
+}
+
+#cgrjbvippq .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+&lt;/style&gt;
+&lt;div id=&#34;cgrjbvippq&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+  &lt;thead class=&#34;gt_header&#34;&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;5&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Chemical Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;5&#34; class=&#34;gt_heading gt_subtitle gt_font_normal gt_bottom_border&#34; style&gt;Total pounds of applied herbicide and fertilizer&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;thead class=&#34;gt_col_headings&#34;&gt;
+    &lt;tr&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_left&#34; rowspan=&#34;2&#34; colspan=&#34;1&#34;&gt;Year&lt;/th&gt;
+      &lt;th class=&#34;gt_center gt_columns_top_border gt_column_spanner_outer&#34; rowspan=&#34;1&#34; colspan=&#34;2&#34;&gt;
+        &lt;span class=&#34;gt_column_spanner&#34;&gt;Fertilizer&lt;/span&gt;
+      &lt;/th&gt;
+      &lt;th class=&#34;gt_center gt_columns_top_border gt_column_spanner_outer&#34; rowspan=&#34;1&#34; colspan=&#34;2&#34;&gt;
+        &lt;span class=&#34;gt_column_spanner&#34;&gt;Herbicide&lt;/span&gt;
+      &lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;NITROGEN&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;PHOSPHATE&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;DICAMBA&lt;sup class=&#34;gt_footnote_marks&#34;&gt;1&lt;/sup&gt;&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;GLYPHOSATE&lt;sup class=&#34;gt_footnote_marks&#34;&gt;1&lt;/sup&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody class=&#34;gt_table_body&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2018&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,784,300,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;698,200,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;323,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;9,759,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2014&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,842,200,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;600,500,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;91,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;10,047,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2010&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,806,600,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;620,300,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;11,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;9,390,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2005&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,653,200,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;579,000,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;164,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2,230,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,533,000,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;503,200,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;988,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;479,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;1995&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,364,600,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;534,500,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,373,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;158,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;1990&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,561,000,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;609,000,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;833,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot class=&#34;gt_sourcenotes&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_sourcenote&#34; colspan=&#34;5&#34;&gt;Source: USDA NASS&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+  &lt;tfoot&gt;
+    &lt;tr class=&#34;gt_footnotes&#34;&gt;
+      &lt;td colspan=&#34;5&#34;&gt;
+        &lt;p class=&#34;gt_footnote&#34;&gt;
+          &lt;sup class=&#34;gt_footnote_marks&#34;&gt;
+            &lt;em&gt;1&lt;/em&gt;
+          &lt;/sup&gt;
+           
+          Includes all formulations with the active ingredient
+          &lt;br /&gt;
+        &lt;/p&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;&lt;/div&gt;
+&lt;p&gt;This table adds a couple new elements:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;Years are a stubhead, which is sort of equivalent to transitioning a column to a rowname in a table. In order to transition a column to a stubhead you must specify the column in the initial &lt;code&gt;gt()&lt;/code&gt; call. In other words, I don’t &lt;em&gt;believe&lt;/em&gt; you can make a column into stubhead by adding another layer to your table.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Column spanners ‘Fertilizer’ and ‘Herbicide’ now label multiple column names.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The numbers in this table suggest that both N &amp;amp; P fertilizer use hasn’t changed much since 1990. This checks out with our initial observation. However there are changes in herbicide usage (mostly because I picked herbicides that I know have changed usage over the years..). Glyphosate use went from 0 lbs in 1990 to over 10 million pounds in 2014. This mirrors the release of ‘Round-up Ready’ corn in 1996-ish (glyphosate is the active killing ingredient in Round-Up) and its widespread adoption. Dicamba (which again is merely the active killing ingredient) is not a new herbicide, but it has gotten renewed press and scrutiny since it has come back onto the market due to the proclivity of the herbicide to volatilize, drift, and damage surrounding crop field. News stories &lt;a href=&#34;https://www.nytimes.com/2017/09/21/business/monsanto-dicamba-weed-killer.html&#34;&gt;here&lt;/a&gt; and &lt;a href=&#34;https://www.npr.org/sections/thesalt/2019/07/19/742836972/rogue-weedkiller-vapors-are-threatening-soybean-science&#34;&gt;here&lt;/a&gt;. This table doesn’t show the type of Dicamba use trend I predicted, but, importantly, I lumped all the herbicides together that use Glyphosate or Dicamba as their active ingredient (peep that footnote). There are actually a myriad of formulations that have been developed over the years that use these active ingredients. The logical next step is a table with all the different formulations separated…&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;chem_subset2 &amp;lt;-   
+  chem_apps %&amp;gt;%
+  filter(str_detect(name, &amp;quot;^DICAMBA&amp;quot;)|str_detect(name, &amp;quot;^GLYPHOSATE&amp;quot;)) %&amp;gt;%
+  filter(param == &amp;quot;LB&amp;quot;) %&amp;gt;%
+  pivot_wider(id_cols = Year, 
+              names_from = name, 
+              values_from = Value) %&amp;gt;%
+  janitor::remove_empty(which = &amp;quot;cols&amp;quot;) %&amp;gt;%
+  replace(., is.na(.), 0)
+
+chem_subset2 %&amp;gt;%
+  gt(rowname_col = &amp;quot;Year&amp;quot;) %&amp;gt;%
+  tab_header(title    = md(&amp;quot;**Herbicide Use on Cornfields in Iowa**&amp;quot;), 
+             subtitle = &amp;quot;Total pounds of applied herbicide&amp;quot;)%&amp;gt;%
+  tab_stubhead(label = &amp;quot;Year&amp;quot;) %&amp;gt;%
+  cols_move(columns = c(&amp;quot;DICAMBA, DIMET. SALT = 29802&amp;quot;,
+                        &amp;quot;DICAMBA, POT. SALT = 129043&amp;quot;),
+            after   = &amp;quot;DICAMBA, SODIUM SALT = 29806&amp;quot;) %&amp;gt;%
+  fmt_number(columns = everything(), 
+             use_seps = TRUE,
+             decimals = 0) %&amp;gt;%
+  tab_spanner(label = md(&amp;quot;**DICAMBA**&amp;quot;), columns = c(&amp;quot;DICAMBA = 29801&amp;quot;,
+                                             &amp;quot;DICAMBA, DIGLY. SALT = 128931&amp;quot;,
+                                             &amp;quot;DICAMBA, SODIUM SALT = 29806&amp;quot;, 
+                                             &amp;quot;DICAMBA, DIMET. SALT = 29802&amp;quot;,  
+                                             &amp;quot;DICAMBA, POT. SALT = 129043&amp;quot;)) %&amp;gt;%
+  tab_spanner(label = md(&amp;quot;**GLYPHOSATE**&amp;quot;), columns = c(&amp;quot;GLYPHOSATE = 417300&amp;quot;,
+                                                &amp;quot;GLYPHOSATE DIM. SALT = 103608&amp;quot;,
+                                                &amp;quot;GLYPHOSATE ISO. SALT = 103601&amp;quot;,
+                                                &amp;quot;GLYPHOSATE POT. SALT = 103613&amp;quot;))%&amp;gt;%
+  tab_source_note(source_note = &amp;quot;Source: USDA NASS&amp;quot;) %&amp;gt;%
+# adding color to certain cells!  
+  tab_style(style = list(
+                      cell_fill(color = &amp;quot;darkgreen&amp;quot;),
+                      cell_text(color = &amp;quot;white&amp;quot;)),
+            locations = cells_body(columns = &amp;quot;DICAMBA, DIGLY. SALT = 128931&amp;quot;,
+                                   rows    = Year == 2018)) %&amp;gt;%
+  tab_style(style = list(
+                      cell_fill(color = &amp;quot;darkred&amp;quot;),
+                      cell_text(color = &amp;quot;white&amp;quot;)),
+            locations = cells_body(columns = &amp;quot;DICAMBA = 29801&amp;quot;,
+                                   rows    = Year &amp;lt; 2005 &amp;amp; Year &amp;gt; 1989)) %&amp;gt;%
+  opt_row_striping(row_striping = FALSE)&lt;/code&gt;&lt;/pre&gt;
+&lt;style&gt;html {
+  font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
+}
+
+#eyncrpdsgs .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#eyncrpdsgs .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#eyncrpdsgs .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#eyncrpdsgs .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#eyncrpdsgs .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#eyncrpdsgs .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#eyncrpdsgs .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#eyncrpdsgs .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#eyncrpdsgs .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#eyncrpdsgs .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#eyncrpdsgs .gt_from_md &gt; :first-child {
+  margin-top: 0;
+}
+
+#eyncrpdsgs .gt_from_md &gt; :last-child {
+  margin-bottom: 0;
+}
+
+#eyncrpdsgs .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#eyncrpdsgs .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#eyncrpdsgs .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eyncrpdsgs .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#eyncrpdsgs .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#eyncrpdsgs .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#eyncrpdsgs .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#eyncrpdsgs .gt_left {
+  text-align: left;
+}
+
+#eyncrpdsgs .gt_center {
+  text-align: center;
+}
+
+#eyncrpdsgs .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#eyncrpdsgs .gt_font_normal {
+  font-weight: normal;
+}
+
+#eyncrpdsgs .gt_font_bold {
+  font-weight: bold;
+}
+
+#eyncrpdsgs .gt_font_italic {
+  font-style: italic;
+}
+
+#eyncrpdsgs .gt_super {
+  font-size: 65%;
+}
+
+#eyncrpdsgs .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+&lt;/style&gt;
+&lt;div id=&#34;eyncrpdsgs&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+  &lt;thead class=&#34;gt_header&#34;&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;10&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Herbicide Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;10&#34; class=&#34;gt_heading gt_subtitle gt_font_normal gt_bottom_border&#34; style&gt;Total pounds of applied herbicide&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;thead class=&#34;gt_col_headings&#34;&gt;
+    &lt;tr&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_left&#34; rowspan=&#34;2&#34; colspan=&#34;1&#34;&gt;Year&lt;/th&gt;
+      &lt;th class=&#34;gt_center gt_columns_top_border gt_column_spanner_outer&#34; rowspan=&#34;1&#34; colspan=&#34;5&#34;&gt;
+        &lt;span class=&#34;gt_column_spanner&#34;&gt;&lt;strong&gt;DICAMBA&lt;/strong&gt;&lt;/span&gt;
+      &lt;/th&gt;
+      &lt;th class=&#34;gt_center gt_columns_top_border gt_column_spanner_outer&#34; rowspan=&#34;1&#34; colspan=&#34;4&#34;&gt;
+        &lt;span class=&#34;gt_column_spanner&#34;&gt;&lt;strong&gt;GLYPHOSATE&lt;/strong&gt;&lt;/span&gt;
+      &lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;DICAMBA = 29801&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;DICAMBA, DIGLY. SALT = 128931&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;DICAMBA, SODIUM SALT = 29806&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;DICAMBA, DIMET. SALT = 29802&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;DICAMBA, POT. SALT = 129043&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;GLYPHOSATE = 417300&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;GLYPHOSATE DIM. SALT = 103608&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;GLYPHOSATE ISO. SALT = 103601&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_center&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;GLYPHOSATE POT. SALT = 103613&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody class=&#34;gt_table_body&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2018&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34; style=&#34;background-color: #006400; color: white;&#34;&gt;227,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;96,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,831,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;727,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2,678,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;4,523,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2014&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;91,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,530,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;1,058,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;3,500,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;3,959,000&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2010&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;11,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;519,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;8,871,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2005&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;18,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;146,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;2,230,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34; style=&#34;background-color: #8B0000; color: white;&#34;&gt;540,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;23,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;425,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;479,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;1995&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34; style=&#34;background-color: #8B0000; color: white;&#34;&gt;1,373,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;158,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;1990&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34; style=&#34;background-color: #8B0000; color: white;&#34;&gt;833,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;0&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot class=&#34;gt_sourcenotes&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_sourcenote&#34; colspan=&#34;10&#34;&gt;Source: USDA NASS&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+  
+&lt;/table&gt;&lt;/div&gt;
+&lt;p&gt;Oy! This is getting messy now. I won’t pretend to understand the differences between these herbicide formulations. I did, however, find &lt;a href=&#34;https://www.uaex.edu/media-resources/news/november2016/11-21-2016-Ark-Dicamba-Primer.aspx&#34;&gt;this article&lt;/a&gt; helpful. As expected, one formulation of Dicamba (highlighted in dark red) has been phased out of usage, while another formulation (highlighted in dark green) has been phased in quite recently. The article I just linked confirms that the newer formulations of Dicamba (labeled commercially as “Clarity” or “Xtend”) have heavier salts added to them (“DIGLY. SALT” = diglycolamine salt) so that the herbicide doesn’t volatilize as easily and cause damage by drift. The point being - looking at formulations can be confusing and insightful. It also gave me a good excuse to try out highlighting different cells.&lt;/p&gt;
+&lt;p&gt;Alright let’s wrap up this post by looking at some basic corn stats:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;acre_dat &amp;lt;- 
+  read_csv(&amp;quot;acres_data.csv&amp;quot;) %&amp;gt;%
+  select(Year, Period, `Data Item`, Value) %&amp;gt;%
+  filter(Period == &amp;quot;YEAR&amp;quot; | Period == &amp;quot;MARKETING YEAR&amp;quot;) %&amp;gt;%
+  pivot_wider(id_cols = Year, names_from = `Data Item`, values_from = Value) %&amp;gt;%
+  janitor::clean_names()  # should have done this on the last dataset...
+
+corn_url &amp;lt;- &amp;quot;https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png&amp;quot;
+
+last_tab &amp;lt;- 
+  gt(acre_dat, rowname_col = &amp;quot;year&amp;quot;) %&amp;gt;%
+  cols_label(
+    corn_grain_price_received_measured_in_bu = &amp;quot;Price&amp;quot;,
+    corn_acres_planted = &amp;quot;Acres planted&amp;quot;,
+    corn_grain_production_measured_in = &amp;quot;Total production&amp;quot;,
+    corn_grain_yield_measured_in_bu_acre = &amp;quot;Yield (bu/acre)&amp;quot;
+  ) %&amp;gt;%
+  cols_move_to_end(columns = &amp;quot;corn_grain_price_received_measured_in_bu&amp;quot;) %&amp;gt;%
+  tab_header(title = md(&amp;quot;**Acreage, Yield, and Price of Iowa Corn**&amp;quot;),
+             subtitle = html(web_image(url = corn_url) %&amp;gt;% rep (4))) %&amp;gt;%
+  tab_source_note(source_note = &amp;quot;Source: USDA NASS&amp;quot;) %&amp;gt;%
+  tab_stubhead(label = &amp;quot;Year&amp;quot;) %&amp;gt;%
+  tab_footnote(footnote = &amp;quot;per bushel (equivalent to 64 pints)&amp;quot;,
+               locations = cells_column_labels(&amp;quot;corn_grain_price_received_measured_in_bu&amp;quot;)) %&amp;gt;%
+  fmt_currency(columns = vars(corn_grain_price_received_measured_in_bu,
+                              corn_grain_production_measured_in),
+               currency = &amp;quot;USD&amp;quot;,
+               decimals = 2) %&amp;gt;%
+  fmt_number(columns = vars(corn_acres_planted),
+             use_seps = TRUE,
+             decimals = 0) %&amp;gt;%
+  grand_summary_rows(columns = vars(corn_grain_price_received_measured_in_bu,
+                                    corn_acres_planted,
+                                    corn_grain_production_measured_in,
+                                    corn_grain_yield_measured_in_bu_acre),
+                     fns = list(Average = ~mean(.))) %&amp;gt;%
+  opt_table_outline(style = &amp;quot;solid&amp;quot;, color = &amp;quot;darkgreen&amp;quot;) %&amp;gt;%
+  opt_row_striping(row_striping = FALSE)
+
+last_tab &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;style&gt;html {
+  font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
+}
+
+#ygzphahypf .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #333333;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  width: auto;
+  border-top-style: solid;
+  border-top-width: 3px;
+  border-top-color: darkgreen;
+  border-right-style: solid;
+  border-right-width: 3px;
+  border-right-color: darkgreen;
+  border-bottom-style: solid;
+  border-bottom-width: 3px;
+  border-bottom-color: darkgreen;
+  border-left-style: solid;
+  border-left-width: 3px;
+  border-left-color: darkgreen;
+}
+
+#ygzphahypf .gt_heading {
+  background-color: #FFFFFF;
+  text-align: center;
+  border-bottom-color: #FFFFFF;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_title {
+  color: #333333;
+  font-size: 125%;
+  font-weight: initial;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#ygzphahypf .gt_subtitle {
+  color: #333333;
+  font-size: 85%;
+  font-weight: initial;
+  padding-top: 0;
+  padding-bottom: 4px;
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#ygzphahypf .gt_bottom_border {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_col_headings {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_col_heading {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-x: hidden;
+}
+
+#ygzphahypf .gt_column_spanner_outer {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: normal;
+  text-transform: inherit;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+#ygzphahypf .gt_column_spanner_outer:first-child {
+  padding-left: 0;
+}
+
+#ygzphahypf .gt_column_spanner_outer:last-child {
+  padding-right: 0;
+}
+
+#ygzphahypf .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: bottom;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  overflow-x: hidden;
+  display: inline-block;
+  width: 100%;
+}
+
+#ygzphahypf .gt_group_heading {
+  padding: 8px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ygzphahypf .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  vertical-align: middle;
+}
+
+#ygzphahypf .gt_striped {
+  background-color: rgba(128, 128, 128, 0.05);
+}
+
+#ygzphahypf .gt_from_md &gt; :first-child {
+  margin-top: 0;
+}
+
+#ygzphahypf .gt_from_md &gt; :last-child {
+  margin-bottom: 0;
+}
+
+#ygzphahypf .gt_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  margin: 10px;
+  border-top-style: solid;
+  border-top-width: 1px;
+  border-top-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 1px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 1px;
+  border-right-color: #D3D3D3;
+  vertical-align: middle;
+  overflow-x: hidden;
+}
+
+#ygzphahypf .gt_stub {
+  color: #333333;
+  background-color: #FFFFFF;
+  font-size: 100%;
+  font-weight: initial;
+  text-transform: inherit;
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+  padding-left: 12px;
+}
+
+#ygzphahypf .gt_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ygzphahypf .gt_first_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_grand_summary_row {
+  color: #333333;
+  background-color: #FFFFFF;
+  text-transform: inherit;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#ygzphahypf .gt_first_grand_summary_row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-top-style: double;
+  border-top-width: 6px;
+  border-top-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_table_body {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #D3D3D3;
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_footnotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_footnote {
+  margin: 0px;
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ygzphahypf .gt_sourcenotes {
+  color: #333333;
+  background-color: #FFFFFF;
+  border-bottom-style: none;
+  border-bottom-width: 2px;
+  border-bottom-color: #D3D3D3;
+  border-left-style: none;
+  border-left-width: 2px;
+  border-left-color: #D3D3D3;
+  border-right-style: none;
+  border-right-width: 2px;
+  border-right-color: #D3D3D3;
+}
+
+#ygzphahypf .gt_sourcenote {
+  font-size: 90%;
+  padding: 4px;
+}
+
+#ygzphahypf .gt_left {
+  text-align: left;
+}
+
+#ygzphahypf .gt_center {
+  text-align: center;
+}
+
+#ygzphahypf .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#ygzphahypf .gt_font_normal {
+  font-weight: normal;
+}
+
+#ygzphahypf .gt_font_bold {
+  font-weight: bold;
+}
+
+#ygzphahypf .gt_font_italic {
+  font-style: italic;
+}
+
+#ygzphahypf .gt_super {
+  font-size: 65%;
+}
+
+#ygzphahypf .gt_footnote_marks {
+  font-style: italic;
+  font-size: 65%;
+}
+&lt;/style&gt;
+&lt;div id=&#34;ygzphahypf&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+  &lt;thead class=&#34;gt_header&#34;&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;5&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Acreage, Yield, and Price of Iowa Corn&lt;/strong&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th colspan=&#34;5&#34; class=&#34;gt_heading gt_subtitle gt_font_normal gt_bottom_border&#34; style&gt;&lt;img src=&#34;https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png&#34; style=&#34;height:30px;&#34;&gt; &lt;img src=&#34;https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png&#34; style=&#34;height:30px;&#34;&gt; &lt;img src=&#34;https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png&#34; style=&#34;height:30px;&#34;&gt; &lt;img src=&#34;https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png&#34; style=&#34;height:30px;&#34;&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;thead class=&#34;gt_col_headings&#34;&gt;
+    &lt;tr&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_left&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;Year&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;Acres planted&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;Total production&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;Yield (bu/acre)&lt;/th&gt;
+      &lt;th class=&#34;gt_col_heading gt_columns_bottom_border gt_right&#34; rowspan=&#34;1&#34; colspan=&#34;1&#34;&gt;Price&lt;sup class=&#34;gt_footnote_marks&#34;&gt;1&lt;/sup&gt;&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody class=&#34;gt_table_body&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2018&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;13,200,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$8,971,410,000.00&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;196&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$3.59&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2014&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;13,700,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$8,783,054,000.00&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;178&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$3.71&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2010&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;13,400,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$11,261,498,000.00&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;165&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$5.23&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2005&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;12,800,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$4,195,250,000.00&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;173&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$1.94&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;2000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;12,300,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$3,024,000,000.00&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;144&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$1.75&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;1995&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;11,900,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$4,565,760,000.00&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;123&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$3.20&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_left gt_stub&#34;&gt;1990&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;12,800,000&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$3,452,904,000.00&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;126&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right&#34;&gt;$2.21&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_row gt_stub gt_right gt_grand_summary_row gt_first_grand_summary_row&#34;&gt;Average&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row&#34;&gt;12,871,428.57&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row&#34;&gt;6,321,982,285.71&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row&#34;&gt;157.86&lt;/td&gt;
+      &lt;td class=&#34;gt_row gt_right gt_grand_summary_row gt_first_grand_summary_row&#34;&gt;3.09&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot class=&#34;gt_sourcenotes&#34;&gt;
+    &lt;tr&gt;
+      &lt;td class=&#34;gt_sourcenote&#34; colspan=&#34;5&#34;&gt;Source: USDA NASS&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+  &lt;tfoot&gt;
+    &lt;tr class=&#34;gt_footnotes&#34;&gt;
+      &lt;td colspan=&#34;5&#34;&gt;
+        &lt;p class=&#34;gt_footnote&#34;&gt;
+          &lt;sup class=&#34;gt_footnote_marks&#34;&gt;
+            &lt;em&gt;1&lt;/em&gt;
+          &lt;/sup&gt;
+           
+          per bushel (equivalent to 64 pints)
+          &lt;br /&gt;
+        &lt;/p&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;&lt;/div&gt;
+New features in this table:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;I added a darkgreen border to the whole table&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;I added a grand summary line at the bottom that takes the average of all columns. I couldn’t figure out how to get some of the columns with dollar signs and some without…?&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;I added a tiny corn image to the title! Which looked great when I saved the table as png (as you can see from image in this post), but then when markdown rendered this post my tiny corn got its own line and awkward spacing….alas!&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;# gtsave(last_tab, filename = &#34;corn_table.png&#34;)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;Again, let’s just take a quick moment to look at these numbers. Corn acreage has increased since 1990, peaking in 2014. Prices per bushel and total production ($) are highest in 2010 (thanks renewable fuel standard!), so it makes sense we’d see a delayed boom in production acres in 2014 And yield continues to steadily increase.&lt;/p&gt;
+&lt;div id=&#34;verdict-on-gt&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Verdict on gt&lt;/h4&gt;
+&lt;p&gt;I like it! I’m still getting used to the syntax, but it seems pretty straightforward and easy to pick up on. The help files are well written. I do wish I could place the title at the bottom of the table, since that’s where the figure caption needs to be for academic publishing, but that’s also OK. I will definitely be using it again.&lt;/p&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Checking our palette for colorblindness</title>
+      <link>/2020/03/25/checking-colorblindness/</link>
+      <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/03/25/checking-colorblindness/</guid>
+      <description>
+
+
+&lt;p&gt;In my &lt;a href=&#34;/2020/03/16/a-prairie-color-palette/&#34;&gt;last post&lt;/a&gt;, I had some fun and made prototypes of color palettes based on off prairie plants. If I ever get around to making these color palettes into something more, like a package, I’d want to ensure they are color-blind friendly.&lt;/p&gt;
+&lt;p&gt;This led me to try out Claire McWhite and Claus Wilke’s &lt;a href=&#34;https://github.com/clauswilke/colorblindr&#34;&gt;package&lt;/a&gt; &lt;code&gt;colorblindr&lt;/code&gt; on my palettes. One of the functionalities of &lt;code&gt;colorblindr&lt;/code&gt; is that it can display plots as they would appear to a colorblind person. The package wasn’t on CRAN at the time of this posting, but you can download it from github &lt;em&gt;(FYI at the time of this posting I couldn’t get the package to download on my computer (?? idk) so I cloned it from github and built it on my own device)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;For the sake of this blog post I wanted to view my original palette next to the colorblind version of the palette. I focused my efforts on making sure my palettes would work for red-green colorblindness (Protanopia/Deuteranopia) since those seem to be the most common forms of colorblindness. Therefore I edited the &lt;code&gt;cvd_grid&lt;/code&gt; function to only display those two grids.&lt;br /&gt;
+#### Here’s how my color palettes look:&lt;/p&gt;
+&lt;p&gt;These first two palettes, which are based off of plants in the bean family and are more discrete in nature seem to be OK for colorblind folks. Cool!&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#ok! 
-amoca_colors &amp;lt;- c(&amp;quot;#361554&amp;quot;, &amp;quot;#7A4FB6&amp;quot;, &amp;quot;#C7B1F2&amp;quot;, &amp;quot;#E99725&amp;quot;, 
-                  &amp;quot;#8B1C38&amp;quot;, &amp;quot;#778A77&amp;quot;)
-fig_amoca &amp;lt;- make_col_plot(prairiePal = amoca_colors)
-colorblindr::cvd_grid(fig_amoca)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ascsp_colors &amp;lt;- c(&amp;quot;#77162F&amp;quot;, &amp;quot;#AE506B&amp;quot;, &amp;quot;#D0A9BB&amp;quot;, &amp;quot;#C6B9B0&amp;quot;, &amp;quot;#8AA467&amp;quot;, &amp;quot;#4B873A&amp;quot;, &amp;quot;#205713&amp;quot;)
-fig_ascsp &amp;lt;- make_col_plot(prairiePal = ascsp_colors)
-colorblindr::cvd_grid(fig_ascsp)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-3.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;asctu_colors &amp;lt;- c(&amp;quot;#F64850&amp;quot;, &amp;quot;#AA230F&amp;quot;, &amp;quot;#FD5D0E&amp;quot;, &amp;quot;#F9AB1A&amp;quot;, &amp;quot;#EFBB56&amp;quot;, 
-                   &amp;quot;#ECE982&amp;quot;, &amp;quot;#B9E437&amp;quot;, &amp;quot;#5F942B&amp;quot;)
-fig_asctu &amp;lt;- make_col_plot(prairiePal = asctu_colors)
-colorblindr::cvd_grid(fig_asctu)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-4.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rudsu_colors &amp;lt;- c(&amp;quot;#8D3D46&amp;quot;, &amp;quot;#4B2A17&amp;quot;, &amp;quot;#F4AB00&amp;quot;, &amp;quot;#FEDD00&amp;quot;, &amp;quot;#D3BE17&amp;quot;, 
-                   &amp;quot;#8FA844&amp;quot;, &amp;quot;#4C7A3D&amp;quot;)
-fig_rudsu &amp;lt;- make_col_plot(prairiePal = rudsu_colors)
-colorblindr::cvd_grid(fig_rudsu)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-5.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;silin_colors &amp;lt;- c(&amp;quot;#74532C&amp;quot;, &amp;quot;#DE9E06&amp;quot;, &amp;quot;#E9B907&amp;quot;, &amp;quot;#FED806&amp;quot;, &amp;quot;#A1B150&amp;quot;, 
-                   &amp;quot;#819C3F&amp;quot;)
-fig_silin &amp;lt;- make_col_plot(prairiePal = silin_colors)
-colorblindr::cvd_grid(fig_silin)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-6.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;andge_colors &amp;lt;- c(&amp;quot;#8E5A68&amp;quot;, &amp;quot;#BD7353&amp;quot;, &amp;quot;#FAAD62&amp;quot;, &amp;quot;#FFF07E&amp;quot;, &amp;quot;#C8D75F&amp;quot;,  
-                  &amp;quot;#99AE55&amp;quot;)
-fig_andge &amp;lt;- make_col_plot(prairiePal = andge_colors)
-colorblindr::cvd_grid(fig_andge)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-7.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;boucu_colors &amp;lt;- c(&amp;quot;#E15B38&amp;quot;, &amp;quot;#A5646A&amp;quot;, &amp;quot;#6C7258&amp;quot;, &amp;quot;#8FB440&amp;quot;)
-fig_boucu &amp;lt;- make_col_plot(prairiePal = boucu_colors)
-colorblindr::cvd_grid(fig_boucu)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-8.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# interpolate colors
-make_col_plot(prairiePal = silin_colors)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;silin_cont &amp;lt;- grDevices::colorRampPalette(silin_colors)(60)
-scales::show_col(silin_cont)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;
+This butterfly milkweed inspired palette is less than optimal in colorblind vision. The light green and light orange seems problematic - it shall be altered!&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;As a sequential palette, the showy milkweed seems OK! The light pinks are a little hard to differentiate, but they are also kind of hard to differentiate for a non-color blind person.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;This sweet cone-flower palette was originally my favorite, but similar to the butterfly milkweed palette above, the light orange and green are hard to differentiate. Perhaps I’ll make this a discrete palette instead of sequential…&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;While I love the idea of there being a sunflower palette, I’m not sure if this works. Also, yellow doesn’t usually show up well on project screens, especially on a white background.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Surprisingly the first of the grass palettes looks decent.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;I had no hopes for this palette since it is based on red and green. It’s honestly better than I was expecting but still not good enough to export into a package. Oh well!&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Using &lt;code&gt;colorblindr&lt;/code&gt; has given me some good insight into which colors don’t work well in the same palette (mostly oranges and greens). As I move forward with this project and create any new palettes I’ll make sure to continue to use it.&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>A prairie color palette</title>
-      <link>/post/a-prairie-color-palette/</link>
+      <link>/2020/03/16/a-prairie-color-palette/</link>
       <pubDate>Mon, 16 Mar 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/a-prairie-color-palette/</guid>
+      <guid>/2020/03/16/a-prairie-color-palette/</guid>
       <description>
 
 
-&lt;p&gt;I’ve been inspired by other R packages that have created color palettes &lt;a href=&#34;https://nschiett.github.io/fishualize/index.html&#34;&gt;based on living organisms&lt;/a&gt;. Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn’t do anything fancy when choosing colors. I merely used the &lt;a href=&#34;http://instant-eyedropper.com/&#34;&gt;instant eyedropped&lt;/a&gt; tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I’ve noted it as such.&lt;/p&gt;
+&lt;p&gt;I’ve been inspired by other R packages that have created color palettes &lt;a href=&#34;https://nschiett.github.io/fishualize/index.html&#34;&gt;based on living organisms&lt;/a&gt;. Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn’t do anything fancy when choosing colors. I merely used the &lt;a href=&#34;http://instant-eyedropper.com/&#34;&gt;instant eyedropped&lt;/a&gt; tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. Most of these photos can be found in my &lt;a href=&#34;content/gallery/index.md&#34;&gt;gallery&lt;/a&gt;. If a photo is taken from somewhere else (i.e. is not my own) then I’ve noted it as such.&lt;/p&gt;
 &lt;p&gt;For all the botany nerds out there I’ve decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point.&lt;/p&gt;
 &lt;div id=&#34;i.-the-bean-family-fabaceae&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;i. The bean family (Fabaceae)&lt;/h4&gt;
@@ -95,8 +2387,8 @@ Butterfly milkweed (&lt;em&gt;Asclepias tuberosa&lt;/em&gt;) is one of the few o
 &lt;p&gt;I thought I should do another milkweed, so I chose showy milkweed, which has a more color palette that is more similar to the common milkweed we all know. Showy milkweed is just more, well, showy than the common variety.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&#34;iii.-the-daily-family-asteraceae&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;iii. The daily family (Asteraceae)&lt;/h4&gt;
+&lt;div id=&#34;iii.-the-daisy-family-asteraceae&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;iii. The daisy family (Asteraceae)&lt;/h4&gt;
 &lt;p&gt;I knew I had to make some color palettes from species in the Asteraceae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (&lt;em&gt;Rudbeckia subtermosa&lt;/em&gt;), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/prairie_colors/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;The other asteraceae flower I chose was Rosinweed (&lt;em&gt;Silphium integrefolium&lt;/em&gt;) which has a more traditional sunflower appearance (although it is &lt;em&gt;not&lt;/em&gt; in the sunflower genus &lt;em&gt;Helianthus&lt;/em&gt;).&lt;/p&gt;

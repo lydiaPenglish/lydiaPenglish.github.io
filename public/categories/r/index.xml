@@ -14,59 +14,33 @@
     
     <item>
       <title>Checking our palette for colorblindness</title>
-      <link>/post/checking-our-palette-for-colorblindness/</link>
+      <link>/2020/03/25/checking-colorblindness/</link>
       <pubDate>Wed, 25 Mar 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/checking-our-palette-for-colorblindness/</guid>
+      <guid>/2020/03/25/checking-colorblindness/</guid>
       <description>
 
 
-&lt;p&gt;In my last post, I made some color palettes based on off prairie plants.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dalpu_colors &amp;lt;- c(&amp;quot;#5F1343&amp;quot;, &amp;quot;#A41393&amp;quot;, &amp;quot;#C669D5&amp;quot;,  &amp;quot;#E98018&amp;quot;, &amp;quot;#667056&amp;quot;,
-                  &amp;quot;#2E4D24&amp;quot;)
-fig_dalpu &amp;lt;- make_col_plot(prairiePal = dalpu_colors)
-colorblindr::cvd_grid(fig_dalpu)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In my &lt;a href=&#34;/2020/03/16/a-prairie-color-palette/&#34;&gt;last post&lt;/a&gt;, I had some fun and made prototypes of color palettes based on off prairie plants. If I ever get around to making these color palettes into something more, like a package, I’d want to ensure they are color-blind friendly.&lt;/p&gt;
+&lt;p&gt;This led me to try out Claire McWhite and Claus Wilke’s &lt;a href=&#34;https://github.com/clauswilke/colorblindr&#34;&gt;package&lt;/a&gt; &lt;code&gt;colorblindr&lt;/code&gt; on my palettes. One of the functionalities of &lt;code&gt;colorblindr&lt;/code&gt; is that it can display plots as they would appear to a colorblind person. The package wasn’t on CRAN at the time of this posting, but you can download it from github &lt;em&gt;(FYI at the time of this posting I couldn’t get the package to download on my computer (?? idk) so I cloned it from github and built it on my own device)&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;For the sake of this blog post I wanted to view my original palette next to the colorblind version of the palette. I focused my efforts on making sure my palettes would work for red-green colorblindness (Protanopia/Deuteranopia) since those seem to be the most common forms of colorblindness. Therefore I edited the &lt;code&gt;cvd_grid&lt;/code&gt; function to only display those two grids.&lt;br /&gt;
+#### Here’s how my color palettes look:&lt;/p&gt;
+&lt;p&gt;These first two palettes, which are based off of plants in the bean family and are more discrete in nature seem to be OK for colorblind folks. Cool!&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;#ok! 
-amoca_colors &amp;lt;- c(&amp;quot;#361554&amp;quot;, &amp;quot;#7A4FB6&amp;quot;, &amp;quot;#C7B1F2&amp;quot;, &amp;quot;#E99725&amp;quot;, 
-                  &amp;quot;#8B1C38&amp;quot;, &amp;quot;#778A77&amp;quot;)
-fig_amoca &amp;lt;- make_col_plot(prairiePal = amoca_colors)
-colorblindr::cvd_grid(fig_amoca)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ascsp_colors &amp;lt;- c(&amp;quot;#77162F&amp;quot;, &amp;quot;#AE506B&amp;quot;, &amp;quot;#D0A9BB&amp;quot;, &amp;quot;#C6B9B0&amp;quot;, &amp;quot;#8AA467&amp;quot;, &amp;quot;#4B873A&amp;quot;, &amp;quot;#205713&amp;quot;)
-fig_ascsp &amp;lt;- make_col_plot(prairiePal = ascsp_colors)
-colorblindr::cvd_grid(fig_ascsp)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-3.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;asctu_colors &amp;lt;- c(&amp;quot;#F64850&amp;quot;, &amp;quot;#AA230F&amp;quot;, &amp;quot;#FD5D0E&amp;quot;, &amp;quot;#F9AB1A&amp;quot;, &amp;quot;#EFBB56&amp;quot;, 
-                   &amp;quot;#ECE982&amp;quot;, &amp;quot;#B9E437&amp;quot;, &amp;quot;#5F942B&amp;quot;)
-fig_asctu &amp;lt;- make_col_plot(prairiePal = asctu_colors)
-colorblindr::cvd_grid(fig_asctu)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-4.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rudsu_colors &amp;lt;- c(&amp;quot;#8D3D46&amp;quot;, &amp;quot;#4B2A17&amp;quot;, &amp;quot;#F4AB00&amp;quot;, &amp;quot;#FEDD00&amp;quot;, &amp;quot;#D3BE17&amp;quot;, 
-                   &amp;quot;#8FA844&amp;quot;, &amp;quot;#4C7A3D&amp;quot;)
-fig_rudsu &amp;lt;- make_col_plot(prairiePal = rudsu_colors)
-colorblindr::cvd_grid(fig_rudsu)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-5.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;silin_colors &amp;lt;- c(&amp;quot;#74532C&amp;quot;, &amp;quot;#DE9E06&amp;quot;, &amp;quot;#E9B907&amp;quot;, &amp;quot;#FED806&amp;quot;, &amp;quot;#A1B150&amp;quot;, 
-                   &amp;quot;#819C3F&amp;quot;)
-fig_silin &amp;lt;- make_col_plot(prairiePal = silin_colors)
-colorblindr::cvd_grid(fig_silin)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-6.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;andge_colors &amp;lt;- c(&amp;quot;#8E5A68&amp;quot;, &amp;quot;#BD7353&amp;quot;, &amp;quot;#FAAD62&amp;quot;, &amp;quot;#FFF07E&amp;quot;, &amp;quot;#C8D75F&amp;quot;,  
-                  &amp;quot;#99AE55&amp;quot;)
-fig_andge &amp;lt;- make_col_plot(prairiePal = andge_colors)
-colorblindr::cvd_grid(fig_andge)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-7.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;boucu_colors &amp;lt;- c(&amp;quot;#E15B38&amp;quot;, &amp;quot;#A5646A&amp;quot;, &amp;quot;#6C7258&amp;quot;, &amp;quot;#8FB440&amp;quot;)
-fig_boucu &amp;lt;- make_col_plot(prairiePal = boucu_colors)
-colorblindr::cvd_grid(fig_boucu)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-8.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# interpolate colors
-make_col_plot(prairiePal = silin_colors)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;silin_cont &amp;lt;- grDevices::colorRampPalette(silin_colors)(60)
-scales::show_col(silin_cont)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;
+This butterfly milkweed inspired palette is less than optimal in colorblind vision. The light green and light orange seems problematic - it shall be altered!&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;As a sequential palette, the showy milkweed seems OK! The light pinks are a little hard to differentiate, but they are also kind of hard to differentiate for a non-color blind person.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;This sweet cone-flower palette was originally my favorite, but similar to the butterfly milkweed palette above, the light orange and green are hard to differentiate. Perhaps I’ll make this a discrete palette instead of sequential…&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;While I love the idea of there being a sunflower palette, I’m not sure if this works. Also, yellow doesn’t usually show up well on project screens, especially on a white background.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Surprisingly the first of the grass palettes looks decent.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;I had no hopes for this palette since it is based on red and green. It’s honestly better than I was expecting but still not good enough to export into a package. Oh well!&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Using &lt;code&gt;colorblindr&lt;/code&gt; has given me some good insight into which colors don’t work well in the same palette (mostly oranges and greens). As I move forward with this project and create any new palettes I’ll make sure to continue to use it.&lt;/p&gt;
 </description>
     </item>
     

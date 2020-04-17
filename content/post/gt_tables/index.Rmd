@@ -1,0 +1,242 @@
+---
+title: Making tables with gt
+author: Lydia English
+date: '2020-04-13'
+slug: gt-tables
+categories:
+  - agriculture
+  - tables
+tags:
+  - R
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-04-17T14:26:14-05:00'
+featured: yes
+image:
+  caption: 'gt corn table'
+  focal_point: 'top'
+  preview_only: no
+draft: true  
+projects: []
+---
+
+Making tables in R is something I've dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table...I try making table in R...I successfully make a table but I can't figure out how to format it exactly to my liking...I get frustrated...I abandon my R table and go to Microsoft word. I have no beef with the other R packages intended for table making and I'm sure with more finesse they could give me what I'm looking for. However, I'm excited to try out `gt` because it is ["the grammar of tables"](https://gt.rstudio.com/) and was designed to mirror the layered style of creating `ggplot2` figures. 
+
+I used this self-imposed table-making opportunity to play around with gathering data from the USDA's National Agricultural Statistics Service (NASS). I used their [quickstats](https://quickstats.nass.usda.gov/) page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it's not sweet corn). If you want to see the raw data, you can find it on my github. 
+
+_(NB: There were gaps where data were available so I picked time points roughly 4-5 years apart)_
+
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(gt)
+```
+
+First things first, I had to do a little data cleaning to get rid of some unwanted text and columns in the data-frame. 
+
+```{r, message = FALSE, warning = FALSE}
+chem_apps <- 
+  read_csv("chem_data.csv") %>%
+  mutate(param    = str_remove_all(`Data Item`, 
+                                    "CORN - APPLICATIONS, MEASURED IN "),
+         app_type = str_remove_all(Domain,
+                                   "CHEMICAL, "),
+         name     = str_extract(`Domain Category`,
+                                   "(?<=\\().+(?=\\))"),
+         Value    = str_replace_all(Value, "\\(D\\)", "NA"),
+         Value    = str_remove_all(Value, "\\,"),
+         Value    = as.numeric(Value)) %>%
+  select(Year, param, app_type, name, Value)
+head(chem_apps)
+```
+
+Next step: build a basic table with `gt`. Here I've filtered my data-frame and rearranged it slightly and then gone right into using `gt`, all with pipe operators. It's quite easy to add a title and subtitle, as well as a source note. It's also easy to use Markdown formatting by putting your title within the `md()` function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!  
+
+
+```{r}
+tab_v1 <- 
+  chem_apps %>%
+# Get data just on total chemical usage
+  filter(name == "TOTAL" | name == "NITROGEN" & param == "LB") %>%
+# convert into a wider dataframe that is more table-ready  
+  pivot_wider(id_cols = c(Year, Value), 
+              names_from = app_type, 
+              values_from = Value) %>%
+# now add in gt 
+  gt() %>%
+# Title
+  tab_header(title    = md("**Chemical Use on Cornfields in Iowa**"), 
+             subtitle = "Total pounds of applied herbicide and fertilizer") %>%
+# Source note  
+  tab_source_note(source_note = "Source: USDA NASS") %>%
+# Format numbers to have commas   
+  fmt_number(columns = vars(HERBICIDE,FERTILIZER), 
+             use_seps = TRUE,
+             decimals = 0) %>%
+  opt_row_striping(row_striping = FALSE)
+tab_v1
+```
+
+The default gt table has its rows alternatively striped and while I don't mind that aesthetically, half the strips go black under the dark mode of my website (ha!), so I also removed the striping for all of my tables in this post. 
+
+Let's add a footnote because this table doesn't include all types of fertilizer.
+
+```{r}
+tab_v1 %>%
+  tab_footnote(footnote = md("Nitrogen Fertilizer *only*"),
+               locations = cells_column_labels("FERTILIZER"))
+```
+
+Let's just look at the values in this table for a moment: it doesn't look like total herbicide or fertilizer use has changed all that much from the 1990s to the near present. OK! Perhaps we should examine certain chemicals instead of total chemical use to make this table more interesting. The first part of this chunk is a different subset of the data and the second part of the chunk is where I made it into a table. 
+
+```{r}
+chem_subset <- 
+  chem_apps %>%
+# filtering for specific herbicides and fertilizer  
+  filter(str_detect(name, "^DICAMBA")|str_detect(name, "^GLYPHOSATE")|name == "NITROGEN"|name == "PHOSPHATE") %>%
+  filter(param == "LB") %>%
+# again, making into a wider format  
+  pivot_wider(id_cols = Year, 
+              names_from = name, 
+              values_from = Value) %>%
+# getting totals for formulations  
+  mutate(DICAMBA    = rowSums(select(., starts_with("DICAMBA")), na.rm = TRUE),
+         GLYPHOSATE = rowSums(select(., starts_with("GLYPHOSATE")), na.rm = TRUE)) 
+
+# Table time! 
+chem_subset %>%
+  select(Year, NITROGEN, PHOSPHATE, DICAMBA, GLYPHOSATE) %>%
+  gt(rowname_col = "Year") %>%
+  tab_header(title    = md("**Chemical Use on Cornfields in Iowa**"), 
+             subtitle = "Total pounds of applied herbicide and fertilizer")%>%
+  tab_stubhead(label = "Year") %>%
+  tab_spanner(label = "Fertilizer", columns = c("NITROGEN", "PHOSPHATE")) %>%
+  tab_spanner(label = "Herbicide", columns = c("DICAMBA", "GLYPHOSATE")) %>%
+  fmt_number(columns = everything(), 
+             use_seps = TRUE,
+             decimals = 0) %>%
+  tab_footnote(footnote = "Includes all formulations with the active ingredient",
+               locations = cells_column_labels(c("DICAMBA", "GLYPHOSATE"))) %>%
+  tab_source_note(source_note = "Source: USDA NASS") %>%
+  opt_row_striping(row_striping = FALSE)
+```
+
+This table adds a couple new elements: 
+
+* Years are a stubhead, which is sort of equivalent to transitioning a column to a rowname in a table. In order to transition a column to a stubhead you must specify the column in the initial `gt()` call. In other words, I don't _believe_ you can make a column into stubhead by adding another layer to your table.
+
+* Column spanners 'Fertilizer' and 'Herbicide' now label multiple column names.
+
+
+The numbers in this table suggest that both N & P fertilizer use hasn't changed much since 1990. This checks out with our initial observation. However there are changes in herbicide usage (mostly because I picked herbicides that I know have changed usage over the years..). Glyphosate use went from 0 lbs in 1990 to over 10 million pounds in 2014. This mirrors the release of 'Round-up Ready' corn in 1996-ish (glyphosate is the active killing ingredient in Round-Up) and its widespread adoption. Dicamba (which again is merely the active killing ingredient) is not a new herbicide, but it has gotten renewed press and scrutiny since it has come back onto the market due to the proclivity of the herbicide to volatilize, drift, and damage surrounding crop field. News stories  [here](https://www.nytimes.com/2017/09/21/business/monsanto-dicamba-weed-killer.html) and [here](https://www.npr.org/sections/thesalt/2019/07/19/742836972/rogue-weedkiller-vapors-are-threatening-soybean-science). This table doesn't show the type of Dicamba use trend I predicted, but, importantly, I lumped all the herbicides together that use Glyphosate or Dicamba as their active ingredient (peep that footnote). There are actually a myriad of formulations that have been developed over the years that use these active ingredients. The logical next step is a table with all the different formulations separated... 
+
+```{r}
+chem_subset2 <-   
+  chem_apps %>%
+  filter(str_detect(name, "^DICAMBA")|str_detect(name, "^GLYPHOSATE")) %>%
+  filter(param == "LB") %>%
+  pivot_wider(id_cols = Year, 
+              names_from = name, 
+              values_from = Value) %>%
+  janitor::remove_empty(which = "cols") %>%
+  replace(., is.na(.), 0)
+
+chem_subset2 %>%
+  gt(rowname_col = "Year") %>%
+  tab_header(title    = md("**Herbicide Use on Cornfields in Iowa**"), 
+             subtitle = "Total pounds of applied herbicide")%>%
+  tab_stubhead(label = "Year") %>%
+  cols_move(columns = c("DICAMBA, DIMET. SALT = 29802",
+                        "DICAMBA, POT. SALT = 129043"),
+            after   = "DICAMBA, SODIUM SALT = 29806") %>%
+  fmt_number(columns = everything(), 
+             use_seps = TRUE,
+             decimals = 0) %>%
+  tab_spanner(label = md("**DICAMBA**"), columns = c("DICAMBA = 29801",
+                                             "DICAMBA, DIGLY. SALT = 128931",
+                                             "DICAMBA, SODIUM SALT = 29806", 
+                                             "DICAMBA, DIMET. SALT = 29802",  
+                                             "DICAMBA, POT. SALT = 129043")) %>%
+  tab_spanner(label = md("**GLYPHOSATE**"), columns = c("GLYPHOSATE = 417300",
+                                                "GLYPHOSATE DIM. SALT = 103608",
+                                                "GLYPHOSATE ISO. SALT = 103601",
+                                                "GLYPHOSATE POT. SALT = 103613"))%>%
+  tab_source_note(source_note = "Source: USDA NASS") %>%
+# adding color to certain cells!  
+  tab_style(style = list(
+                      cell_fill(color = "darkgreen"),
+                      cell_text(color = "white")),
+            locations = cells_body(columns = "DICAMBA, DIGLY. SALT = 128931",
+                                   rows    = Year == 2018)) %>%
+  tab_style(style = list(
+                      cell_fill(color = "darkred"),
+                      cell_text(color = "white")),
+            locations = cells_body(columns = "DICAMBA = 29801",
+                                   rows    = Year < 2005 & Year > 1989)) %>%
+  opt_row_striping(row_striping = FALSE)
+
+```
+
+Oy! This is getting messy now. I won't pretend to understand the differences between these herbicide formulations. I did, however, find [this article](https://www.uaex.edu/media-resources/news/november2016/11-21-2016-Ark-Dicamba-Primer.aspx) helpful.  As expected, one formulation of Dicamba (highlighted in dark red) has been phased out of usage, while another formulation (highlighted in dark green) has been phased in quite recently. The article I just linked confirms that the newer formulations of Dicamba (labeled commercially as "Clarity" or "Xtend") have heavier salts added to them ("DIGLY. SALT" = diglycolamine salt) so that the herbicide doesn't volatilize as easily and cause damage by drift. The point being - looking at formulations can be confusing and insightful. It also gave me a good excuse to try out highlighting different cells. 
+
+Alright let's wrap up this post by looking at some basic corn stats: 
+
+```{r, message = FALSE, warning = FALSE}
+acre_dat <- 
+  read_csv("acres_data.csv") %>%
+  select(Year, Period, `Data Item`, Value) %>%
+  filter(Period == "YEAR" | Period == "MARKETING YEAR") %>%
+  pivot_wider(id_cols = Year, names_from = `Data Item`, values_from = Value) %>%
+  janitor::clean_names()  # should have done this on the last dataset...
+
+corn_url <- "https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png"
+
+last_tab <- 
+  gt(acre_dat, rowname_col = "year") %>%
+  cols_label(
+    corn_grain_price_received_measured_in_bu = "Price",
+    corn_acres_planted = "Acres planted",
+    corn_grain_production_measured_in = "Total production",
+    corn_grain_yield_measured_in_bu_acre = "Yield (bu/acre)"
+  ) %>%
+  cols_move_to_end(columns = "corn_grain_price_received_measured_in_bu") %>%
+  tab_header(title = html("<strong>Acreage, Yield, and Price of Iowa Corn<strong>",
+                          web_image(url = corn_url))) %>%
+  tab_source_note(source_note = "Source: USDA NASS") %>%
+  tab_stubhead(label = "Year") %>%
+  tab_footnote(footnote = "per bushel (equivalent to 64 pints)",
+               locations = cells_column_labels("corn_grain_price_received_measured_in_bu")) %>%
+  fmt_currency(columns = vars(corn_grain_price_received_measured_in_bu,
+                              corn_grain_production_measured_in),
+               currency = "USD",
+               decimals = 2) %>%
+  fmt_number(columns = vars(corn_acres_planted),
+             use_seps = TRUE,
+             decimals = 0) %>%
+  grand_summary_rows(columns = vars(corn_grain_price_received_measured_in_bu,
+                                    corn_acres_planted,
+                                    corn_grain_production_measured_in,
+                                    corn_grain_yield_measured_in_bu_acre),
+                     fns = list(Average = ~mean(.))) %>%
+  opt_table_outline(style = "solid", color = "darkgreen") %>%
+  opt_row_striping(row_striping = FALSE)
+
+last_tab 
+
+```
+New features in this table:
+
+* I added a darkgreen border to the whole table 
+
+* I added a grand summary line at the bottom that takes the average of all columns. I couldn't figure out how to get some of the columns with dollar signs and some without...? 
+
+* I added a tiny corn image to the title! Which looked great when I saved the table as png (as you can see from image in this post), but then when markdown rendered this post my tiny corn got its own line and awkward spacing....alas!
+
+`# gtsave(last_tab, filename = "corn_table.png")`
+
+Again, let's just take a quick moment to look at these numbers. Corn acreage has increased since 1990, peaking in 2014. Prices per bushel and total production ($) are highest in 2010 (thanks renewable fuel standard!), so it makes sense we'd see a delayed boom in production acres in 2014 And yield continues to steadily increase. 
+
+#### Verdict on gt 
+
+I like it! I'm still getting used to the syntax, but it seems pretty straightforward and easy to pick up on. The help files are well written. I do wish I could place the title at the bottom of the table, since that's where the figure caption needs to be for academic publishing, but that's also OK. I will definitely be using it again.  

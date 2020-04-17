@@ -368,11 +368,11 @@
   
   
   <div>
-    <h2><a href="/post/checking-our-palette-for-colorblindness/">Checking our palette for colorblindness</a></h2>
+    <h2><a href="/2020/03/25/checking-colorblindness/">Checking our palette for colorblindness</a></h2>
     <div class="article-style">
       
-      In my last post, I made some color palettes based on off prairie plants.
-dalpu_colors &lt;- c(&quot;#5F1343&quot;, &quot;#A41393&quot;, &quot;#C669D5&quot;, &quot;#E98018&quot;, &quot;#667056&quot;,&quot;#2E4D24&quot;)fig_dalpu &lt;- make_col_plot(prairiePal = dalpu_colors)colorblindr::cvd_grid(fig_dalpu)#ok! amoca_colors &lt;- c(&quot;#361554&quot;, &quot;#7A4FB6&quot;, &quot;#C7B1F2&quot;, &quot;#E99725&quot;, &quot;#8B1C38&quot;, &quot;#778A77&quot;)fig_amoca &lt;- make_col_plot(prairiePal = amoca_colors)colorblindr::cvd_grid(fig_amoca)ascsp_colors &lt;- c(&quot;#77162F&quot;, &quot;#AE506B&quot;, &quot;#D0A9BB&quot;, &quot;#C6B9B0&quot;, &quot;#8AA467&quot;, &quot;#4B873A&quot;, &quot;#205713&quot;)fig_ascsp &lt;- make_col_plot(prairiePal = ascsp_colors)colorblindr::cvd_grid(fig_ascsp)asctu_colors &lt;- c(&quot;#F64850&quot;, &quot;#AA230F&quot;, &quot;#FD5D0E&quot;, &quot;#F9AB1A&quot;, &quot;#EFBB56&quot;, &quot;#ECE982&quot;, &quot;#B9E437&quot;, &quot;#5F942B&quot;)fig_asctu &lt;- make_col_plot(prairiePal = asctu_colors)colorblindr::cvd_grid(fig_asctu)rudsu_colors &lt;- c(&quot;#8D3D46&quot;, &quot;#4B2A17&quot;, &quot;#F4AB00&quot;, &quot;#FEDD00&quot;, &quot;#D3BE17&quot;, &quot;#8FA844&quot;, &quot;#4C7A3D&quot;)fig_rudsu &lt;- make_col_plot(prairiePal = rudsu_colors)colorblindr::cvd_grid(fig_rudsu)silin_colors &lt;- c(&quot;#74532C&quot;, &quot;#DE9E06&quot;, &quot;#E9B907&quot;, &quot;#FED806&quot;, &quot;#A1B150&quot;, &quot;#819C3F&quot;)fig_silin &lt;- make_col_plot(prairiePal = silin_colors)colorblindr::cvd_grid(fig_silin)andge_colors &lt;- c(&quot;#8E5A68&quot;, &quot;#BD7353&quot;, &quot;#FAAD62&quot;, &quot;#FFF07E&quot;, &quot;#C8D75F&quot;, &quot;#99AE55&quot;)fig_andge &lt;- make_col_plot(prairiePal = andge_colors)colorblindr::cvd_grid(fig_andge)boucu_colors &lt;- c(&quot;#E15B38&quot;, &quot;#A5646A&quot;, &quot;#6C7258&quot;, &quot;#8FB440&quot;)fig_boucu &lt;- make_col_plot(prairiePal = boucu_colors)colorblindr::cvd_grid(fig_boucu)# interpolate colorsmake_col_plot(prairiePal = silin_colors)silin_cont &lt;- grDevices::colorRampPalette(silin_colors)(60)scales::show_col(silin_cont)
+      In my last post, I had some fun and made prototypes of color palettes based on off prairie plants. If I ever get around to making these color palettes into something more, like a package, I’d want to ensure they are color-blind friendly.
+This led me to try out Claire McWhite and Claus Wilke’s package colorblindr on my palettes. One of the functionalities of colorblindr is that it can display plots as they would appear to a colorblind person.
       
     </div>
   </div>

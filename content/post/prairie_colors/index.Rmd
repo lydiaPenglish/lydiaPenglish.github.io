@@ -20,7 +20,7 @@ image:
 projects: []
 ---
 
-I've been inspired by other R packages that have created color palettes [based on living organisms](https://nschiett.github.io/fishualize/index.html). Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn't do anything fancy when choosing colors. I merely used the [instant eyedropped](http://instant-eyedropper.com/) tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. If a photo is taken from somewhere else (i.e. is not my own) then I've noted it as such. 
+I've been inspired by other R packages that have created color palettes [based on living organisms](https://nschiett.github.io/fishualize/index.html). Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn't do anything fancy when choosing colors. I merely used the [instant eyedropped](http://instant-eyedropper.com/) tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. Most of these photos can be found in my [gallery](content/gallery/index.md). If a photo is taken from somewhere else (i.e. is not my own) then I've noted it as such. 
 
 For all the botany nerds out there I've decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point. 
 
@@ -96,7 +96,7 @@ ascsp_gg  <- make_col_plot(prairiePal = ascsp_colors)
 grid.arrange(ascsp, ascsp_gg, ncol = 2)
 ```
 
-#### iii. The daily family (Asteraceae)
+#### iii. The daisy family (Asteraceae)
 
 I knew I had to make some color palettes from species in the Asteraceae (Daisy) family. After all the Asteraceae is a HUGE plant family (tied for first with the Orchideae). I started with sweet coneflower (*Rudbeckia subtermosa*), which is related to brown- and black-eyed Susan. I love the brownish red color of the inner disk florets. 
 
