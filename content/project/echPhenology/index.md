@@ -26,7 +26,7 @@ This is a project I started when I worked as a technician for the [Echinacea Pro
 
 ### Preamble
 
-Flowering phenology, or the timing of flowering, has long been a trait studied by scientists, given it's importance for plant reproduction and fitness. Plants that rely on pollen from other plants (i.e. obligate outcrossers) must flowering at the same time other individuals to successfully reproduce. Moreover, if plants rely on pollinators to transfer said pollen then they must ensure that they are flowering at the same time as their pollinators.    
+Flowering phenology, or the timing of flowering, has long been a trait studied by scientists, given it's importance for plant reproduction and fitness. Plants that rely on pollen from other plants ("obligate outcrossers") must flower at the same time other individuals to successfully reproduce. Moreover, if plants rely on pollinators to transfer said pollen then they must ensure that they are flowering at the same time that their pollinators are active.    
 
 _Echinacea angustifolia_ (hereinafter just _Echinacea_) is an obligate outcrosser and relies on pollination. It is also a perennial that often flowers multiple times throughout its life, but not necessarily in consecutive years. Plants are usually at least 3 years when they flower for the first time, but sometimes they are more than 15 years old when they flower for the first time. It quickly gets complicated. 
 

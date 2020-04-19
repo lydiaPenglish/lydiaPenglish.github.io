@@ -52,6 +52,6 @@ date_format = "Jan 2006"
   location = "Manchester, Vermont"
   date_start = "2014-09-01"
   date_end = "2015-03-15"
-  description = """Technically WWOOFed. Ran farmers markets, took care of chickens, made commercial batches of veggie burgers, farmed veggies, etc., etc. Fattened up on the world's best bread."""
+  description = """Ran farmers markets, took care of chickens, made commercial batches of veggie burgers, farmed veggies, etc., etc. Fattened up on the world's best bread."""
 
 +++

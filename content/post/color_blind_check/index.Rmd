@@ -17,7 +17,6 @@ image:
   caption: ''
   focal_point: ''
   preview_only: no
-draft: true
 projects: []
 ---
 
@@ -26,6 +25,7 @@ In my [last post](/2020/03/16/a-prairie-color-palette/), I had some fun and made
 This led me to try out Claire McWhite and Claus Wilke's [package](https://github.com/clauswilke/colorblindr) `colorblindr` on my palettes. One of the functionalities of `colorblindr` is that it can display plots as they would appear to a colorblind person. The package wasn't on CRAN at the time of this posting, but you can download it from github _(FYI at the time of this posting I couldn't get the package to download on my computer (?? idk) so I cloned it from github and built it on my own device)_ 
 
 For the sake of this blog post I wanted to view my original palette next to the colorblind version of the palette. I focused my efforts on making sure my palettes would work for red-green colorblindness (Protanopia/Deuteranopia) since those seem to be the most common forms of colorblindness. Therefore I edited the `cvd_grid` function to only display those two grids.  
+
 #### Here's how my color palettes look:
 
 ```{r setup, include = FALSE}

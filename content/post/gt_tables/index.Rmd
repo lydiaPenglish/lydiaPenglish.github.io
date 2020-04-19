@@ -11,22 +11,27 @@ tags:
 subtitle: ''
 summary: ''
 authors: []
-lastmod: '2020-04-17T14:26:14-05:00'
+lastmod: '2020-04-19T14:26:14-05:00'
 featured: yes
 image:
   caption: 'gt corn table'
   focal_point: 'top'
   preview_only: no
-draft: true  
 projects: []
 ---
 
+Overall notes about `gt`: I like it! I'm still learning the syntax but it seems intuitive and user-friendly. It's worth noting at the beginning of this post that the tables are rendered a little differently via blogdown than they would be if they were just knit into an html file. Therefore, **please don't view this page in dark mode**...you won't be able see half the table rows. I believe this problem should be fixed with the next release of `gt` on CRAN.
+
+#### Preamble
+
 Making tables in R is something I've dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table...I try making table in R...I successfully make a table but I can't figure out how to format it exactly to my liking...I get frustrated...I abandon my R table and go to Microsoft word. I have no beef with the other R packages intended for table making and I'm sure with more finesse they could give me what I'm looking for. However, I'm excited to try out `gt` because it is ["the grammar of tables"](https://gt.rstudio.com/) and was designed to mirror the layered style of creating `ggplot2` figures. 
 
-I used this self-imposed table-making opportunity to play around with gathering data from the USDA's National Agricultural Statistics Service (NASS). I used their [quickstats](https://quickstats.nass.usda.gov/) page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it's not sweet corn). If you want to see the raw data, you can find it on my github. 
+I used this self-imposed table-making opportunity to play around with gathering data from the USDA's National Agricultural Statistics Service (NASS). I used their [quickstats](https://quickstats.nass.usda.gov/) page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it's not sweet corn). If you want to see the raw data, you can find it on [my github](https://github.com/lydiaPenglish/lydiaPenglish.github.io). 
 
 _(NB: There were gaps where data were available so I picked time points roughly 4-5 years apart)_
 
+
+#### Table time! 
 
 ```{r setup, include = FALSE}
 library(tidyverse)
@@ -74,11 +79,10 @@ tab_v1 <-
   fmt_number(columns = vars(HERBICIDE,FERTILIZER), 
              use_seps = TRUE,
              decimals = 0) %>%
+# this should remove row striping but it doesn't work when using blogdown to render scripts  
   opt_row_striping(row_striping = FALSE)
 tab_v1
 ```
-
-The default gt table has its rows alternatively striped and while I don't mind that aesthetically, half the strips go black under the dark mode of my website (ha!), so I also removed the striping for all of my tables in this post. 
 
 Let's add a footnote because this table doesn't include all types of fertilizer.
 
@@ -129,7 +133,7 @@ This table adds a couple new elements:
 * Column spanners 'Fertilizer' and 'Herbicide' now label multiple column names.
 
 
-The numbers in this table suggest that both N & P fertilizer use hasn't changed much since 1990. This checks out with our initial observation. However there are changes in herbicide usage (mostly because I picked herbicides that I know have changed usage over the years..). Glyphosate use went from 0 lbs in 1990 to over 10 million pounds in 2014. This mirrors the release of 'Round-up Ready' corn in 1996-ish (glyphosate is the active killing ingredient in Round-Up) and its widespread adoption. Dicamba (which again is merely the active killing ingredient) is not a new herbicide, but it has gotten renewed press and scrutiny since it has come back onto the market due to the proclivity of the herbicide to volatilize, drift, and damage surrounding crop field. News stories  [here](https://www.nytimes.com/2017/09/21/business/monsanto-dicamba-weed-killer.html) and [here](https://www.npr.org/sections/thesalt/2019/07/19/742836972/rogue-weedkiller-vapors-are-threatening-soybean-science). This table doesn't show the type of Dicamba use trend I predicted, but, importantly, I lumped all the herbicides together that use Glyphosate or Dicamba as their active ingredient (peep that footnote). There are actually a myriad of formulations that have been developed over the years that use these active ingredients. The logical next step is a table with all the different formulations separated... 
+The numbers in this table suggest that both N & P fertilizer use hasn't changed much since 1990. This checks out with our initial observation. However there are changes in herbicide usage (mostly because I picked herbicides that I know have changed usage over the years..). Glyphosate use went from 0 lbs in 1990 to over 10 million pounds in 2014. This mirrors the release of 'Round-up Ready' corn in 1996-ish (glyphosate is the active killing ingredient in Round-Up) and its widespread adoption. Dicamba (which again is merely the active killing ingredient) is not a new herbicide, but it has gotten renewed press and scrutiny since it has come back onto the market due to the proclivity of the herbicide to volatilize, drift, and damage surrounding crop fields. News stories  [here](https://www.nytimes.com/2017/09/21/business/monsanto-dicamba-weed-killer.html) and [here](https://www.npr.org/sections/thesalt/2019/07/19/742836972/rogue-weedkiller-vapors-are-threatening-soybean-science). This table doesn't show the type of Dicamba use trend I predicted, but, importantly, I lumped all the herbicides together that use Glyphosate or Dicamba as their active ingredient (peep that footnote). There are actually a myriad of formulations that have been developed over the years that use these active ingredients. The logical next step is a table with all the different formulations separated... 
 
 ```{r}
 chem_subset2 <-   
@@ -231,12 +235,11 @@ New features in this table:
 
 * I added a grand summary line at the bottom that takes the average of all columns. I couldn't figure out how to get some of the columns with dollar signs and some without...? 
 
-* I added a tiny corn image to the title! Which looked great when I saved the table as png (as you can see from image in this post), but then when markdown rendered this post my tiny corn got its own line and awkward spacing....alas!
+* I added a tiny corn image to the title! Which looked great when I saved the table as png (as you can see from image in this post), but then gets all messed up when rendered via blogdown. 
 
+Btw, tables are pretty easy to save:
 `# gtsave(last_tab, filename = "corn_table.png")`
 
-Again, let's just take a quick moment to look at these numbers. Corn acreage has increased since 1990, peaking in 2014. Prices per bushel and total production ($) are highest in 2010 (thanks renewable fuel standard!), so it makes sense we'd see a delayed boom in production acres in 2014 And yield continues to steadily increase. 
+Again, let's just take a quick moment to look at these numbers. Corn acreage has increased since 1990, peaking in 2014. Prices per bushel and total production ($) are highest in 2010 (thanks renewable fuel standard!), so it makes sense we'd see a delayed boom in production acres in 2014. Yield continues to steadily increase. 
 
-#### Verdict on gt 
-
-I like it! I'm still getting used to the syntax, but it seems pretty straightforward and easy to pick up on. The help files are well written. I do wish I could place the title at the bottom of the table, since that's where the figure caption needs to be for academic publishing, but that's also OK. I will definitely be using it again.  
+ 

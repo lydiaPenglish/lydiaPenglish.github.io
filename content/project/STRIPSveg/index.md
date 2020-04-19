@@ -16,7 +16,7 @@ image:
 
 ### Acknowledgements: 
 
-This project would first and foremost not be possible without the many Iowa farmers and landowners (26!) who let me come on to their property and tromp around their fields. This project would also have been harder and more isolating without the many people who sat on plastic buckets and recorded data while out in the field with me. Field work in Iowa in July and August is often uncomfortably hot and humid. Lastly, thanks to Katherine Goode for statistical advice, my lab group for their guidance, and my committee for keeping me on task.
+This project would first and foremost not be possible without the many Iowa farmers and landowners (26!) who let me come on to their property and tromp around their fields. This project would also have been harder and more isolating without the many people who sat on plastic buckets and recorded data while out in the field with me. They were all troopers, field work in Iowa in July and August is often uncomfortably hot and humid. Lastly, thanks to [Katherine Goode](https://goodekat.github.io/) for statistical advice, my lab group for their guidance, and my committee for keeping me on task.
 
 ### Preamble:
 
@@ -30,7 +30,7 @@ I surveyed the vegetation during the summers of 2018 and 2019. My sampling point
 
 _(please note: these results are not published yet and are not intended to be cited)_
 
-1) Diversity was largely related to the richness of the seed mix. When sites seeded more species, they had more prairie species. This isn't a surprising result, one might both hypothesize and hope that seeding more species would result in more species being found, but it's a reassuring pattern nonetheless. We also found larger sites to be more diverse, which is a pattern in line with a longstanding pattern in ecology: the species-area relationship.
+1) Diversity was largely related to the richness of the seed mix. When sites seeded more species, they had more prairie species. This isn't a surprising result, one might both hypothesize and hope that seeding more species would result in more species being found, but it's a reassuring pattern nonetheless. We also found larger sites to be more diverse, which is in line with a longstanding pattern in ecology: the species-area relationship.
 
 2) Very few of our covariates (seed mix richness, site age, size, perimeter:area ratio, and season planted) explained variation in the abundance of different functional groups. Contrary to our expectations, seeding a more diverse mix was not associated with more consistent cover of prairie species. Age was a negative predictor for annual weeds. We expect annual species to be out-competed in a largely perennial community over time, so this finding agreed with our expectations. But we also found age to be a negative predictor of legumes (nitrogen fixing forbs). I don't know why yet...
 

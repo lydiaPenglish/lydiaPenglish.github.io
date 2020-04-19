@@ -22,27 +22,25 @@
 
 &lt;h3 id=&#34;acknowledgements&#34;&gt;Acknowledgements:&lt;/h3&gt;
 
-&lt;p&gt;This was a collaborate project and would &lt;strong&gt;not&lt;/strong&gt; have been possible without the hardworking Gina Nichols and Jarad Niemi.&lt;/p&gt;
+&lt;p&gt;This was a collaborative project and would &lt;strong&gt;not&lt;/strong&gt; have been possible without the hardworking Gina Nichols and Jarad Niemi.&lt;/p&gt;
 
 &lt;h3 id=&#34;preamble&#34;&gt;Preamble:&lt;/h3&gt;
 
-&lt;p&gt;CyChecks began as a required assignment in STAT 585 at Iowa State University (ISU). As groups, we were tasked with creating a package that had data and useful functions. My collaborator and peer, Gina Nichols, had the great idea of looking at salary data from our very own university to see if there are any obvious pay disparities. Gina and I are housed in the Agronomy department, which seems to have a lot of male faculty but little female representation, despite having a largely female biased graduate program (cite?). We&amp;rsquo;re able to examine salaries because ISU is a land grant school and is, in part, paid for by the taxpayer. We completed the group project with some other people, which was the original &lt;a href=&#34;https://github.com/vanichols/CyChecks&#34; target=&#34;_blank&#34;&gt;CyChecks&lt;/a&gt;. &lt;a href=&#34;https://en.wikipedia.org/wiki/Cy_the_Cardinal&#34; target=&#34;_blank&#34;&gt;Cy&lt;/a&gt; is ISU&amp;rsquo;s mascot, and Checks because&amp;hellip;well you get it.&lt;/p&gt;
+&lt;p&gt;CyChecks began as a required assignment in STAT 585 at Iowa State University (ISU). As groups, we were tasked with creating an R package that had data and useful functions. My collaborator and peer, Gina Nichols, had the great idea of looking at salary data from our very own university to see if there are any obvious pay disparities. Gina and I are housed in the Agronomy department, which seems to have a lot of male faculty but little female representation, despite having a largely female biased graduate program. We&amp;rsquo;re able to examine salaries because ISU is a land grant school and is, in part, paid for by the taxpayer. We completed the group project with some other people, which was the original &lt;a href=&#34;https://github.com/vanichols/CyChecks&#34; target=&#34;_blank&#34;&gt;CyChecks&lt;/a&gt;. &lt;a href=&#34;https://en.wikipedia.org/wiki/Cy_the_Cardinal&#34; target=&#34;_blank&#34;&gt;Cy&lt;/a&gt; is ISU&amp;rsquo;s mascot, and Checks because&amp;hellip;well you get it.&lt;/p&gt;
 
-&lt;p&gt;The class ended in the spring of 2019, but Gina and I wanted to continue our analysis, mostly because we didn&amp;rsquo;t have enough time to comb through everything we would have liked for the class project. So was born CyChecks2, which is a cleaner version of the original.&lt;/p&gt;
+&lt;p&gt;The class ended in the spring of 2019, but Gina and I wanted to continue our analysis, mostly because we didn&amp;rsquo;t have enough time to comb through everything we would have liked. So was born CyChecks2, which is a cleaner version of the original.&lt;/p&gt;
 
-&lt;p&gt;We&amp;rsquo;ve focused our analysis on gender because that&amp;rsquo;s what&amp;rsquo;s included in the public data set. We realize there is likely an interplay between gender and rate (CITE article), however we are limited in our ability to address this interaction given the data we have. Similarly we realize that our research is considering gender as a binary and is ignoring anyone who decided to omit their gender for any reason.&lt;/p&gt;
-
-&lt;p&gt;&lt;em&gt;If you&amp;rsquo;re interested in the hiccups of wrangling public salary data and HR department information then check out the section at the bottom&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;We&amp;rsquo;ve focused our salardy analysis on gender because that&amp;rsquo;s what&amp;rsquo;s included in the public data set. We realize there is likely an interplay between gender and race, however we are limited in our ability to address this interaction given the data we have. Similarly we realize that our research is considering gender as a binary and is ignoring anyone who decided to omit their gender for any reason.&lt;/p&gt;
 
 &lt;h3 id=&#34;what-we-found&#34;&gt;What we found:&lt;/h3&gt;
 
-&lt;p&gt;This is a work in progress and we are currently wading through things still. But our former shiny app can be found &lt;a href=&#34;https://vanichols.shinyapps.io/myapp/&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This is a work in progress and we are currently wading through the many issues that arise when working with real life data. But our former shiny app can be found &lt;a href=&#34;https://vanichols.shinyapps.io/myapp/&#34; target=&#34;_blank&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h3 id=&#34;wrangling-issues&#34;&gt;Wrangling issues:&lt;/h3&gt;
 
-&lt;p&gt;You guys, this was a little bit of a doozy. The reason wrangling was such a pain is that the salary database did not indicate any employee&amp;rsquo;s department within the university. And while directory data in theory is public (you can Google anyone to see where they work at Iowa State), that data is not easily scrape-able. Therefore to gain access to this data we had to wade through the back-channels of ISU HR, who were super kind and helpful in giving us the information we wanted.&lt;/p&gt;
+&lt;p&gt;This was a little bit of a doozy. The reason wrangling was such a pain is that the salary database did not indicate any employee&amp;rsquo;s department within the university. And while directory data in theory is public (you can Google anyone to see where they work at Iowa State), that data is not easily scrape-able. Therefore to gain access to this data we had to wade through the back-channels of ISU HR, who were super kind and helpful in giving us the information we wanted.&lt;/p&gt;
 
-&lt;p&gt;But then we had issues with names. Usually middle names. Middle names were included in the salary data but not the directory data. There were duplicate names. How people designated their middle names changed over time. Sometimes there were hyphens and sometimes there weren&amp;rsquo;t. The list goes on&amp;hellip;&lt;/p&gt;
+&lt;p&gt;We then had to do a simple join between salary data and directory data. But there were issues with names. Usually middle names. There were also duplicate names. Peoples&amp;rsquo; names changed over time. Department names changed over time. People were in one database but not the other. You get the gist&amp;hellip;&lt;/p&gt;
 </description>
     </item>
     
@@ -60,7 +58,7 @@
 
 &lt;h3 id=&#34;preamble&#34;&gt;Preamble&lt;/h3&gt;
 
-&lt;p&gt;Flowering phenology, or the timing of flowering, has long been a trait studied by scientists, given it&amp;rsquo;s importance for plant reproduction and fitness. Plants that rely on pollen from other plants (i.e. obligate outcrossers) must flowering at the same time other individuals to successfully reproduce. Moreover, if plants rely on pollinators to transfer said pollen then they must ensure that they are flowering at the same time as their pollinators.&lt;/p&gt;
+&lt;p&gt;Flowering phenology, or the timing of flowering, has long been a trait studied by scientists, given it&amp;rsquo;s importance for plant reproduction and fitness. Plants that rely on pollen from other plants (&amp;ldquo;obligate outcrossers&amp;rdquo;) must flower at the same time other individuals to successfully reproduce. Moreover, if plants rely on pollinators to transfer said pollen then they must ensure that they are flowering at the same time that their pollinators are active.&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;Echinacea angustifolia&lt;/em&gt; (hereinafter just &lt;em&gt;Echinacea&lt;/em&gt;) is an obligate outcrosser and relies on pollination. It is also a perennial that often flowers multiple times throughout its life, but not necessarily in consecutive years. Plants are usually at least 3 years when they flower for the first time, but sometimes they are more than 15 years old when they flower for the first time. It quickly gets complicated.&lt;/p&gt;
 
@@ -82,7 +80,7 @@
 
 &lt;h3 id=&#34;acknowledgements&#34;&gt;Acknowledgements:&lt;/h3&gt;
 
-&lt;p&gt;This project would first and foremost not be possible without the many Iowa farmers and landowners (26!) who let me come on to their property and tromp around their fields. This project would also have been harder and more isolating without the many people who sat on plastic buckets and recorded data while out in the field with me. Field work in Iowa in July and August is often uncomfortably hot and humid. Lastly, thanks to Katherine Goode for statistical advice, my lab group for their guidance, and my committee for keeping me on task.&lt;/p&gt;
+&lt;p&gt;This project would first and foremost not be possible without the many Iowa farmers and landowners (26!) who let me come on to their property and tromp around their fields. This project would also have been harder and more isolating without the many people who sat on plastic buckets and recorded data while out in the field with me. They were all troopers, field work in Iowa in July and August is often uncomfortably hot and humid. Lastly, thanks to &lt;a href=&#34;https://goodekat.github.io/&#34; target=&#34;_blank&#34;&gt;Katherine Goode&lt;/a&gt; for statistical advice, my lab group for their guidance, and my committee for keeping me on task.&lt;/p&gt;
 
 &lt;h3 id=&#34;preamble&#34;&gt;Preamble:&lt;/h3&gt;
 
@@ -96,7 +94,7 @@
 
 &lt;p&gt;&lt;em&gt;(please note: these results are not published yet and are not intended to be cited)&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;1) Diversity was largely related to the richness of the seed mix. When sites seeded more species, they had more prairie species. This isn&amp;rsquo;t a surprising result, one might both hypothesize and hope that seeding more species would result in more species being found, but it&amp;rsquo;s a reassuring pattern nonetheless. We also found larger sites to be more diverse, which is a pattern in line with a longstanding pattern in ecology: the species-area relationship.&lt;/p&gt;
+&lt;p&gt;1) Diversity was largely related to the richness of the seed mix. When sites seeded more species, they had more prairie species. This isn&amp;rsquo;t a surprising result, one might both hypothesize and hope that seeding more species would result in more species being found, but it&amp;rsquo;s a reassuring pattern nonetheless. We also found larger sites to be more diverse, which is in line with a longstanding pattern in ecology: the species-area relationship.&lt;/p&gt;
 
 &lt;p&gt;2) Very few of our covariates (seed mix richness, site age, size, perimeter:area ratio, and season planted) explained variation in the abundance of different functional groups. Contrary to our expectations, seeding a more diverse mix was not associated with more consistent cover of prairie species. Age was a negative predictor for annual weeds. We expect annual species to be out-competed in a largely perennial community over time, so this finding agreed with our expectations. But we also found age to be a negative predictor of legumes (nitrogen fixing forbs). I don&amp;rsquo;t know why yet&amp;hellip;&lt;/p&gt;
 
@@ -122,9 +120,9 @@
 
 &lt;h3 id=&#34;acknowledgements&#34;&gt;Acknowledgements:&lt;/h3&gt;
 
-&lt;p&gt;This project is &lt;strong&gt;way&lt;/strong&gt; bigger than me. The primary investigator is Gina Nichols in conjunction with Stefan Gailans and Sarah Carlson at Practical Farmers of Iowa. Further support was provided by Matt Liebman.&lt;/p&gt;
+&lt;p&gt;This project is &lt;strong&gt;way&lt;/strong&gt; bigger than me. The primary investigator is Gina Nichols in conjunction with Stefan Gailans and Sarah Carlson at &lt;a href=&#34;https://practicalfarmers.org/&#34; target=&#34;_blank&#34;&gt;Practical Farmers of Iowa&lt;/a&gt;. Further support was provided by Matt Liebman. I jumped on board to help with species identiciation and diveristy analysis. I also like working with Gina Nichols.&lt;/p&gt;
 
-&lt;p&gt;Disclaimer: Thoughts are my own.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Disclaimer: Thoughts are my own.&lt;/em&gt;&lt;/p&gt;
 
 &lt;h4 id=&#34;a-short-preamble&#34;&gt;A short preamble:&lt;/h4&gt;
 
@@ -132,9 +130,9 @@
 
 &lt;p&gt;&lt;strong&gt;Enter cover crops.&lt;/strong&gt; Sown in the fall and killed (&amp;ldquo;terminated&amp;rdquo;) in the spring, cover crops are meant to provide continuous cover on the landscape. Besides holding the physical soil in place with their roots, cover crops can also take up excess, available nutrients that might otherwise leave the field. Hence they are a nice option for an in-field conservation practice that fits within our annual cropping system in Iowa.&lt;/p&gt;
 
-&lt;p&gt;The question of this research project, however, regards the effects of cover crops on weeds. Weeds are ubiquitous pains for farmers and they can cause yield serious yield loss. Furthermore, many weed species now exhibit resistance to at least one form of herbicide so having alternative control options is absolutely necessary.&lt;/p&gt;
+&lt;p&gt;The question of this research project, however, regards the effects of cover crops on weeds. Weeds are ubiquitous plagues for farmers. They can cause serious yield loss. Furthermore, many weed species now exhibit resistance to at least one form of herbicide, which has been the dominant method of control for the last two decades. It&amp;rsquo;s therefore becoming increasingly necessary to have alternatives methods of controlling weed populations.&lt;/p&gt;
 
-&lt;p&gt;Utilizing long-term cover cropping trials, this project aimed to see whether the weed seed bank (which represents the legacy of weed control in these systems) differed between cover-cropped and non-cover cropped treatments.&lt;/p&gt;
+&lt;p&gt;Utilizing long-term cover cropping trials, this project aimed to see whether the weed seed bank (which represents the legacy of weed control in these systems) differed between cover-cropped and non-cover cropped treatments. Since cover crops begin growing in the fall and provide cover over the winter, the thought is that they might be able to help suppress early emerging weeds and reduce the weed seedbank over time.&lt;/p&gt;
 
 &lt;p&gt;More results forthcoming!&lt;/p&gt;
 </description>

@@ -23,8 +23,9 @@
 
 &lt;p&gt;In my &lt;a href=&#34;/2020/03/16/a-prairie-color-palette/&#34;&gt;last post&lt;/a&gt;, I had some fun and made prototypes of color palettes based on off prairie plants. If I ever get around to making these color palettes into something more, like a package, I’d want to ensure they are color-blind friendly.&lt;/p&gt;
 &lt;p&gt;This led me to try out Claire McWhite and Claus Wilke’s &lt;a href=&#34;https://github.com/clauswilke/colorblindr&#34;&gt;package&lt;/a&gt; &lt;code&gt;colorblindr&lt;/code&gt; on my palettes. One of the functionalities of &lt;code&gt;colorblindr&lt;/code&gt; is that it can display plots as they would appear to a colorblind person. The package wasn’t on CRAN at the time of this posting, but you can download it from github &lt;em&gt;(FYI at the time of this posting I couldn’t get the package to download on my computer (?? idk) so I cloned it from github and built it on my own device)&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;For the sake of this blog post I wanted to view my original palette next to the colorblind version of the palette. I focused my efforts on making sure my palettes would work for red-green colorblindness (Protanopia/Deuteranopia) since those seem to be the most common forms of colorblindness. Therefore I edited the &lt;code&gt;cvd_grid&lt;/code&gt; function to only display those two grids.&lt;br /&gt;
-#### Here’s how my color palettes look:&lt;/p&gt;
+&lt;p&gt;For the sake of this blog post I wanted to view my original palette next to the colorblind version of the palette. I focused my efforts on making sure my palettes would work for red-green colorblindness (Protanopia/Deuteranopia) since those seem to be the most common forms of colorblindness. Therefore I edited the &lt;code&gt;cvd_grid&lt;/code&gt; function to only display those two grids.&lt;/p&gt;
+&lt;div id=&#34;heres-how-my-color-palettes-look&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Here’s how my color palettes look:&lt;/h4&gt;
 &lt;p&gt;These first two palettes, which are based off of plants in the bean family and are more discrete in nature seem to be OK for colorblind folks. Cool!&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-1-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;
@@ -41,6 +42,7 @@ This butterfly milkweed inspired palette is less than optimal in colorblind visi
 &lt;p&gt;I had no hopes for this palette since it is based on red and green. It’s honestly better than I was expecting but still not good enough to export into a package. Oh well!&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/color_blind_check/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Using &lt;code&gt;colorblindr&lt;/code&gt; has given me some good insight into which colors don’t work well in the same palette (mostly oranges and greens). As I move forward with this project and create any new palettes I’ll make sure to continue to use it.&lt;/p&gt;
+&lt;/div&gt;
 </description>
     </item>
     
