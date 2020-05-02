@@ -55,7 +55,7 @@ ignoreFiles = ["\\.ipynb$", ".ipynb_checkpoints$", "\\.Rmd$", "\\.Rmarkdown$", "
   extensions = ["backslashLineBreak"]
   
 [permalinks]
-    post = "/:year/:month/:day/:slug/"  
+    post   = "/:year/:month/:day/:slug/"
 
 [imaging]
   resampleFilter = "lanczos"

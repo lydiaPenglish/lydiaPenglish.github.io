@@ -1,5 +1,5 @@
 ---
-title: Making tables with gt
+title: Making tables with the R package gt
 author: Lydia English
 date: '2020-04-13'
 slug: gt-tables
@@ -11,7 +11,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: []
-lastmod: '2020-04-19T14:26:14-05:00'
+lastmod: '2020-04-23T14:26:14-05:00'
 featured: yes
 image:
   caption: 'gt corn table'
@@ -20,18 +20,21 @@ image:
 projects: []
 ---
 
-Overall notes about `gt`: I like it! I'm still learning the syntax but it seems intuitive and user-friendly. It's worth noting at the beginning of this post that the tables are rendered a little differently via blogdown than they would be if they were just knit into an html file. Therefore, **please don't view this page in dark mode**...you won't be able see half the table rows. I believe this problem should be fixed with the next release of `gt` on CRAN.
+Overall notes about the R package `gt`: I like it! I'm still learning the syntax but it seems intuitive and user-friendly. Would recommend. 
+
+It's worth noting at the beginning of this post that the tables are rendered a little differently via blogdown than they would be if they were just knit into an html file. Therefore, **please don't view this page in dark mode**...you won't be able see half the table rows. After sleuthing through the `gt` github, I believe this problem should be fixed with the next release on CRAN.
 
 #### Preamble
 
-Making tables in R is something I've dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table...I try making table in R...I successfully make a table but I can't figure out how to format it exactly to my liking...I get frustrated...I abandon my R table and go to Microsoft word. I have no beef with the other R packages intended for table making and I'm sure with more finesse they could give me what I'm looking for. However, I'm excited to try out `gt` because it is ["the grammar of tables"](https://gt.rstudio.com/) and was designed to mirror the layered style of creating `ggplot2` figures. 
+Making tables in R is something I've dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table...I try making table in R...I successfully make a table but I can't figure out how to format it exactly to my liking...I get frustrated...I abandon my R table and go to Microsoft word. 
 
-I used this self-imposed table-making opportunity to play around with gathering data from the USDA's National Agricultural Statistics Service (NASS). I used their [quickstats](https://quickstats.nass.usda.gov/) page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it's not sweet corn). If you want to see the raw data, you can find it on [my github](https://github.com/lydiaPenglish/lydiaPenglish.github.io). 
+I have no beef with the other R packages intended for table making, and I'm sure with more finesse they could give me what I'm looking for. However, I'm excited to try out `gt` because it is ["the grammar of tables"](https://gt.rstudio.com/) and was designed to mirror the layered style of creating `ggplot2` figures. 
+
+I used this self-imposed table-making opportunity to play around with gathering data from the USDA's National Agricultural Statistics Service (NASS). I used their [quickstats](https://quickstats.nass.usda.gov/) page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it's not sweet corn). If you want to see the raw data, you can find it on [my github](https://github.com/lydiaPenglish/lydiaPenglish.github.io/tree/master/content/post/gt_tables). 
 
 _(NB: There were gaps where data were available so I picked time points roughly 4-5 years apart)_
 
-
-#### Table time! 
+#### Tables
 
 ```{r setup, include = FALSE}
 library(tidyverse)
@@ -56,7 +59,7 @@ chem_apps <-
 head(chem_apps)
 ```
 
-Next step: build a basic table with `gt`. Here I've filtered my data-frame and rearranged it slightly and then gone right into using `gt`, all with pipe operators. It's quite easy to add a title and subtitle, as well as a source note. It's also easy to use Markdown formatting by putting your title within the `md()` function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!  
+Next step: build a basic table with `gt`. Here I've filtered my data-frame and rearranged it slightly (`pivot_wider`!!) and then I've gone right into using `gt`by using pipe operators. It's quite easy to add a title and subtitle, as well as a source note. It's also easy to use Markdown formatting by putting your title within the `md()` function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!  
 
 
 ```{r}

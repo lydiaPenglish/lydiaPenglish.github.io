@@ -1,5 +1,5 @@
 ---
-title: Making tables with gt
+title: Making tables with the R package gt
 author: Lydia English
 date: '2020-04-13'
 slug: gt-tables
@@ -11,7 +11,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: []
-lastmod: '2020-04-19T14:26:14-05:00'
+lastmod: '2020-04-23T14:26:14-05:00'
 featured: yes
 image:
   caption: 'gt corn table'
@@ -22,15 +22,17 @@ projects: []
 
 
 
-<p>Overall notes about <code>gt</code>: I like it! I’m still learning the syntax but it seems intuitive and user-friendly. It’s worth noting at the beginning of this post that the tables are rendered a little differently via blogdown than they would be if they were just knit into an html file. Therefore, <strong>please don’t view this page in dark mode</strong>…you won’t be able see half the table rows. I believe this problem should be fixed with the next release of <code>gt</code> on CRAN.</p>
+<p>Overall notes about the R package <code>gt</code>: I like it! I’m still learning the syntax but it seems intuitive and user-friendly. Would recommend.</p>
+<p>It’s worth noting at the beginning of this post that the tables are rendered a little differently via blogdown than they would be if they were just knit into an html file. Therefore, <strong>please don’t view this page in dark mode</strong>…you won’t be able see half the table rows. After sleuthing through the <code>gt</code> github, I believe this problem should be fixed with the next release on CRAN.</p>
 <div id="preamble" class="section level4">
 <h4>Preamble</h4>
-<p>Making tables in R is something I’ve dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table…I try making table in R…I successfully make a table but I can’t figure out how to format it exactly to my liking…I get frustrated…I abandon my R table and go to Microsoft word. I have no beef with the other R packages intended for table making and I’m sure with more finesse they could give me what I’m looking for. However, I’m excited to try out <code>gt</code> because it is <a href="https://gt.rstudio.com/">“the grammar of tables”</a> and was designed to mirror the layered style of creating <code>ggplot2</code> figures.</p>
-<p>I used this self-imposed table-making opportunity to play around with gathering data from the USDA’s National Agricultural Statistics Service (NASS). I used their <a href="https://quickstats.nass.usda.gov/">quickstats</a> page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it’s not sweet corn). If you want to see the raw data, you can find it on <a href="https://github.com/lydiaPenglish/lydiaPenglish.github.io">my github</a>.</p>
+<p>Making tables in R is something I’ve dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table…I try making table in R…I successfully make a table but I can’t figure out how to format it exactly to my liking…I get frustrated…I abandon my R table and go to Microsoft word.</p>
+<p>I have no beef with the other R packages intended for table making, and I’m sure with more finesse they could give me what I’m looking for. However, I’m excited to try out <code>gt</code> because it is <a href="https://gt.rstudio.com/">“the grammar of tables”</a> and was designed to mirror the layered style of creating <code>ggplot2</code> figures.</p>
+<p>I used this self-imposed table-making opportunity to play around with gathering data from the USDA’s National Agricultural Statistics Service (NASS). I used their <a href="https://quickstats.nass.usda.gov/">quickstats</a> page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it’s not sweet corn). If you want to see the raw data, you can find it on <a href="https://github.com/lydiaPenglish/lydiaPenglish.github.io/tree/master/content/post/gt_tables">my github</a>.</p>
 <p><em>(NB: There were gaps where data were available so I picked time points roughly 4-5 years apart)</em></p>
 </div>
-<div id="table-time" class="section level4">
-<h4>Table time!</h4>
+<div id="tables" class="section level4">
+<h4>Tables</h4>
 <p>First things first, I had to do a little data cleaning to get rid of some unwanted text and columns in the data-frame.</p>
 <pre class="r"><code>chem_apps &lt;- 
   read_csv(&quot;chem_data.csv&quot;) %&gt;%
@@ -54,7 +56,7 @@ head(chem_apps)</code></pre>
 ## 4  2018 LB    HERBICIDE ACETOCHLOR = 121601            8823000
 ## 5  2018 LB    HERBICIDE ATRAZINE = 80803               6621000
 ## 6  2018 LB    HERBICIDE BAPMA SALT OF DICAMBA = 100094      NA</code></pre>
-<p>Next step: build a basic table with <code>gt</code>. Here I’ve filtered my data-frame and rearranged it slightly and then gone right into using <code>gt</code>, all with pipe operators. It’s quite easy to add a title and subtitle, as well as a source note. It’s also easy to use Markdown formatting by putting your title within the <code>md()</code> function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!</p>
+<p>Next step: build a basic table with <code>gt</code>. Here I’ve filtered my data-frame and rearranged it slightly (<code>pivot_wider</code>!!) and then I’ve gone right into using <code>gt</code>by using pipe operators. It’s quite easy to add a title and subtitle, as well as a source note. It’s also easy to use Markdown formatting by putting your title within the <code>md()</code> function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!</p>
 <pre class="r"><code>tab_v1 &lt;- 
   chem_apps %&gt;%
 # Get data just on total chemical usage
@@ -81,7 +83,7 @@ tab_v1</code></pre>
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#rgwsvigtwo .gt_table {
+#rdzmevogzs .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -104,7 +106,7 @@ tab_v1</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_heading {
+#rdzmevogzs .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -116,7 +118,7 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_title {
+#rdzmevogzs .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -126,7 +128,7 @@ tab_v1</code></pre>
   border-bottom-width: 0;
 }
 
-#rgwsvigtwo .gt_subtitle {
+#rdzmevogzs .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -136,13 +138,13 @@ tab_v1</code></pre>
   border-top-width: 0;
 }
 
-#rgwsvigtwo .gt_bottom_border {
+#rdzmevogzs .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_col_headings {
+#rdzmevogzs .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -157,7 +159,7 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_col_heading {
+#rdzmevogzs .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -177,7 +179,7 @@ tab_v1</code></pre>
   overflow-x: hidden;
 }
 
-#rgwsvigtwo .gt_column_spanner_outer {
+#rdzmevogzs .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -189,15 +191,15 @@ tab_v1</code></pre>
   padding-right: 4px;
 }
 
-#rgwsvigtwo .gt_column_spanner_outer:first-child {
+#rdzmevogzs .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#rgwsvigtwo .gt_column_spanner_outer:last-child {
+#rdzmevogzs .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#rgwsvigtwo .gt_column_spanner {
+#rdzmevogzs .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -209,7 +211,7 @@ tab_v1</code></pre>
   width: 100%;
 }
 
-#rgwsvigtwo .gt_group_heading {
+#rdzmevogzs .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -231,7 +233,7 @@ tab_v1</code></pre>
   vertical-align: middle;
 }
 
-#rgwsvigtwo .gt_empty_group_heading {
+#rdzmevogzs .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -246,19 +248,19 @@ tab_v1</code></pre>
   vertical-align: middle;
 }
 
-#rgwsvigtwo .gt_striped {
+#rdzmevogzs .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#rgwsvigtwo .gt_from_md > :first-child {
+#rdzmevogzs .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#rgwsvigtwo .gt_from_md > :last-child {
+#rdzmevogzs .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#rgwsvigtwo .gt_row {
+#rdzmevogzs .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -277,7 +279,7 @@ tab_v1</code></pre>
   overflow-x: hidden;
 }
 
-#rgwsvigtwo .gt_stub {
+#rdzmevogzs .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -289,7 +291,7 @@ tab_v1</code></pre>
   padding-left: 12px;
 }
 
-#rgwsvigtwo .gt_summary_row {
+#rdzmevogzs .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -299,7 +301,7 @@ tab_v1</code></pre>
   padding-right: 5px;
 }
 
-#rgwsvigtwo .gt_first_summary_row {
+#rdzmevogzs .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -309,7 +311,7 @@ tab_v1</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_grand_summary_row {
+#rdzmevogzs .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -319,7 +321,7 @@ tab_v1</code></pre>
   padding-right: 5px;
 }
 
-#rgwsvigtwo .gt_first_grand_summary_row {
+#rdzmevogzs .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -329,7 +331,7 @@ tab_v1</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_table_body {
+#rdzmevogzs .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -338,7 +340,7 @@ tab_v1</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_footnotes {
+#rdzmevogzs .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -352,13 +354,13 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_footnote {
+#rdzmevogzs .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#rgwsvigtwo .gt_sourcenotes {
+#rdzmevogzs .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -372,46 +374,46 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_sourcenote {
+#rdzmevogzs .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#rgwsvigtwo .gt_left {
+#rdzmevogzs .gt_left {
   text-align: left;
 }
 
-#rgwsvigtwo .gt_center {
+#rdzmevogzs .gt_center {
   text-align: center;
 }
 
-#rgwsvigtwo .gt_right {
+#rdzmevogzs .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#rgwsvigtwo .gt_font_normal {
+#rdzmevogzs .gt_font_normal {
   font-weight: normal;
 }
 
-#rgwsvigtwo .gt_font_bold {
+#rdzmevogzs .gt_font_bold {
   font-weight: bold;
 }
 
-#rgwsvigtwo .gt_font_italic {
+#rdzmevogzs .gt_font_italic {
   font-style: italic;
 }
 
-#rgwsvigtwo .gt_super {
+#rdzmevogzs .gt_super {
   font-size: 65%;
 }
 
-#rgwsvigtwo .gt_footnote_marks {
+#rdzmevogzs .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="rgwsvigtwo" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="rdzmevogzs" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   <thead class="gt_header">
     <tr>
       <th colspan="3" class="gt_heading gt_title gt_font_normal" style><strong>Chemical Use on Cornfields in Iowa</strong></th>
@@ -479,7 +481,7 @@ tab_v1</code></pre>
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#yyphtnafhq .gt_table {
+#lrpvpdekdx .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -502,7 +504,7 @@ tab_v1</code></pre>
   border-left-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_heading {
+#lrpvpdekdx .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -514,7 +516,7 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_title {
+#lrpvpdekdx .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -524,7 +526,7 @@ tab_v1</code></pre>
   border-bottom-width: 0;
 }
 
-#yyphtnafhq .gt_subtitle {
+#lrpvpdekdx .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -534,13 +536,13 @@ tab_v1</code></pre>
   border-top-width: 0;
 }
 
-#yyphtnafhq .gt_bottom_border {
+#lrpvpdekdx .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_col_headings {
+#lrpvpdekdx .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -555,7 +557,7 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_col_heading {
+#lrpvpdekdx .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -575,7 +577,7 @@ tab_v1</code></pre>
   overflow-x: hidden;
 }
 
-#yyphtnafhq .gt_column_spanner_outer {
+#lrpvpdekdx .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -587,15 +589,15 @@ tab_v1</code></pre>
   padding-right: 4px;
 }
 
-#yyphtnafhq .gt_column_spanner_outer:first-child {
+#lrpvpdekdx .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#yyphtnafhq .gt_column_spanner_outer:last-child {
+#lrpvpdekdx .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#yyphtnafhq .gt_column_spanner {
+#lrpvpdekdx .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -607,7 +609,7 @@ tab_v1</code></pre>
   width: 100%;
 }
 
-#yyphtnafhq .gt_group_heading {
+#lrpvpdekdx .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -629,7 +631,7 @@ tab_v1</code></pre>
   vertical-align: middle;
 }
 
-#yyphtnafhq .gt_empty_group_heading {
+#lrpvpdekdx .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -644,19 +646,19 @@ tab_v1</code></pre>
   vertical-align: middle;
 }
 
-#yyphtnafhq .gt_striped {
+#lrpvpdekdx .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#yyphtnafhq .gt_from_md > :first-child {
+#lrpvpdekdx .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#yyphtnafhq .gt_from_md > :last-child {
+#lrpvpdekdx .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#yyphtnafhq .gt_row {
+#lrpvpdekdx .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -675,7 +677,7 @@ tab_v1</code></pre>
   overflow-x: hidden;
 }
 
-#yyphtnafhq .gt_stub {
+#lrpvpdekdx .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -687,7 +689,7 @@ tab_v1</code></pre>
   padding-left: 12px;
 }
 
-#yyphtnafhq .gt_summary_row {
+#lrpvpdekdx .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -697,7 +699,7 @@ tab_v1</code></pre>
   padding-right: 5px;
 }
 
-#yyphtnafhq .gt_first_summary_row {
+#lrpvpdekdx .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -707,7 +709,7 @@ tab_v1</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_grand_summary_row {
+#lrpvpdekdx .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -717,7 +719,7 @@ tab_v1</code></pre>
   padding-right: 5px;
 }
 
-#yyphtnafhq .gt_first_grand_summary_row {
+#lrpvpdekdx .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -727,7 +729,7 @@ tab_v1</code></pre>
   border-top-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_table_body {
+#lrpvpdekdx .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -736,7 +738,7 @@ tab_v1</code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_footnotes {
+#lrpvpdekdx .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -750,13 +752,13 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_footnote {
+#lrpvpdekdx .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#yyphtnafhq .gt_sourcenotes {
+#lrpvpdekdx .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -770,46 +772,46 @@ tab_v1</code></pre>
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_sourcenote {
+#lrpvpdekdx .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#yyphtnafhq .gt_left {
+#lrpvpdekdx .gt_left {
   text-align: left;
 }
 
-#yyphtnafhq .gt_center {
+#lrpvpdekdx .gt_center {
   text-align: center;
 }
 
-#yyphtnafhq .gt_right {
+#lrpvpdekdx .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#yyphtnafhq .gt_font_normal {
+#lrpvpdekdx .gt_font_normal {
   font-weight: normal;
 }
 
-#yyphtnafhq .gt_font_bold {
+#lrpvpdekdx .gt_font_bold {
   font-weight: bold;
 }
 
-#yyphtnafhq .gt_font_italic {
+#lrpvpdekdx .gt_font_italic {
   font-style: italic;
 }
 
-#yyphtnafhq .gt_super {
+#lrpvpdekdx .gt_super {
   font-size: 65%;
 }
 
-#yyphtnafhq .gt_footnote_marks {
+#lrpvpdekdx .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="yyphtnafhq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="lrpvpdekdx" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   <thead class="gt_header">
     <tr>
       <th colspan="3" class="gt_heading gt_title gt_font_normal" style><strong>Chemical Use on Cornfields in Iowa</strong></th>
@@ -916,7 +918,7 @@ chem_subset %&gt;%
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#mdxxmwtqot .gt_table {
+#woloogwzhb .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -939,7 +941,7 @@ chem_subset %&gt;%
   border-left-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_heading {
+#woloogwzhb .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -951,7 +953,7 @@ chem_subset %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_title {
+#woloogwzhb .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -961,7 +963,7 @@ chem_subset %&gt;%
   border-bottom-width: 0;
 }
 
-#mdxxmwtqot .gt_subtitle {
+#woloogwzhb .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -971,13 +973,13 @@ chem_subset %&gt;%
   border-top-width: 0;
 }
 
-#mdxxmwtqot .gt_bottom_border {
+#woloogwzhb .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_col_headings {
+#woloogwzhb .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -992,7 +994,7 @@ chem_subset %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_col_heading {
+#woloogwzhb .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1012,7 +1014,7 @@ chem_subset %&gt;%
   overflow-x: hidden;
 }
 
-#mdxxmwtqot .gt_column_spanner_outer {
+#woloogwzhb .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1024,15 +1026,15 @@ chem_subset %&gt;%
   padding-right: 4px;
 }
 
-#mdxxmwtqot .gt_column_spanner_outer:first-child {
+#woloogwzhb .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#mdxxmwtqot .gt_column_spanner_outer:last-child {
+#woloogwzhb .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#mdxxmwtqot .gt_column_spanner {
+#woloogwzhb .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1044,7 +1046,7 @@ chem_subset %&gt;%
   width: 100%;
 }
 
-#mdxxmwtqot .gt_group_heading {
+#woloogwzhb .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1066,7 +1068,7 @@ chem_subset %&gt;%
   vertical-align: middle;
 }
 
-#mdxxmwtqot .gt_empty_group_heading {
+#woloogwzhb .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1081,19 +1083,19 @@ chem_subset %&gt;%
   vertical-align: middle;
 }
 
-#mdxxmwtqot .gt_striped {
+#woloogwzhb .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#mdxxmwtqot .gt_from_md > :first-child {
+#woloogwzhb .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#mdxxmwtqot .gt_from_md > :last-child {
+#woloogwzhb .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#mdxxmwtqot .gt_row {
+#woloogwzhb .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1112,7 +1114,7 @@ chem_subset %&gt;%
   overflow-x: hidden;
 }
 
-#mdxxmwtqot .gt_stub {
+#woloogwzhb .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1124,7 +1126,7 @@ chem_subset %&gt;%
   padding-left: 12px;
 }
 
-#mdxxmwtqot .gt_summary_row {
+#woloogwzhb .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1134,7 +1136,7 @@ chem_subset %&gt;%
   padding-right: 5px;
 }
 
-#mdxxmwtqot .gt_first_summary_row {
+#woloogwzhb .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1144,7 +1146,7 @@ chem_subset %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_grand_summary_row {
+#woloogwzhb .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1154,7 +1156,7 @@ chem_subset %&gt;%
   padding-right: 5px;
 }
 
-#mdxxmwtqot .gt_first_grand_summary_row {
+#woloogwzhb .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1164,7 +1166,7 @@ chem_subset %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_table_body {
+#woloogwzhb .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1173,7 +1175,7 @@ chem_subset %&gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_footnotes {
+#woloogwzhb .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1187,13 +1189,13 @@ chem_subset %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_footnote {
+#woloogwzhb .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#mdxxmwtqot .gt_sourcenotes {
+#woloogwzhb .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1207,46 +1209,46 @@ chem_subset %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_sourcenote {
+#woloogwzhb .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#mdxxmwtqot .gt_left {
+#woloogwzhb .gt_left {
   text-align: left;
 }
 
-#mdxxmwtqot .gt_center {
+#woloogwzhb .gt_center {
   text-align: center;
 }
 
-#mdxxmwtqot .gt_right {
+#woloogwzhb .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#mdxxmwtqot .gt_font_normal {
+#woloogwzhb .gt_font_normal {
   font-weight: normal;
 }
 
-#mdxxmwtqot .gt_font_bold {
+#woloogwzhb .gt_font_bold {
   font-weight: bold;
 }
 
-#mdxxmwtqot .gt_font_italic {
+#woloogwzhb .gt_font_italic {
   font-style: italic;
 }
 
-#mdxxmwtqot .gt_super {
+#woloogwzhb .gt_super {
   font-size: 65%;
 }
 
-#mdxxmwtqot .gt_footnote_marks {
+#woloogwzhb .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="mdxxmwtqot" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="woloogwzhb" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   <thead class="gt_header">
     <tr>
       <th colspan="5" class="gt_heading gt_title gt_font_normal" style><strong>Chemical Use on Cornfields in Iowa</strong></th>
@@ -1396,7 +1398,7 @@ chem_subset2 %&gt;%
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#gevxgtnrqu .gt_table {
+#wrukxvmmzq .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1419,7 +1421,7 @@ chem_subset2 %&gt;%
   border-left-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_heading {
+#wrukxvmmzq .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1431,7 +1433,7 @@ chem_subset2 %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_title {
+#wrukxvmmzq .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1441,7 +1443,7 @@ chem_subset2 %&gt;%
   border-bottom-width: 0;
 }
 
-#gevxgtnrqu .gt_subtitle {
+#wrukxvmmzq .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1451,13 +1453,13 @@ chem_subset2 %&gt;%
   border-top-width: 0;
 }
 
-#gevxgtnrqu .gt_bottom_border {
+#wrukxvmmzq .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_col_headings {
+#wrukxvmmzq .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1472,7 +1474,7 @@ chem_subset2 %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_col_heading {
+#wrukxvmmzq .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1492,7 +1494,7 @@ chem_subset2 %&gt;%
   overflow-x: hidden;
 }
 
-#gevxgtnrqu .gt_column_spanner_outer {
+#wrukxvmmzq .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1504,15 +1506,15 @@ chem_subset2 %&gt;%
   padding-right: 4px;
 }
 
-#gevxgtnrqu .gt_column_spanner_outer:first-child {
+#wrukxvmmzq .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#gevxgtnrqu .gt_column_spanner_outer:last-child {
+#wrukxvmmzq .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#gevxgtnrqu .gt_column_spanner {
+#wrukxvmmzq .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1524,7 +1526,7 @@ chem_subset2 %&gt;%
   width: 100%;
 }
 
-#gevxgtnrqu .gt_group_heading {
+#wrukxvmmzq .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1546,7 +1548,7 @@ chem_subset2 %&gt;%
   vertical-align: middle;
 }
 
-#gevxgtnrqu .gt_empty_group_heading {
+#wrukxvmmzq .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1561,19 +1563,19 @@ chem_subset2 %&gt;%
   vertical-align: middle;
 }
 
-#gevxgtnrqu .gt_striped {
+#wrukxvmmzq .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#gevxgtnrqu .gt_from_md > :first-child {
+#wrukxvmmzq .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#gevxgtnrqu .gt_from_md > :last-child {
+#wrukxvmmzq .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#gevxgtnrqu .gt_row {
+#wrukxvmmzq .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1592,7 +1594,7 @@ chem_subset2 %&gt;%
   overflow-x: hidden;
 }
 
-#gevxgtnrqu .gt_stub {
+#wrukxvmmzq .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1604,7 +1606,7 @@ chem_subset2 %&gt;%
   padding-left: 12px;
 }
 
-#gevxgtnrqu .gt_summary_row {
+#wrukxvmmzq .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1614,7 +1616,7 @@ chem_subset2 %&gt;%
   padding-right: 5px;
 }
 
-#gevxgtnrqu .gt_first_summary_row {
+#wrukxvmmzq .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1624,7 +1626,7 @@ chem_subset2 %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_grand_summary_row {
+#wrukxvmmzq .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1634,7 +1636,7 @@ chem_subset2 %&gt;%
   padding-right: 5px;
 }
 
-#gevxgtnrqu .gt_first_grand_summary_row {
+#wrukxvmmzq .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1644,7 +1646,7 @@ chem_subset2 %&gt;%
   border-top-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_table_body {
+#wrukxvmmzq .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1653,7 +1655,7 @@ chem_subset2 %&gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_footnotes {
+#wrukxvmmzq .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1667,13 +1669,13 @@ chem_subset2 %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_footnote {
+#wrukxvmmzq .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#gevxgtnrqu .gt_sourcenotes {
+#wrukxvmmzq .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1687,46 +1689,46 @@ chem_subset2 %&gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_sourcenote {
+#wrukxvmmzq .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#gevxgtnrqu .gt_left {
+#wrukxvmmzq .gt_left {
   text-align: left;
 }
 
-#gevxgtnrqu .gt_center {
+#wrukxvmmzq .gt_center {
   text-align: center;
 }
 
-#gevxgtnrqu .gt_right {
+#wrukxvmmzq .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#gevxgtnrqu .gt_font_normal {
+#wrukxvmmzq .gt_font_normal {
   font-weight: normal;
 }
 
-#gevxgtnrqu .gt_font_bold {
+#wrukxvmmzq .gt_font_bold {
   font-weight: bold;
 }
 
-#gevxgtnrqu .gt_font_italic {
+#wrukxvmmzq .gt_font_italic {
   font-style: italic;
 }
 
-#gevxgtnrqu .gt_super {
+#wrukxvmmzq .gt_super {
   font-size: 65%;
 }
 
-#gevxgtnrqu .gt_footnote_marks {
+#wrukxvmmzq .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="gevxgtnrqu" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="wrukxvmmzq" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   <thead class="gt_header">
     <tr>
       <th colspan="10" class="gt_heading gt_title gt_font_normal" style><strong>Herbicide Use on Cornfields in Iowa</strong></th>
@@ -1896,7 +1898,7 @@ last_tab </code></pre>
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#uarfvptydp .gt_table {
+#hhzfjsftmc .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1919,7 +1921,7 @@ last_tab </code></pre>
   border-left-color: darkgreen;
 }
 
-#uarfvptydp .gt_heading {
+#hhzfjsftmc .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1931,7 +1933,7 @@ last_tab </code></pre>
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_title {
+#hhzfjsftmc .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1941,7 +1943,7 @@ last_tab </code></pre>
   border-bottom-width: 0;
 }
 
-#uarfvptydp .gt_subtitle {
+#hhzfjsftmc .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1951,13 +1953,13 @@ last_tab </code></pre>
   border-top-width: 0;
 }
 
-#uarfvptydp .gt_bottom_border {
+#hhzfjsftmc .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_col_headings {
+#hhzfjsftmc .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1972,7 +1974,7 @@ last_tab </code></pre>
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_col_heading {
+#hhzfjsftmc .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1992,7 +1994,7 @@ last_tab </code></pre>
   overflow-x: hidden;
 }
 
-#uarfvptydp .gt_column_spanner_outer {
+#hhzfjsftmc .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2004,15 +2006,15 @@ last_tab </code></pre>
   padding-right: 4px;
 }
 
-#uarfvptydp .gt_column_spanner_outer:first-child {
+#hhzfjsftmc .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#uarfvptydp .gt_column_spanner_outer:last-child {
+#hhzfjsftmc .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#uarfvptydp .gt_column_spanner {
+#hhzfjsftmc .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2024,7 +2026,7 @@ last_tab </code></pre>
   width: 100%;
 }
 
-#uarfvptydp .gt_group_heading {
+#hhzfjsftmc .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2046,7 +2048,7 @@ last_tab </code></pre>
   vertical-align: middle;
 }
 
-#uarfvptydp .gt_empty_group_heading {
+#hhzfjsftmc .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2061,19 +2063,19 @@ last_tab </code></pre>
   vertical-align: middle;
 }
 
-#uarfvptydp .gt_striped {
+#hhzfjsftmc .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#uarfvptydp .gt_from_md > :first-child {
+#hhzfjsftmc .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#uarfvptydp .gt_from_md > :last-child {
+#hhzfjsftmc .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#uarfvptydp .gt_row {
+#hhzfjsftmc .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2092,7 +2094,7 @@ last_tab </code></pre>
   overflow-x: hidden;
 }
 
-#uarfvptydp .gt_stub {
+#hhzfjsftmc .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2104,7 +2106,7 @@ last_tab </code></pre>
   padding-left: 12px;
 }
 
-#uarfvptydp .gt_summary_row {
+#hhzfjsftmc .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2114,7 +2116,7 @@ last_tab </code></pre>
   padding-right: 5px;
 }
 
-#uarfvptydp .gt_first_summary_row {
+#hhzfjsftmc .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2124,7 +2126,7 @@ last_tab </code></pre>
   border-top-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_grand_summary_row {
+#hhzfjsftmc .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2134,7 +2136,7 @@ last_tab </code></pre>
   padding-right: 5px;
 }
 
-#uarfvptydp .gt_first_grand_summary_row {
+#hhzfjsftmc .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2144,7 +2146,7 @@ last_tab </code></pre>
   border-top-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_table_body {
+#hhzfjsftmc .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2153,7 +2155,7 @@ last_tab </code></pre>
   border-bottom-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_footnotes {
+#hhzfjsftmc .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2167,13 +2169,13 @@ last_tab </code></pre>
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_footnote {
+#hhzfjsftmc .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#uarfvptydp .gt_sourcenotes {
+#hhzfjsftmc .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2187,46 +2189,46 @@ last_tab </code></pre>
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_sourcenote {
+#hhzfjsftmc .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#uarfvptydp .gt_left {
+#hhzfjsftmc .gt_left {
   text-align: left;
 }
 
-#uarfvptydp .gt_center {
+#hhzfjsftmc .gt_center {
   text-align: center;
 }
 
-#uarfvptydp .gt_right {
+#hhzfjsftmc .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#uarfvptydp .gt_font_normal {
+#hhzfjsftmc .gt_font_normal {
   font-weight: normal;
 }
 
-#uarfvptydp .gt_font_bold {
+#hhzfjsftmc .gt_font_bold {
   font-weight: bold;
 }
 
-#uarfvptydp .gt_font_italic {
+#hhzfjsftmc .gt_font_italic {
   font-style: italic;
 }
 
-#uarfvptydp .gt_super {
+#hhzfjsftmc .gt_super {
   font-size: 65%;
 }
 
-#uarfvptydp .gt_footnote_marks {
+#hhzfjsftmc .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 </style>
-<div id="uarfvptydp" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
+<div id="hhzfjsftmc" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;"><table class="gt_table">
   <thead class="gt_header">
     <tr>
       <th colspan="5" class="gt_heading gt_title gt_font_normal" style><strong>Acreage, Yield, and Price of Iowa Corn<strong> <img src="https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png" style="height:30px;"></th>

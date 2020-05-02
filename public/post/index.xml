@@ -12,7 +12,239 @@
     
     
     <item>
-      <title>Making tables with gt</title>
+      <title>Many models, same data</title>
+      <link>/2020/04/22/many-models/</link>
+      <pubDate>Wed, 22 Apr 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/04/22/many-models/</guid>
+      <description>
+
+
+&lt;p&gt;This post explores the often agonizing decision-making process behind model selection. We will be using a real-life example, meaning this is an actual decision process that Gina Nichols and I waded through. The hope is that others who may struggle with the same sorts of basic stats decisions can take solace in our process.&lt;/p&gt;
+&lt;p&gt;We’re using data from &lt;a href=&#34;/project/pfiweeds/&#34;&gt;this project&lt;/a&gt;. In very breif terms we’re interested in the effect of cover crops on the weed seedbank. The data can be accessed from Gina Nichol’s Github repository like so:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;remotes::install_github(&#34;vanichols/PFIweeds2020&#34;)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The raw data are in &lt;code&gt;pfi_ghobsraw&lt;/code&gt;. These are observations from soil which we incubating in a greenhouse to grow weeds. We don’t need to clean the data very much, but we will do a couple steps to consolidate observations.&lt;/p&gt;
+&lt;p&gt;A couple other notes on the experimental layout:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;There are four &lt;code&gt;site_sys&lt;/code&gt;, which encompass three different farms and two different cropping systems&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Boyd Grain&lt;/li&gt;
+&lt;li&gt;Boyd Silage&lt;/li&gt;
+&lt;li&gt;Funcke Grain&lt;/li&gt;
+&lt;li&gt;Stout Grain&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;em&gt;FYI: Grain systems employ a two year rotation of corn and soybeans and sell both crops off as feed grain, ethanol grain, etc. The silage system also has a 2 year rotation of corn and soybeans, but in the corn year the crop is harvested earlier (while it’s still green) and sold as silage (fermented cattle feed)&lt;/em&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There are two cover crop treatments (&lt;code&gt;cc_trt&lt;/code&gt;): &lt;code&gt;none&lt;/code&gt; and &lt;code&gt;cc_rye&lt;/code&gt; (rye)&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There are 4-5 blocks per treatment, which will our random effect.&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(PFIweeds2020)
+data(&amp;quot;pfi_ghobsraw&amp;quot;)
+
+# Quick data cleaning
+dat &amp;lt;- 
+  pfi_ghobsraw %&amp;gt;% 
+  dplyr::mutate_if(is.numeric, tidyr::replace_na, 0) %&amp;gt;%
+  dplyr::group_by(site_name, field, sys_trt, cc_trt, rep, blockID) %&amp;gt;%
+  dplyr::summarise_if(is.numeric, sum) %&amp;gt;%
+  dplyr::ungroup() %&amp;gt;%
+# Sum all seeds by species  
+  dplyr::mutate(totseeds = rowSums(.[, 7:24])) %&amp;gt;%
+  tidyr::unite(site_name, sys_trt, col = &amp;quot;site_sys&amp;quot;, remove = T) %&amp;gt;% 
+  select(-field, -rep, -c(AMATU:UB)) %&amp;gt;%
+  mutate(cc_trt = recode(cc_trt,         
+                          no = &amp;quot;none&amp;quot;,
+                          rye = &amp;quot;cc_rye&amp;quot;))
+head(dat)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 6 x 4
+##   site_sys   cc_trt blockID totseeds
+##   &amp;lt;chr&amp;gt;      &amp;lt;chr&amp;gt;  &amp;lt;chr&amp;gt;      &amp;lt;dbl&amp;gt;
+## 1 Boyd_grain none   B42_1         34
+## 2 Boyd_grain none   B42_2         12
+## 3 Boyd_grain none   B42_3          9
+## 4 Boyd_grain none   B42_4          7
+## 5 Boyd_grain none   B42_5         17
+## 6 Boyd_grain cc_rye B42_1        116&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We are interested in &lt;code&gt;totseeds&lt;/code&gt; (total seeds) as a response variable, which is an integer value. In all of our mixed models our fixed effects are &lt;code&gt;site_sys&lt;/code&gt; and &lt;code&gt;cc_trt&lt;/code&gt; and our random effect is &lt;code&gt;blockID&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;But before we get to modeling, let’s just quickly look at the data and see what we are working with.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-2-1.png&#34; width=&#34;672&#34; /&gt;
+There is one point that is much higher than the rest, in the &lt;code&gt;Funcke_grain&lt;/code&gt; cover crop treatment, which may be a little cause for concern…we’re going to make another dataset without it.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat2 &amp;lt;- dat %&amp;gt;%
+  filter(totseeds &amp;lt; 700)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s also plot the distribution of totseeds. It is pretty skewed. If we log-tranform the raw data we get a much nicer distribution and our large values are much less far apart than are small values.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;Ok now it’s time to start fitting out models. Given the graphs above, our first thought was to run a lmer with a log-transformed response.&lt;/p&gt;
+&lt;p&gt;(Here we are also examining whether there is any interaction between &lt;code&gt;site_sys&lt;/code&gt; and &lt;code&gt;cc_trt&lt;/code&gt;, and looks like there is.)&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;m1 &amp;lt;- lmer(log(totseeds) ~ site_sys * cc_trt + (1|blockID), data = dat2)
+m2 &amp;lt;- lmer(log(totseeds) ~ site_sys + cc_trt + (1|blockID), data = dat2)
+
+anova(m1, m2) # keep interaction&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## refitting model(s) with ML (instead of REML)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Data: dat2
+## Models:
+## m2: log(totseeds) ~ site_sys + cc_trt + (1 | blockID)
+## m1: log(totseeds) ~ site_sys * cc_trt + (1 | blockID)
+##    npar    AIC    BIC  logLik deviance  Chisq Df Pr(&amp;gt;Chisq)  
+## m2    7 117.40 130.04 -51.698  103.397                       
+## m1   10 115.13 133.20 -47.566   95.132 8.2643  3    0.04085 *
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Before we dive into the summary values and statistical reporting lets check out our diagnostic plots:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;resid_panel(m1)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;This doesn’t look bad, but perhaps it could look better…&lt;/p&gt;
+&lt;p&gt;To stick within the normal-distribution framework we could also try another transformation. The square-root transformation can also work for count data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat %&amp;gt;%
+  ggplot(aes(sqrt(totseeds)))+
+  geom_histogram(binwidth = 1, fill = &amp;quot;white&amp;quot;, color = &amp;quot;black&amp;quot;)+
+  ggtitle(&amp;quot;Sqrt-transformed Data&amp;quot;)+
+  theme(plot.title.position = &amp;quot;plot&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;The data still look a little skewed, but that’s ok…&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;m1b &amp;lt;- lmer(sqrt(totseeds) ~ site_sys * cc_trt + (1|blockID), dat2)
+resid_panel(m1b)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;These diagnostic plots look pretty similar, although the square root transformation might be a little better…&lt;/p&gt;
+&lt;p&gt;Since we are working with count data, however, we have other options in the generalized linear model catagory. The natural first option is a Poisson distribution with a log link function&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1a &amp;lt;- glmer(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2, 
+            family = poisson(link = &amp;quot;log&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This model converged, awesome! But we should always check for overdispersion our Poisson models, which is when the variance &amp;gt;&amp;gt; mean. We are using the &lt;a href=&#34;https://easystats.github.io/performance/&#34;&gt;performance&lt;/a&gt; package for this since it makes checking for overdispersion really easy.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;performance::check_overdispersion(p1a) # overdispersion!&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # Overdispersion test
+## 
+##        dispersion ratio =   8.001
+##   Pearson&amp;#39;s Chi-Squared = 288.047
+##                 p-value = &amp;lt; 0.001&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Overdispersion detected.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Argh, it’s overdispered.&lt;/p&gt;
+&lt;p&gt;Now we have two options if we want to continue down the glmer path. We could:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Add an observation-level random effect to our Poisson model&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Switch to a negative binomial model&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Let’s start with option 1 and add an oberservation-level random effect.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;dat2 &amp;lt;- 
+  dat2 %&amp;gt;%
+  mutate(obs_id = paste(&amp;quot;obs&amp;quot;, 1:45, sep = &amp;quot;_&amp;quot;))
+
+p1b &amp;lt;- glmer(totseeds ~ site_sys*cc_trt + (1|blockID) + (1|obs_id), data = dat2, 
+            family = poisson(link = &amp;quot;log&amp;quot;))  
+performance::check_overdispersion(p1b)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # Overdispersion test
+## 
+##        dispersion ratio = 0.145
+##   Pearson&amp;#39;s Chi-Squared = 5.065
+##                 p-value =     1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## No overdispersion detected.&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Adding our observation-level random effect fixed out overdispersion problem. Great! Let’s look at the diagnostic plots now:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;resid_panel(p1b) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;What we’re really interested in here is the first plot, the Residual Plot. Since normality isn’t an assumption of generalized linear models, we don’t need to worry about irregularies in the Q-Q plot. The model fits the data really well as the obserations get larger, but there is a lot more variance in the residuals in our smaller values. This gives us a little pause…&lt;/p&gt;
+&lt;p&gt;Let’s also try option 2 and fit the data to a negative-binomial model&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# option 2, negative binomial....
+g1a &amp;lt;- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2)
+
+resid_panel(g1a)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(g1a)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(3.7588)  ( log )
+## Formula: totseeds ~ site_sys * cc_trt + (1 | blockID)
+##    Data: dat2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    445.4    463.5   -212.7    425.4       35 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.2879 -0.6244 -0.1260  0.4711  2.0199 
+## 
+## Random effects:
+##  Groups  Name        Variance Std.Dev.
+##  blockID (Intercept) 0.179    0.4231  
+## Number of obs: 45, groups:  blockID, 18
+## 
+## Fixed effects:
+##                                 Estimate Std. Error z value Pr(&amp;gt;|z|)    
+## (Intercept)                      3.43950    0.22667  15.174  &amp;lt; 2e-16 ***
+## site_sysBoyd_silage             -0.01624    0.32432  -0.050  0.96005    
+## site_sysFuncke_grain             1.88043    0.44272   4.247 2.16e-05 ***
+## site_sysStout_grain             -0.45557    0.42093  -1.082  0.27912    
+## cc_trtnone                      -0.32847    0.25796  -1.273  0.20290    
+## site_sysBoyd_silage:cc_trtnone   1.35345    0.43192   3.134  0.00173 ** 
+## site_sysFuncke_grain:cc_trtnone  1.03593    0.48511   2.135  0.03273 *  
+## site_sysStout_grain:cc_trtnone   0.77414    0.47305   1.636  0.10174    
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) st_sB_ st_sF_ st_sS_ cc_trt s_B_:_ s_F_:_
+## st_sysByd_s -0.464                                          
+## st_sysFnck_ -0.513  0.237                                   
+## st_sysStt_g -0.518  0.249  0.265                            
+## cc_trtnone  -0.574  0.445  0.295  0.298                     
+## st_sysBy_:_  0.344 -0.694 -0.176 -0.180 -0.609              
+## st_sysFn_:_  0.307 -0.237 -0.625 -0.158 -0.533  0.324       
+## st_sysSt_:_  0.316 -0.243 -0.162 -0.564 -0.547  0.333  0.292&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# now with the outlier - unpsurprisingly Funcke isn&amp;#39;t sig anymore
+g1b &amp;lt;- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat)
+
+resid_panel(g1b)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-13-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(g1b)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: Negative Binomial(3.5535)  ( log )
+## Formula: totseeds ~ site_sys * cc_trt + (1 | blockID)
+##    Data: dat
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    464.0    482.2   -222.0    444.0       36 
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -1.2552 -0.6903 -0.1392  0.4758  1.9132 
+## 
+## Random effects:
+##  Groups  Name        Variance Std.Dev.
+##  blockID (Intercept) 0.2049   0.4526  
+## Number of obs: 46, groups:  blockID, 18
+## 
+## Fixed effects:
+##                                 Estimate Std. Error z value Pr(&amp;gt;|z|)    
+## (Intercept)                       3.4343     0.2356  14.575  &amp;lt; 2e-16 ***
+## site_sysBoyd_silage              -0.0162     0.3336  -0.049  0.96128    
+## site_sysFuncke_grain              2.3250     0.4259   5.459  4.8e-08 ***
+## site_sysStout_grain              -0.4587     0.4384  -1.046  0.29547    
+## cc_trtnone                       -0.3255     0.2648  -1.229  0.21901    
+## site_sysBoyd_silage:cc_trtnone    1.3514     0.4437   3.046  0.00232 ** 
+## site_sysFuncke_grain:cc_trtnone   0.6034     0.4690   1.286  0.19828    
+## site_sysStout_grain:cc_trtnone    0.7706     0.4854   1.587  0.11242    
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) st_sB_ st_sF_ st_sS_ cc_trt s_B_:_ s_F_:_
+## st_sysByd_s -0.458                                          
+## st_sysFnck_ -0.543  0.253                                   
+## st_sysStt_g -0.521  0.246  0.291                            
+## cc_trtnone  -0.566  0.447  0.307  0.295                     
+## st_sysBy_:_  0.339 -0.693 -0.185 -0.178 -0.609              
+## st_sysFn_:_  0.308 -0.252 -0.559 -0.169 -0.559  0.341       
+## st_sysSt_:_  0.311 -0.244 -0.168 -0.557 -0.547  0.333  0.304&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This has a similar problem to the Poisson model, our residuals don’t have equal variance across our predicted values…&lt;/p&gt;
+&lt;p&gt;Looks like we are back to our transformations of the response variable and usually regular linear mixed effects model.&lt;/p&gt;
+&lt;p&gt;Our decision boils down to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The square root transformation has slightly better diagnostic plots, but is harder to interpret.&lt;/li&gt;
+&lt;li&gt;The log transformation has slightly worse diagnostic plots, but means and contrasts can be readily interpretable and back-transformed to the original scale.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;If one is more interested in the effect sizes among treatments then it make sense to use the log-transformation so that those effect sizes can be interpretted in a meaningful way. On the other hand, if effect sizes aren’t super important that square root transformation seems like a better option.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Making tables with the R package gt</title>
       <link>/2020/04/13/gt-tables/</link>
       <pubDate>Mon, 13 Apr 2020 00:00:00 +0000</pubDate>
       
@@ -20,15 +252,17 @@
       <description>
 
 
-&lt;p&gt;Overall notes about &lt;code&gt;gt&lt;/code&gt;: I like it! I’m still learning the syntax but it seems intuitive and user-friendly. It’s worth noting at the beginning of this post that the tables are rendered a little differently via blogdown than they would be if they were just knit into an html file. Therefore, &lt;strong&gt;please don’t view this page in dark mode&lt;/strong&gt;…you won’t be able see half the table rows. I believe this problem should be fixed with the next release of &lt;code&gt;gt&lt;/code&gt; on CRAN.&lt;/p&gt;
+&lt;p&gt;Overall notes about the R package &lt;code&gt;gt&lt;/code&gt;: I like it! I’m still learning the syntax but it seems intuitive and user-friendly. Would recommend.&lt;/p&gt;
+&lt;p&gt;It’s worth noting at the beginning of this post that the tables are rendered a little differently via blogdown than they would be if they were just knit into an html file. Therefore, &lt;strong&gt;please don’t view this page in dark mode&lt;/strong&gt;…you won’t be able see half the table rows. After sleuthing through the &lt;code&gt;gt&lt;/code&gt; github, I believe this problem should be fixed with the next release on CRAN.&lt;/p&gt;
 &lt;div id=&#34;preamble&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Preamble&lt;/h4&gt;
-&lt;p&gt;Making tables in R is something I’ve dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table…I try making table in R…I successfully make a table but I can’t figure out how to format it exactly to my liking…I get frustrated…I abandon my R table and go to Microsoft word. I have no beef with the other R packages intended for table making and I’m sure with more finesse they could give me what I’m looking for. However, I’m excited to try out &lt;code&gt;gt&lt;/code&gt; because it is &lt;a href=&#34;https://gt.rstudio.com/&#34;&gt;“the grammar of tables”&lt;/a&gt; and was designed to mirror the layered style of creating &lt;code&gt;ggplot2&lt;/code&gt; figures.&lt;/p&gt;
-&lt;p&gt;I used this self-imposed table-making opportunity to play around with gathering data from the USDA’s National Agricultural Statistics Service (NASS). I used their &lt;a href=&#34;https://quickstats.nass.usda.gov/&#34;&gt;quickstats&lt;/a&gt; page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it’s not sweet corn). If you want to see the raw data, you can find it on &lt;a href=&#34;https://github.com/lydiaPenglish/lydiaPenglish.github.io&#34;&gt;my github&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Making tables in R is something I’ve dabbled lightly in but never really committed to. The story usually goes: I have some data to present in a table…I try making table in R…I successfully make a table but I can’t figure out how to format it exactly to my liking…I get frustrated…I abandon my R table and go to Microsoft word.&lt;/p&gt;
+&lt;p&gt;I have no beef with the other R packages intended for table making, and I’m sure with more finesse they could give me what I’m looking for. However, I’m excited to try out &lt;code&gt;gt&lt;/code&gt; because it is &lt;a href=&#34;https://gt.rstudio.com/&#34;&gt;“the grammar of tables”&lt;/a&gt; and was designed to mirror the layered style of creating &lt;code&gt;ggplot2&lt;/code&gt; figures.&lt;/p&gt;
+&lt;p&gt;I used this self-imposed table-making opportunity to play around with gathering data from the USDA’s National Agricultural Statistics Service (NASS). I used their &lt;a href=&#34;https://quickstats.nass.usda.gov/&#34;&gt;quickstats&lt;/a&gt; page. It took me a couple tries to get the sort of data I was looking for (there are a LOT of options to click through). I decided to look at chemical use on corn acres, as well as some other basic corn stats for Iowa. We do grow a lot of corn here (and no, it’s not sweet corn). If you want to see the raw data, you can find it on &lt;a href=&#34;https://github.com/lydiaPenglish/lydiaPenglish.github.io/tree/master/content/post/gt_tables&#34;&gt;my github&lt;/a&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;em&gt;(NB: There were gaps where data were available so I picked time points roughly 4-5 years apart)&lt;/em&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;div id=&#34;table-time&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Table time!&lt;/h4&gt;
+&lt;div id=&#34;tables&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Tables&lt;/h4&gt;
 &lt;p&gt;First things first, I had to do a little data cleaning to get rid of some unwanted text and columns in the data-frame.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;chem_apps &amp;lt;- 
   read_csv(&amp;quot;chem_data.csv&amp;quot;) %&amp;gt;%
@@ -52,7 +286,7 @@ head(chem_apps)&lt;/code&gt;&lt;/pre&gt;
 ## 4  2018 LB    HERBICIDE ACETOCHLOR = 121601            8823000
 ## 5  2018 LB    HERBICIDE ATRAZINE = 80803               6621000
 ## 6  2018 LB    HERBICIDE BAPMA SALT OF DICAMBA = 100094      NA&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Next step: build a basic table with &lt;code&gt;gt&lt;/code&gt;. Here I’ve filtered my data-frame and rearranged it slightly and then gone right into using &lt;code&gt;gt&lt;/code&gt;, all with pipe operators. It’s quite easy to add a title and subtitle, as well as a source note. It’s also easy to use Markdown formatting by putting your title within the &lt;code&gt;md()&lt;/code&gt; function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!&lt;/p&gt;
+&lt;p&gt;Next step: build a basic table with &lt;code&gt;gt&lt;/code&gt;. Here I’ve filtered my data-frame and rearranged it slightly (&lt;code&gt;pivot_wider&lt;/code&gt;!!) and then I’ve gone right into using &lt;code&gt;gt&lt;/code&gt;by using pipe operators. It’s quite easy to add a title and subtitle, as well as a source note. It’s also easy to use Markdown formatting by putting your title within the &lt;code&gt;md()&lt;/code&gt; function. I appreciate that you can format the numbers to have commas so they are easier to read. Since I kept everything in pounds, these numbers are quite large. Iowa uses a lot of herbicide and fertilizer on a yearly basis!&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;tab_v1 &amp;lt;- 
   chem_apps %&amp;gt;%
 # Get data just on total chemical usage
@@ -79,7 +313,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
 }
 
-#rgwsvigtwo .gt_table {
+#rdzmevogzs .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -102,7 +336,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-left-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_heading {
+#rdzmevogzs .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -114,7 +348,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_title {
+#rdzmevogzs .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -124,7 +358,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-bottom-width: 0;
 }
 
-#rgwsvigtwo .gt_subtitle {
+#rdzmevogzs .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -134,13 +368,13 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-top-width: 0;
 }
 
-#rgwsvigtwo .gt_bottom_border {
+#rdzmevogzs .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_col_headings {
+#rdzmevogzs .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -155,7 +389,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_col_heading {
+#rdzmevogzs .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -175,7 +409,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   overflow-x: hidden;
 }
 
-#rgwsvigtwo .gt_column_spanner_outer {
+#rdzmevogzs .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -187,15 +421,15 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-right: 4px;
 }
 
-#rgwsvigtwo .gt_column_spanner_outer:first-child {
+#rdzmevogzs .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#rgwsvigtwo .gt_column_spanner_outer:last-child {
+#rdzmevogzs .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#rgwsvigtwo .gt_column_spanner {
+#rdzmevogzs .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -207,7 +441,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   width: 100%;
 }
 
-#rgwsvigtwo .gt_group_heading {
+#rdzmevogzs .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -229,7 +463,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   vertical-align: middle;
 }
 
-#rgwsvigtwo .gt_empty_group_heading {
+#rdzmevogzs .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -244,19 +478,19 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   vertical-align: middle;
 }
 
-#rgwsvigtwo .gt_striped {
+#rdzmevogzs .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#rgwsvigtwo .gt_from_md &gt; :first-child {
+#rdzmevogzs .gt_from_md &gt; :first-child {
   margin-top: 0;
 }
 
-#rgwsvigtwo .gt_from_md &gt; :last-child {
+#rdzmevogzs .gt_from_md &gt; :last-child {
   margin-bottom: 0;
 }
 
-#rgwsvigtwo .gt_row {
+#rdzmevogzs .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -275,7 +509,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   overflow-x: hidden;
 }
 
-#rgwsvigtwo .gt_stub {
+#rdzmevogzs .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -287,7 +521,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-left: 12px;
 }
 
-#rgwsvigtwo .gt_summary_row {
+#rdzmevogzs .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -297,7 +531,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-right: 5px;
 }
 
-#rgwsvigtwo .gt_first_summary_row {
+#rdzmevogzs .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -307,7 +541,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-top-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_grand_summary_row {
+#rdzmevogzs .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -317,7 +551,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-right: 5px;
 }
 
-#rgwsvigtwo .gt_first_grand_summary_row {
+#rdzmevogzs .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -327,7 +561,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-top-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_table_body {
+#rdzmevogzs .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -336,7 +570,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-bottom-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_footnotes {
+#rdzmevogzs .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -350,13 +584,13 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_footnote {
+#rdzmevogzs .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#rgwsvigtwo .gt_sourcenotes {
+#rdzmevogzs .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -370,46 +604,46 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#rgwsvigtwo .gt_sourcenote {
+#rdzmevogzs .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#rgwsvigtwo .gt_left {
+#rdzmevogzs .gt_left {
   text-align: left;
 }
 
-#rgwsvigtwo .gt_center {
+#rdzmevogzs .gt_center {
   text-align: center;
 }
 
-#rgwsvigtwo .gt_right {
+#rdzmevogzs .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#rgwsvigtwo .gt_font_normal {
+#rdzmevogzs .gt_font_normal {
   font-weight: normal;
 }
 
-#rgwsvigtwo .gt_font_bold {
+#rdzmevogzs .gt_font_bold {
   font-weight: bold;
 }
 
-#rgwsvigtwo .gt_font_italic {
+#rdzmevogzs .gt_font_italic {
   font-style: italic;
 }
 
-#rgwsvigtwo .gt_super {
+#rdzmevogzs .gt_super {
   font-size: 65%;
 }
 
-#rgwsvigtwo .gt_footnote_marks {
+#rdzmevogzs .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 &lt;/style&gt;
-&lt;div id=&#34;rgwsvigtwo&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+&lt;div id=&#34;rdzmevogzs&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
   &lt;thead class=&#34;gt_header&#34;&gt;
     &lt;tr&gt;
       &lt;th colspan=&#34;3&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Chemical Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
@@ -477,7 +711,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
 }
 
-#yyphtnafhq .gt_table {
+#lrpvpdekdx .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -500,7 +734,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-left-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_heading {
+#lrpvpdekdx .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -512,7 +746,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_title {
+#lrpvpdekdx .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -522,7 +756,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-bottom-width: 0;
 }
 
-#yyphtnafhq .gt_subtitle {
+#lrpvpdekdx .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -532,13 +766,13 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-top-width: 0;
 }
 
-#yyphtnafhq .gt_bottom_border {
+#lrpvpdekdx .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_col_headings {
+#lrpvpdekdx .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -553,7 +787,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_col_heading {
+#lrpvpdekdx .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -573,7 +807,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   overflow-x: hidden;
 }
 
-#yyphtnafhq .gt_column_spanner_outer {
+#lrpvpdekdx .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -585,15 +819,15 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-right: 4px;
 }
 
-#yyphtnafhq .gt_column_spanner_outer:first-child {
+#lrpvpdekdx .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#yyphtnafhq .gt_column_spanner_outer:last-child {
+#lrpvpdekdx .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#yyphtnafhq .gt_column_spanner {
+#lrpvpdekdx .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -605,7 +839,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   width: 100%;
 }
 
-#yyphtnafhq .gt_group_heading {
+#lrpvpdekdx .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -627,7 +861,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   vertical-align: middle;
 }
 
-#yyphtnafhq .gt_empty_group_heading {
+#lrpvpdekdx .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -642,19 +876,19 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   vertical-align: middle;
 }
 
-#yyphtnafhq .gt_striped {
+#lrpvpdekdx .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#yyphtnafhq .gt_from_md &gt; :first-child {
+#lrpvpdekdx .gt_from_md &gt; :first-child {
   margin-top: 0;
 }
 
-#yyphtnafhq .gt_from_md &gt; :last-child {
+#lrpvpdekdx .gt_from_md &gt; :last-child {
   margin-bottom: 0;
 }
 
-#yyphtnafhq .gt_row {
+#lrpvpdekdx .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -673,7 +907,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   overflow-x: hidden;
 }
 
-#yyphtnafhq .gt_stub {
+#lrpvpdekdx .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -685,7 +919,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-left: 12px;
 }
 
-#yyphtnafhq .gt_summary_row {
+#lrpvpdekdx .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -695,7 +929,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-right: 5px;
 }
 
-#yyphtnafhq .gt_first_summary_row {
+#lrpvpdekdx .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -705,7 +939,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-top-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_grand_summary_row {
+#lrpvpdekdx .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -715,7 +949,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   padding-right: 5px;
 }
 
-#yyphtnafhq .gt_first_grand_summary_row {
+#lrpvpdekdx .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -725,7 +959,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-top-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_table_body {
+#lrpvpdekdx .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -734,7 +968,7 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-bottom-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_footnotes {
+#lrpvpdekdx .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -748,13 +982,13 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_footnote {
+#lrpvpdekdx .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#yyphtnafhq .gt_sourcenotes {
+#lrpvpdekdx .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -768,46 +1002,46 @@ tab_v1&lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#yyphtnafhq .gt_sourcenote {
+#lrpvpdekdx .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#yyphtnafhq .gt_left {
+#lrpvpdekdx .gt_left {
   text-align: left;
 }
 
-#yyphtnafhq .gt_center {
+#lrpvpdekdx .gt_center {
   text-align: center;
 }
 
-#yyphtnafhq .gt_right {
+#lrpvpdekdx .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#yyphtnafhq .gt_font_normal {
+#lrpvpdekdx .gt_font_normal {
   font-weight: normal;
 }
 
-#yyphtnafhq .gt_font_bold {
+#lrpvpdekdx .gt_font_bold {
   font-weight: bold;
 }
 
-#yyphtnafhq .gt_font_italic {
+#lrpvpdekdx .gt_font_italic {
   font-style: italic;
 }
 
-#yyphtnafhq .gt_super {
+#lrpvpdekdx .gt_super {
   font-size: 65%;
 }
 
-#yyphtnafhq .gt_footnote_marks {
+#lrpvpdekdx .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 &lt;/style&gt;
-&lt;div id=&#34;yyphtnafhq&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+&lt;div id=&#34;lrpvpdekdx&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
   &lt;thead class=&#34;gt_header&#34;&gt;
     &lt;tr&gt;
       &lt;th colspan=&#34;3&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Chemical Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
@@ -914,7 +1148,7 @@ chem_subset %&amp;gt;%
   font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
 }
 
-#mdxxmwtqot .gt_table {
+#woloogwzhb .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -937,7 +1171,7 @@ chem_subset %&amp;gt;%
   border-left-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_heading {
+#woloogwzhb .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -949,7 +1183,7 @@ chem_subset %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_title {
+#woloogwzhb .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -959,7 +1193,7 @@ chem_subset %&amp;gt;%
   border-bottom-width: 0;
 }
 
-#mdxxmwtqot .gt_subtitle {
+#woloogwzhb .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -969,13 +1203,13 @@ chem_subset %&amp;gt;%
   border-top-width: 0;
 }
 
-#mdxxmwtqot .gt_bottom_border {
+#woloogwzhb .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_col_headings {
+#woloogwzhb .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -990,7 +1224,7 @@ chem_subset %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_col_heading {
+#woloogwzhb .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1010,7 +1244,7 @@ chem_subset %&amp;gt;%
   overflow-x: hidden;
 }
 
-#mdxxmwtqot .gt_column_spanner_outer {
+#woloogwzhb .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1022,15 +1256,15 @@ chem_subset %&amp;gt;%
   padding-right: 4px;
 }
 
-#mdxxmwtqot .gt_column_spanner_outer:first-child {
+#woloogwzhb .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#mdxxmwtqot .gt_column_spanner_outer:last-child {
+#woloogwzhb .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#mdxxmwtqot .gt_column_spanner {
+#woloogwzhb .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1042,7 +1276,7 @@ chem_subset %&amp;gt;%
   width: 100%;
 }
 
-#mdxxmwtqot .gt_group_heading {
+#woloogwzhb .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1064,7 +1298,7 @@ chem_subset %&amp;gt;%
   vertical-align: middle;
 }
 
-#mdxxmwtqot .gt_empty_group_heading {
+#woloogwzhb .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1079,19 +1313,19 @@ chem_subset %&amp;gt;%
   vertical-align: middle;
 }
 
-#mdxxmwtqot .gt_striped {
+#woloogwzhb .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#mdxxmwtqot .gt_from_md &gt; :first-child {
+#woloogwzhb .gt_from_md &gt; :first-child {
   margin-top: 0;
 }
 
-#mdxxmwtqot .gt_from_md &gt; :last-child {
+#woloogwzhb .gt_from_md &gt; :last-child {
   margin-bottom: 0;
 }
 
-#mdxxmwtqot .gt_row {
+#woloogwzhb .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1110,7 +1344,7 @@ chem_subset %&amp;gt;%
   overflow-x: hidden;
 }
 
-#mdxxmwtqot .gt_stub {
+#woloogwzhb .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1122,7 +1356,7 @@ chem_subset %&amp;gt;%
   padding-left: 12px;
 }
 
-#mdxxmwtqot .gt_summary_row {
+#woloogwzhb .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1132,7 +1366,7 @@ chem_subset %&amp;gt;%
   padding-right: 5px;
 }
 
-#mdxxmwtqot .gt_first_summary_row {
+#woloogwzhb .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1142,7 +1376,7 @@ chem_subset %&amp;gt;%
   border-top-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_grand_summary_row {
+#woloogwzhb .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1152,7 +1386,7 @@ chem_subset %&amp;gt;%
   padding-right: 5px;
 }
 
-#mdxxmwtqot .gt_first_grand_summary_row {
+#woloogwzhb .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1162,7 +1396,7 @@ chem_subset %&amp;gt;%
   border-top-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_table_body {
+#woloogwzhb .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1171,7 +1405,7 @@ chem_subset %&amp;gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_footnotes {
+#woloogwzhb .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1185,13 +1419,13 @@ chem_subset %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_footnote {
+#woloogwzhb .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#mdxxmwtqot .gt_sourcenotes {
+#woloogwzhb .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1205,46 +1439,46 @@ chem_subset %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#mdxxmwtqot .gt_sourcenote {
+#woloogwzhb .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#mdxxmwtqot .gt_left {
+#woloogwzhb .gt_left {
   text-align: left;
 }
 
-#mdxxmwtqot .gt_center {
+#woloogwzhb .gt_center {
   text-align: center;
 }
 
-#mdxxmwtqot .gt_right {
+#woloogwzhb .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#mdxxmwtqot .gt_font_normal {
+#woloogwzhb .gt_font_normal {
   font-weight: normal;
 }
 
-#mdxxmwtqot .gt_font_bold {
+#woloogwzhb .gt_font_bold {
   font-weight: bold;
 }
 
-#mdxxmwtqot .gt_font_italic {
+#woloogwzhb .gt_font_italic {
   font-style: italic;
 }
 
-#mdxxmwtqot .gt_super {
+#woloogwzhb .gt_super {
   font-size: 65%;
 }
 
-#mdxxmwtqot .gt_footnote_marks {
+#woloogwzhb .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 &lt;/style&gt;
-&lt;div id=&#34;mdxxmwtqot&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+&lt;div id=&#34;woloogwzhb&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
   &lt;thead class=&#34;gt_header&#34;&gt;
     &lt;tr&gt;
       &lt;th colspan=&#34;5&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Chemical Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
@@ -1394,7 +1628,7 @@ chem_subset2 %&amp;gt;%
   font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
 }
 
-#gevxgtnrqu .gt_table {
+#wrukxvmmzq .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1417,7 +1651,7 @@ chem_subset2 %&amp;gt;%
   border-left-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_heading {
+#wrukxvmmzq .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1429,7 +1663,7 @@ chem_subset2 %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_title {
+#wrukxvmmzq .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1439,7 +1673,7 @@ chem_subset2 %&amp;gt;%
   border-bottom-width: 0;
 }
 
-#gevxgtnrqu .gt_subtitle {
+#wrukxvmmzq .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1449,13 +1683,13 @@ chem_subset2 %&amp;gt;%
   border-top-width: 0;
 }
 
-#gevxgtnrqu .gt_bottom_border {
+#wrukxvmmzq .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_col_headings {
+#wrukxvmmzq .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1470,7 +1704,7 @@ chem_subset2 %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_col_heading {
+#wrukxvmmzq .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1490,7 +1724,7 @@ chem_subset2 %&amp;gt;%
   overflow-x: hidden;
 }
 
-#gevxgtnrqu .gt_column_spanner_outer {
+#wrukxvmmzq .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1502,15 +1736,15 @@ chem_subset2 %&amp;gt;%
   padding-right: 4px;
 }
 
-#gevxgtnrqu .gt_column_spanner_outer:first-child {
+#wrukxvmmzq .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#gevxgtnrqu .gt_column_spanner_outer:last-child {
+#wrukxvmmzq .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#gevxgtnrqu .gt_column_spanner {
+#wrukxvmmzq .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -1522,7 +1756,7 @@ chem_subset2 %&amp;gt;%
   width: 100%;
 }
 
-#gevxgtnrqu .gt_group_heading {
+#wrukxvmmzq .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1544,7 +1778,7 @@ chem_subset2 %&amp;gt;%
   vertical-align: middle;
 }
 
-#gevxgtnrqu .gt_empty_group_heading {
+#wrukxvmmzq .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -1559,19 +1793,19 @@ chem_subset2 %&amp;gt;%
   vertical-align: middle;
 }
 
-#gevxgtnrqu .gt_striped {
+#wrukxvmmzq .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#gevxgtnrqu .gt_from_md &gt; :first-child {
+#wrukxvmmzq .gt_from_md &gt; :first-child {
   margin-top: 0;
 }
 
-#gevxgtnrqu .gt_from_md &gt; :last-child {
+#wrukxvmmzq .gt_from_md &gt; :last-child {
   margin-bottom: 0;
 }
 
-#gevxgtnrqu .gt_row {
+#wrukxvmmzq .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1590,7 +1824,7 @@ chem_subset2 %&amp;gt;%
   overflow-x: hidden;
 }
 
-#gevxgtnrqu .gt_stub {
+#wrukxvmmzq .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1602,7 +1836,7 @@ chem_subset2 %&amp;gt;%
   padding-left: 12px;
 }
 
-#gevxgtnrqu .gt_summary_row {
+#wrukxvmmzq .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1612,7 +1846,7 @@ chem_subset2 %&amp;gt;%
   padding-right: 5px;
 }
 
-#gevxgtnrqu .gt_first_summary_row {
+#wrukxvmmzq .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1622,7 +1856,7 @@ chem_subset2 %&amp;gt;%
   border-top-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_grand_summary_row {
+#wrukxvmmzq .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -1632,7 +1866,7 @@ chem_subset2 %&amp;gt;%
   padding-right: 5px;
 }
 
-#gevxgtnrqu .gt_first_grand_summary_row {
+#wrukxvmmzq .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1642,7 +1876,7 @@ chem_subset2 %&amp;gt;%
   border-top-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_table_body {
+#wrukxvmmzq .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1651,7 +1885,7 @@ chem_subset2 %&amp;gt;%
   border-bottom-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_footnotes {
+#wrukxvmmzq .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1665,13 +1899,13 @@ chem_subset2 %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_footnote {
+#wrukxvmmzq .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#gevxgtnrqu .gt_sourcenotes {
+#wrukxvmmzq .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1685,46 +1919,46 @@ chem_subset2 %&amp;gt;%
   border-right-color: #D3D3D3;
 }
 
-#gevxgtnrqu .gt_sourcenote {
+#wrukxvmmzq .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#gevxgtnrqu .gt_left {
+#wrukxvmmzq .gt_left {
   text-align: left;
 }
 
-#gevxgtnrqu .gt_center {
+#wrukxvmmzq .gt_center {
   text-align: center;
 }
 
-#gevxgtnrqu .gt_right {
+#wrukxvmmzq .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#gevxgtnrqu .gt_font_normal {
+#wrukxvmmzq .gt_font_normal {
   font-weight: normal;
 }
 
-#gevxgtnrqu .gt_font_bold {
+#wrukxvmmzq .gt_font_bold {
   font-weight: bold;
 }
 
-#gevxgtnrqu .gt_font_italic {
+#wrukxvmmzq .gt_font_italic {
   font-style: italic;
 }
 
-#gevxgtnrqu .gt_super {
+#wrukxvmmzq .gt_super {
   font-size: 65%;
 }
 
-#gevxgtnrqu .gt_footnote_marks {
+#wrukxvmmzq .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 &lt;/style&gt;
-&lt;div id=&#34;gevxgtnrqu&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+&lt;div id=&#34;wrukxvmmzq&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
   &lt;thead class=&#34;gt_header&#34;&gt;
     &lt;tr&gt;
       &lt;th colspan=&#34;10&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Herbicide Use on Cornfields in Iowa&lt;/strong&gt;&lt;/th&gt;
@@ -1894,7 +2128,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   font-family: -apple-system, BlinkMacSystemFont, &#39;Segoe UI&#39;, Roboto, Oxygen, Ubuntu, Cantarell, &#39;Helvetica Neue&#39;, &#39;Fira Sans&#39;, &#39;Droid Sans&#39;, Arial, sans-serif;
 }
 
-#uarfvptydp .gt_table {
+#hhzfjsftmc .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -1917,7 +2151,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-left-color: darkgreen;
 }
 
-#uarfvptydp .gt_heading {
+#hhzfjsftmc .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -1929,7 +2163,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_title {
+#hhzfjsftmc .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -1939,7 +2173,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-bottom-width: 0;
 }
 
-#uarfvptydp .gt_subtitle {
+#hhzfjsftmc .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -1949,13 +2183,13 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-top-width: 0;
 }
 
-#uarfvptydp .gt_bottom_border {
+#hhzfjsftmc .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_col_headings {
+#hhzfjsftmc .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1970,7 +2204,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_col_heading {
+#hhzfjsftmc .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -1990,7 +2224,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   overflow-x: hidden;
 }
 
-#uarfvptydp .gt_column_spanner_outer {
+#hhzfjsftmc .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2002,15 +2236,15 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   padding-right: 4px;
 }
 
-#uarfvptydp .gt_column_spanner_outer:first-child {
+#hhzfjsftmc .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#uarfvptydp .gt_column_spanner_outer:last-child {
+#hhzfjsftmc .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#uarfvptydp .gt_column_spanner {
+#hhzfjsftmc .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2022,7 +2256,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   width: 100%;
 }
 
-#uarfvptydp .gt_group_heading {
+#hhzfjsftmc .gt_group_heading {
   padding: 8px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2044,7 +2278,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   vertical-align: middle;
 }
 
-#uarfvptydp .gt_empty_group_heading {
+#hhzfjsftmc .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2059,19 +2293,19 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   vertical-align: middle;
 }
 
-#uarfvptydp .gt_striped {
+#hhzfjsftmc .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#uarfvptydp .gt_from_md &gt; :first-child {
+#hhzfjsftmc .gt_from_md &gt; :first-child {
   margin-top: 0;
 }
 
-#uarfvptydp .gt_from_md &gt; :last-child {
+#hhzfjsftmc .gt_from_md &gt; :last-child {
   margin-bottom: 0;
 }
 
-#uarfvptydp .gt_row {
+#hhzfjsftmc .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2090,7 +2324,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   overflow-x: hidden;
 }
 
-#uarfvptydp .gt_stub {
+#hhzfjsftmc .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2102,7 +2336,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   padding-left: 12px;
 }
 
-#uarfvptydp .gt_summary_row {
+#hhzfjsftmc .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2112,7 +2346,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   padding-right: 5px;
 }
 
-#uarfvptydp .gt_first_summary_row {
+#hhzfjsftmc .gt_first_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2122,7 +2356,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-top-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_grand_summary_row {
+#hhzfjsftmc .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2132,7 +2366,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   padding-right: 5px;
 }
 
-#uarfvptydp .gt_first_grand_summary_row {
+#hhzfjsftmc .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2142,7 +2376,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-top-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_table_body {
+#hhzfjsftmc .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2151,7 +2385,7 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-bottom-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_footnotes {
+#hhzfjsftmc .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2165,13 +2399,13 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_footnote {
+#hhzfjsftmc .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding: 4px;
 }
 
-#uarfvptydp .gt_sourcenotes {
+#hhzfjsftmc .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2185,46 +2419,46 @@ last_tab &lt;/code&gt;&lt;/pre&gt;
   border-right-color: #D3D3D3;
 }
 
-#uarfvptydp .gt_sourcenote {
+#hhzfjsftmc .gt_sourcenote {
   font-size: 90%;
   padding: 4px;
 }
 
-#uarfvptydp .gt_left {
+#hhzfjsftmc .gt_left {
   text-align: left;
 }
 
-#uarfvptydp .gt_center {
+#hhzfjsftmc .gt_center {
   text-align: center;
 }
 
-#uarfvptydp .gt_right {
+#hhzfjsftmc .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#uarfvptydp .gt_font_normal {
+#hhzfjsftmc .gt_font_normal {
   font-weight: normal;
 }
 
-#uarfvptydp .gt_font_bold {
+#hhzfjsftmc .gt_font_bold {
   font-weight: bold;
 }
 
-#uarfvptydp .gt_font_italic {
+#hhzfjsftmc .gt_font_italic {
   font-style: italic;
 }
 
-#uarfvptydp .gt_super {
+#hhzfjsftmc .gt_super {
   font-size: 65%;
 }
 
-#uarfvptydp .gt_footnote_marks {
+#hhzfjsftmc .gt_footnote_marks {
   font-style: italic;
   font-size: 65%;
 }
 &lt;/style&gt;
-&lt;div id=&#34;uarfvptydp&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
+&lt;div id=&#34;hhzfjsftmc&#34; style=&#34;overflow-x:auto;overflow-y:auto;width:auto;height:auto;&#34;&gt;&lt;table class=&#34;gt_table&#34;&gt;
   &lt;thead class=&#34;gt_header&#34;&gt;
     &lt;tr&gt;
       &lt;th colspan=&#34;5&#34; class=&#34;gt_heading gt_title gt_font_normal&#34; style&gt;&lt;strong&gt;Acreage, Yield, and Price of Iowa Corn&lt;strong&gt; &lt;img src=&#34;https://www.netclipart.com/pp/m/7-70514_corn-clipart-single-vegetable-corn-clipart-png.png&#34; style=&#34;height:30px;&#34;&gt;&lt;/th&gt;
@@ -2376,7 +2610,7 @@ This butterfly milkweed inspired palette is less than optimal in colorblind visi
       <description>
 
 
-&lt;p&gt;I’ve been inspired by other R packages that have created color palettes &lt;a href=&#34;https://nschiett.github.io/fishualize/index.html&#34;&gt;based on living organisms&lt;/a&gt;. Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn’t do anything fancy when choosing colors. I merely used the &lt;a href=&#34;http://instant-eyedropper.com/&#34;&gt;instant eyedropped&lt;/a&gt; tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. Most of these photos can be found in my &lt;a href=&#34;content/gallery/index.md&#34;&gt;gallery&lt;/a&gt;. If a photo is taken from somewhere else (i.e. is not my own) then I’ve noted it as such.&lt;/p&gt;
+&lt;p&gt;I’ve been inspired by other R packages that have created color palettes &lt;a href=&#34;https://nschiett.github.io/fishualize/index.html&#34;&gt;based on living organisms&lt;/a&gt;. Naturally I decided to try to make a color palette using prairie species. I want to note right away that I didn’t do anything fancy when choosing colors. I merely used the &lt;a href=&#34;http://instant-eyedropper.com/&#34;&gt;instant eyedropped&lt;/a&gt; tool to hover over different pixels in my photos and wrote down the hex codes. Obviously colors will vary based on lighting and shading. I had to be a little arbitrary in picking the essential pixel shades. Most of these photos can be found in my &lt;a href=&#34;/gallery/&#34;&gt;gallery&lt;/a&gt;. If a photo is taken from somewhere else (i.e. is not my own) then I’ve noted it as such.&lt;/p&gt;
 &lt;p&gt;For all the botany nerds out there I’ve decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point.&lt;/p&gt;
 &lt;div id=&#34;i.-the-bean-family-fabaceae&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;i. The bean family (Fabaceae)&lt;/h4&gt;

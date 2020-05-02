@@ -81,6 +81,11 @@ caption = "Swamp Milkweed (Asclepias incarnata)"
   
 [[gallery_item]]
   album = "gallery"
+  image = "echan.jpg"
+  caption = "Narrow-leaved purple coneflower (Echinacea angustifolia)"   
+  
+[[gallery_item]]
+  album = "gallery"
   image = "echpa.JPG"
   caption = "Pale purple coneflower (Echinacea pallida)" 
   
@@ -98,6 +103,11 @@ caption = "Swamp Milkweed (Asclepias incarnata)"
   album = "gallery"
   image = "euppu.jpg"
   caption = "Purple Joe Pye weed (Eutrochium purpureum)"   
+  
+[[gallery_item]]
+  album = "gallery"
+  image = "geutr.jpg"
+  caption = "Prairie smoke (Geum triflorum)"   
 
 [[gallery_item]]
   album = "gallery"
@@ -216,6 +226,11 @@ caption = "Swamp Milkweed (Asclepias incarnata)"
   
 [[gallery_item]]
   album = "gallery"
+  image = "sornu.JPG"
+  caption = "Indiangrass (Sorghastrum nutans)"   
+  
+[[gallery_item]]
+  album = "gallery"
   image = "symer.JPG"
   caption = "Heath aster (Symphyotrichum ericoides)"   
   
@@ -251,17 +266,22 @@ caption = "Swamp Milkweed (Asclepias incarnata)"
   
 [[gallery_item]]
   album = "gallery"
-  image = "white_orchid.jpg"
-  caption = "White fringed prairie orchid (Platanthera leucophaea)" 
+  image = "zizau.jpg"
+  caption = "Golden Alexander (Zizea aura)"   
   
 [[gallery_item]]
   album = "gallery"
-  image = "zizau.jpg"
-  caption = "Golden Alexander (Zizea aura)"       
+  image = "white_orchid.jpg"
+  caption = "White fringed prairie orchid (Platanthera leucophaea)"   
+  
+[[gallery_item]]
+  album = "gallery"
+  image = "yellow_orchid.jpg"
+  caption = "Yellow Lady's Slipper (Cypripedium parviflorum)"   
   
 +++
 
-If you haven't already figured it out yet, I like plants! And over the years I've taken photos of a few. I don't need to hoard these photos to myself, they're for sharing! Therefore enjoy this gallery of beautiful flowers. Click on each photo to see the species' name. You'll quickly see that I'm far from a professional photographer - these photos were primarily taken on an iPhone and most of them are from farms across the state of Iowa.   
+If you haven't already figured it out yet, I like plants! And over the years I've taken photos of a few of them. I don't need to hoard these photos to myself, they're for sharing! Therefore enjoy this gallery of beautiful flowers. Click on each photo to see the species' name. You'll quickly see that I'm far from a professional photographer - these photos were primarily taken on an iPhone and most of them are from farms across the state of Iowa.   
 
 
 {{< gallery >}}  

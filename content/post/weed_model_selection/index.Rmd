@@ -1,0 +1,221 @@
+---
+title: Many models, same data
+author: Lydia English and Gina Nichols
+date: '2020-04-22'
+slug: many-models
+categories: 
+  - Weeds
+  - Model selection
+tags: 
+  - r
+  - Grad School
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-04-23T14:27:24-05:00'
+draft: true
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+---
+
+```{r setup, include = FALSE}
+library(dplyr)
+library(ggplot2)
+theme_set(theme_bw())
+library(patchwork)
+library(ggResidpanel)
+library(lme4)
+library(lmerTest)
+library(performance)
+```
+
+This post explores the often agonizing decision-making process behind model selection. We will be using a real-life example, meaning this is an actual decision process that Gina Nichols and I waded through. The hope is that others who may struggle with the same sorts of basic stats decisions can take solace in our process.   
+
+We're using data from [this project](/project/pfiweeds/). In very breif terms we're interested in the effect of cover crops on the weed seedbank. The data can be accessed from Gina Nichol's Github repository like so:
+
+`remotes::install_github("vanichols/PFIweeds2020")`
+
+The raw data are in `pfi_ghobsraw`. These are observations from soil which we incubating in a greenhouse to grow weeds. We don't need to clean the data very much, but we will do a couple steps to consolidate observations. 
+
+A couple other notes on the experimental layout:
+
+* There are four `site_sys`, which encompass three different farms and two different cropping systems
+  + Boyd Grain
+  + Boyd Silage
+  + Funcke Grain
+  + Stout Grain
+  
+  _FYI: Grain systems employ a two year rotation of corn and soybeans and sell both crops off as feed grain, ethanol grain, etc. The silage system also has a 2 year rotation of corn and soybeans, but in the corn year the crop is harvested earlier (while it's still green) and sold as silage (fermented cattle feed)_
+  
+* There are two cover crop treatments (`cc_trt`): `none` and `cc_rye` (rye)
+* There are 4-5 blocks per treatment, which will our random effect. 
+
+```{r}
+library(PFIweeds2020)
+data("pfi_ghobsraw")
+
+# Quick data cleaning
+dat <- 
+  pfi_ghobsraw %>% 
+  dplyr::mutate_if(is.numeric, tidyr::replace_na, 0) %>%
+  dplyr::group_by(site_name, field, sys_trt, cc_trt, rep, blockID) %>%
+  dplyr::summarise_if(is.numeric, sum) %>%
+  dplyr::ungroup() %>%
+# Sum all seeds by species  
+  dplyr::mutate(totseeds = rowSums(.[, 7:24])) %>%
+  tidyr::unite(site_name, sys_trt, col = "site_sys", remove = T) %>% 
+  select(-field, -rep, -c(AMATU:UB)) %>%
+  mutate(cc_trt = recode(cc_trt,         
+                          no = "none",
+                          rye = "cc_rye"))
+head(dat)
+```
+
+We are interested in `totseeds` (total seeds) as a response variable, which is an integer value. In all of our mixed models our fixed effects are `site_sys` and `cc_trt` and our random effect is `blockID`.
+
+But before we get to modeling, let's just quickly look at the data and see what we are working with. 
+
+```{r, echo = FALSE}
+dat %>%
+  ggplot(aes(site_sys, totseeds))+
+  geom_boxplot(aes(color = cc_trt))+
+  geom_point(aes(color = cc_trt), position = position_dodge(width = 0.75))+
+  labs(y = NULL)
+
+```
+There is one point that is much higher than the rest, in the `Funcke_grain` cover crop treatment, which may be a little cause for concern...we're going to make another dataset without it. 
+
+```{r}
+dat2 <- dat %>%
+  filter(totseeds < 700)
+
+```
+Let's also plot the distribution of totseeds. It is pretty skewed. If we log-tranform the raw data we get a much nicer distribution and our large values are much less far apart than are small values. 
+
+```{r, echo = FALSE}
+p1 <- 
+  dat2 %>%
+  ggplot(aes(totseeds)) +
+  geom_histogram(binwidth = 40, fill = "white", color = "black")+
+  ggtitle("Raw Data")+
+   theme(plot.title.position = "plot")
+
+p2 <- 
+  dat2 %>%
+  ggplot(aes(log(totseeds)))+
+  geom_histogram(binwidth = 0.5, fill = "white", color = "black")+
+  ggtitle("Log-transformed Data")+
+  theme(plot.title.position = "plot")
+
+p1 + p2
+
+```
+
+Ok now it's time to start fitting out models. Given the graphs above, our first thought was to run a lmer with a log-transformed response.
+
+(Here we are also examining whether there is any interaction between `site_sys` and `cc_trt`, and looks like there is.) 
+
+```{r}
+
+m1 <- lmer(log(totseeds) ~ site_sys * cc_trt + (1|blockID), data = dat2)
+m2 <- lmer(log(totseeds) ~ site_sys + cc_trt + (1|blockID), data = dat2)
+
+anova(m1, m2) # keep interaction
+```
+
+Before we dive into the summary values and statistical reporting lets check out our diagnostic plots:
+
+```{r}
+resid_panel(m1)
+```
+
+This doesn't look bad, but perhaps it could look better...
+
+To stick within the normal-distribution framework we could also try another transformation. The square-root transformation can also work for count data. 
+
+```{r}
+dat %>%
+  ggplot(aes(sqrt(totseeds)))+
+  geom_histogram(binwidth = 1, fill = "white", color = "black")+
+  ggtitle("Sqrt-transformed Data")+
+  theme(plot.title.position = "plot")
+```
+
+The data still look a little skewed, but that's ok...
+
+```{r}
+m1b <- lmer(sqrt(totseeds) ~ site_sys * cc_trt + (1|blockID), dat2)
+resid_panel(m1b)
+```
+
+These diagnostic plots look pretty similar, although the square root transformation might be a little better...
+
+Since we are working with count data, however, we have other options in the generalized linear model catagory. The natural first option is a Poisson distribution with a log link function
+
+```{r}
+p1a <- glmer(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2, 
+            family = poisson(link = "log"))
+```
+
+This model converged, awesome! But we should always check for overdispersion our Poisson models, which is when the variance >> mean. We are using the [performance](https://easystats.github.io/performance/) package for this since it makes checking for overdispersion really easy. 
+
+```{r}
+performance::check_overdispersion(p1a) # overdispersion!
+```
+Argh, it's overdispered.
+
+Now we have two options if we want to continue down the glmer path. We could:
+
+1. Add an observation-level random effect to our Poisson model
+
+2. Switch to a negative binomial model
+
+Let's start with option 1 and add an oberservation-level random effect. 
+
+```{r}
+dat2 <- 
+  dat2 %>%
+  mutate(obs_id = paste("obs", 1:45, sep = "_"))
+
+p1b <- glmer(totseeds ~ site_sys*cc_trt + (1|blockID) + (1|obs_id), data = dat2, 
+            family = poisson(link = "log"))  
+performance::check_overdispersion(p1b)
+```
+
+Adding our observation-level random effect fixed out overdispersion problem. Great! Let's look at the diagnostic plots now:
+```{r}
+resid_panel(p1b) 
+```
+
+What we're really interested in here is the first plot, the Residual Plot. Since normality isn't an assumption of generalized linear models, we don't need to worry about irregularies in the Q-Q plot. The model fits the data really well as the obserations get larger, but there is a lot more variance in the residuals in our smaller values. This gives us a little pause...
+
+Let's also try option 2 and fit the data to a negative-binomial model
+
+```{r}
+# option 2, negative binomial....
+g1a <- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2)
+
+resid_panel(g1a)
+summary(g1a)
+
+# now with the outlier - unpsurprisingly Funcke isn't sig anymore
+g1b <- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat)
+
+resid_panel(g1b)
+summary(g1b)
+```
+
+This has a similar problem to the Poisson model, our residuals don't have equal variance across our predicted values... 
+
+Looks like we are back to our transformations of the response variable and usually regular linear mixed effects model. 
+
+Our decision boils down to:
+
+* The square root transformation has slightly better diagnostic plots, but is harder to interpret.
+* The log transformation has slightly worse diagnostic plots, but means and contrasts can be readily interpretable and back-transformed to the original scale. 
+
+If one is more interested in the effect sizes among treatments then it make sense to use the log-transformation so that those effect sizes can be interpretted in a meaningful way. On the other hand, if effect sizes aren't super important that square root transformation seems like a better option.  
