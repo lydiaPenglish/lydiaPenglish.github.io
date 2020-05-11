@@ -39,7 +39,7 @@ We're using data from [this project](/project/pfiweeds/). In very breif terms we
 
 `remotes::install_github("vanichols/PFIweeds2020")`
 
-The raw data are in `pfi_ghobsraw`. These are observations from soil which we incubating in a greenhouse to grow weeds. We don't need to clean the data very much, but we will do a couple steps to consolidate observations. 
+The raw data are in `pfi_ghobsraw`. These are observations from soil which Gina incubated in a greenhouse to grow weeds. We don't need to clean the data very much, but we will do a couple steps to consolidate observations. 
 
 A couple other notes on the experimental layout:
 
@@ -154,7 +154,7 @@ resid_panel(m1b)
 
 These diagnostic plots look pretty similar, although the square root transformation might be a little better...
 
-Since we are working with count data, however, we have other options in the generalized linear model catagory. The natural first option is a Poisson distribution with a log link function
+Since we are working with count data, however, we have other options in our stats toolbox - generalized linear models. The natural first option is a Poisson distribution with a log link function:
 
 ```{r}
 p1a <- glmer(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2, 
@@ -164,9 +164,19 @@ p1a <- glmer(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2,
 This model converged, awesome! But we should always check for overdispersion our Poisson models, which is when the variance >> mean. We are using the [performance](https://easystats.github.io/performance/) package for this since it makes checking for overdispersion really easy. 
 
 ```{r}
-performance::check_overdispersion(p1a) # overdispersion!
+performance::check_overdispersion(p1a) 
+
 ```
-Argh, it's overdispered.
+
+
+Just as an aside, you can also calcuate dispersion by hand by like:
+```{r}
+1 - pchisq(deviance(p1a), df.residual(p1a)) 
+r <- resid(p1a,type="pearson")
+1-pchisq(sum(r^2),df.residual(p1a))
+
+```
+Either way our p-value is very close to 0, so it looks like our data are overdispersed.
 
 Now we have two options if we want to continue down the glmer path. We could:
 
@@ -182,16 +192,13 @@ dat2 <-
   mutate(obs_id = paste("obs", 1:45, sep = "_"))
 
 p1b <- glmer(totseeds ~ site_sys*cc_trt + (1|blockID) + (1|obs_id), data = dat2, 
-            family = poisson(link = "log"))  
+            family = poisson(link = "log"))
+
 performance::check_overdispersion(p1b)
+
 ```
 
-Adding our observation-level random effect fixed out overdispersion problem. Great! Let's look at the diagnostic plots now:
-```{r}
-resid_panel(p1b) 
-```
-
-What we're really interested in here is the first plot, the Residual Plot. Since normality isn't an assumption of generalized linear models, we don't need to worry about irregularies in the Q-Q plot. The model fits the data really well as the obserations get larger, but there is a lot more variance in the residuals in our smaller values. This gives us a little pause...
+Adding our observation-level random effect fixed out overdispersion problem. Great! 
 
 Let's also try option 2 and fit the data to a negative-binomial model
 
@@ -199,23 +206,18 @@ Let's also try option 2 and fit the data to a negative-binomial model
 # option 2, negative binomial....
 g1a <- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2)
 
-resid_panel(g1a)
-summary(g1a)
-
-# now with the outlier - unpsurprisingly Funcke isn't sig anymore
-g1b <- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat)
-
-resid_panel(g1b)
-summary(g1b)
 ```
 
-This has a similar problem to the Poisson model, our residuals don't have equal variance across our predicted values... 
+Also converges, great! 
 
-Looks like we are back to our transformations of the response variable and usually regular linear mixed effects model. 
+Let's now compare our summary values:
 
-Our decision boils down to:
+```{r}
+summary(p1b)
+```
 
-* The square root transformation has slightly better diagnostic plots, but is harder to interpret.
-* The log transformation has slightly worse diagnostic plots, but means and contrasts can be readily interpretable and back-transformed to the original scale. 
+```{r}
+summary(g1a)
+```
 
-If one is more interested in the effect sizes among treatments then it make sense to use the log-transformation so that those effect sizes can be interpretted in a meaningful way. On the other hand, if effect sizes aren't super important that square root transformation seems like a better option.  
+Both these models have very similar AICs, and they also have very similar p-values which is reassuring, since our interpretation of the data won't change depending on the model we choose. 
