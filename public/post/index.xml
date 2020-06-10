@@ -20,10 +20,12 @@
       <description>
 
 
-&lt;p&gt;This post explores the often agonizing decision-making process behind model selection. We will be using a real-life example, meaning this is an actual decision process that Gina Nichols and I waded through. The hope is that others who may struggle with the same sorts of basic stats decisions can take solace in our process.&lt;/p&gt;
-&lt;p&gt;We’re using data from &lt;a href=&#34;/project/pfiweeds/&#34;&gt;this project&lt;/a&gt;. In very breif terms we’re interested in the effect of cover crops on the weed seedbank. The data can be accessed from Gina Nichol’s Github repository like so:&lt;/p&gt;
+&lt;p&gt;This post explores the often agonizing decision-making process behind model selection. At least as an indecisive non-statistician I find the process to be slightly agaonizing. Let’s just emphasize something again - I’m not a statistician and am continually learning! This post will probably be most helpful for other non-statisticians although I’m happy to take constructive feedback from anyone.&lt;/p&gt;
+&lt;p&gt;I will be using a real-life example, meaning this is an actual decision process that Gina Nichols and I waded through as we prepped a manuscript. The hope is that others who may struggle with the same sorts of basic stats decisions can take solace in this process.&lt;/p&gt;
+&lt;p&gt;Gina and I are using data from &lt;a href=&#34;/project/pfiweeds/&#34;&gt;this project&lt;/a&gt;. In very breif terms we’re interested in the effect of cover crops on the weed seedbank of corn/soybean cropping systems. While cover crops are oft cited as a practice than can help decrease erosion or nutrient export, we are curious if using cover crops can help decrease the weed seedbank. This is especially important because of the increasing prevalence of herbicide resistent weeds across the Midwest (and beyond).&lt;/p&gt;
+&lt;p&gt;The data can be accessed from Gina Nichol’s Github repository like so:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;remotes::install_github(&#34;vanichols/PFIweeds2020&#34;)&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;The raw data are in &lt;code&gt;pfi_ghobsraw&lt;/code&gt;. These are observations from soil which we incubating in a greenhouse to grow weeds. We don’t need to clean the data very much, but we will do a couple steps to consolidate observations.&lt;/p&gt;
+&lt;p&gt;The raw data are in &lt;code&gt;pfi_ghobsraw&lt;/code&gt;. These are observations from soil which Gina incubated in a greenhouse to grow weeds. We don’t need to clean the data very much, but we will do a couple steps to consolidate observations.&lt;/p&gt;
 &lt;p&gt;A couple other notes on the experimental layout:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;There are four &lt;code&gt;site_sys&lt;/code&gt;, which encompass three different farms and two different cropping systems&lt;/p&gt;
@@ -34,7 +36,7 @@
 &lt;li&gt;Stout Grain&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;&lt;em&gt;FYI: Grain systems employ a two year rotation of corn and soybeans and sell both crops off as feed grain, ethanol grain, etc. The silage system also has a 2 year rotation of corn and soybeans, but in the corn year the crop is harvested earlier (while it’s still green) and sold as silage (fermented cattle feed)&lt;/em&gt;&lt;/p&gt;&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;There are two cover crop treatments (&lt;code&gt;cc_trt&lt;/code&gt;): &lt;code&gt;none&lt;/code&gt; and &lt;code&gt;cc_rye&lt;/code&gt; (rye)&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;There are two cover crop treatments &lt;code&gt;cc_trt&lt;/code&gt; = &lt;code&gt;none&lt;/code&gt; and &lt;code&gt;cc_rye&lt;/code&gt;= &lt;code&gt;rye&lt;/code&gt;&lt;/p&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;There are 4-5 blocks per treatment, which will our random effect.&lt;/p&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(PFIweeds2020)
@@ -73,12 +75,11 @@ There is one point that is much higher than the rest, in the &lt;code&gt;Funcke_
 &lt;p&gt;Let’s also plot the distribution of totseeds. It is pretty skewed. If we log-tranform the raw data we get a much nicer distribution and our large values are much less far apart than are small values.&lt;/p&gt;
 &lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;Ok now it’s time to start fitting out models. Given the graphs above, our first thought was to run a lmer with a log-transformed response.&lt;/p&gt;
-&lt;p&gt;(Here we are also examining whether there is any interaction between &lt;code&gt;site_sys&lt;/code&gt; and &lt;code&gt;cc_trt&lt;/code&gt;, and looks like there is.)&lt;/p&gt;
+&lt;p&gt;(Here we are also examining whether there is any interaction between &lt;code&gt;site_sys&lt;/code&gt; and &lt;code&gt;cc_trt&lt;/code&gt;, and looks like there is. We are therefore going to keep the interaction)&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;m1 &amp;lt;- lmer(log(totseeds) ~ site_sys * cc_trt + (1|blockID), data = dat2)
 m2 &amp;lt;- lmer(log(totseeds) ~ site_sys + cc_trt + (1|blockID), data = dat2)
 
 anova(m1, m2) # keep interaction&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## refitting model(s) with ML (instead of REML)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## Data: dat2
 ## Models:
 ## m2: log(totseeds) ~ site_sys + cc_trt + (1 | blockID)
@@ -103,19 +104,25 @@ anova(m1, m2) # keep interaction&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;m1b &amp;lt;- lmer(sqrt(totseeds) ~ site_sys * cc_trt + (1|blockID), dat2)
 resid_panel(m1b)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;These diagnostic plots look pretty similar, although the square root transformation might be a little better…&lt;/p&gt;
-&lt;p&gt;Since we are working with count data, however, we have other options in the generalized linear model catagory. The natural first option is a Poisson distribution with a log link function&lt;/p&gt;
+&lt;p&gt;These diagnostic plots look pretty similar, although the square root transformation might be a little better. The problem with the square root transformation is that it renders the data pretty uninterpretable.&lt;/p&gt;
+&lt;p&gt;Since we are working with count data, however, we have other options in our stats toolbox - generalized linear models. The natural first option is a Poisson distribution with a log link function:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;p1a &amp;lt;- glmer(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2, 
             family = poisson(link = &amp;quot;log&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This model converged, awesome! But we should always check for overdispersion our Poisson models, which is when the variance &amp;gt;&amp;gt; mean. We are using the &lt;a href=&#34;https://easystats.github.io/performance/&#34;&gt;performance&lt;/a&gt; package for this since it makes checking for overdispersion really easy.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;performance::check_overdispersion(p1a) # overdispersion!&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This model converged, awesome! But we should always check for overdispersion in our Poisson models, which is when the variance &amp;gt;&amp;gt; mean. We are using the &lt;a href=&#34;https://easystats.github.io/performance/&#34;&gt;performance&lt;/a&gt; package for this since it makes checking for overdispersion really easy.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;performance::check_overdispersion(p1a) &lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## # Overdispersion test
 ## 
 ##        dispersion ratio =   8.001
 ##   Pearson&amp;#39;s Chi-Squared = 288.047
 ##                 p-value = &amp;lt; 0.001&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## Overdispersion detected.&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Argh, it’s overdispered.&lt;/p&gt;
+&lt;p&gt;Just as an aside, you can also calcuate dispersion by hand by like:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;1 - pchisq(deviance(p1a), df.residual(p1a)) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;r &amp;lt;- resid(p1a,type=&amp;quot;pearson&amp;quot;)
+1-pchisq(sum(r^2),df.residual(p1a))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 0&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Either way our p-value is very close to 0, so it looks like our data are overdispersed.&lt;/p&gt;
 &lt;p&gt;Now we have two options if we want to continue down the glmer path. We could:&lt;/p&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;&lt;p&gt;Add an observation-level random effect to our Poisson model&lt;/p&gt;&lt;/li&gt;
@@ -127,24 +134,69 @@ resid_panel(m1b)&lt;/code&gt;&lt;/pre&gt;
   mutate(obs_id = paste(&amp;quot;obs&amp;quot;, 1:45, sep = &amp;quot;_&amp;quot;))
 
 p1b &amp;lt;- glmer(totseeds ~ site_sys*cc_trt + (1|blockID) + (1|obs_id), data = dat2, 
-            family = poisson(link = &amp;quot;log&amp;quot;))  
-performance::check_overdispersion(p1b)&lt;/code&gt;&lt;/pre&gt;
+            family = poisson(link = &amp;quot;log&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;performance::check_overdispersion(p1b)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## # Overdispersion test
 ## 
 ##        dispersion ratio = 0.145
 ##   Pearson&amp;#39;s Chi-Squared = 5.065
 ##                 p-value =     1&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## No overdispersion detected.&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Adding our observation-level random effect fixed out overdispersion problem. Great! Let’s look at the diagnostic plots now:&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;resid_panel(p1b) &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-12-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;What we’re really interested in here is the first plot, the Residual Plot. Since normality isn’t an assumption of generalized linear models, we don’t need to worry about irregularies in the Q-Q plot. The model fits the data really well as the obserations get larger, but there is a lot more variance in the residuals in our smaller values. This gives us a little pause…&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# or 
+
+1 - pchisq(deviance(p1b), df.residual(p1b)) &lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 1&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;r &amp;lt;- resid(p1b,type=&amp;quot;pearson&amp;quot;)
+1-pchisq(sum(r^2),df.residual(p1b))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## [1] 1&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Adding our observation-level random effect fixed out overdispersion problem. Great!&lt;/p&gt;
 &lt;p&gt;Let’s also try option 2 and fit the data to a negative-binomial model&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# option 2, negative binomial....
-g1a &amp;lt;- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2)
-
-resid_panel(g1a)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-13-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+g1a &amp;lt;- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Also converges, great!&lt;/p&gt;
+&lt;p&gt;Let’s now compare our summary values:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(p1b)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Generalized linear mixed model fit by maximum likelihood (Laplace
+##   Approximation) [glmerMod]
+##  Family: poisson  ( log )
+## Formula: totseeds ~ site_sys * cc_trt + (1 | blockID) + (1 | obs_id)
+##    Data: dat2
+## 
+##      AIC      BIC   logLik deviance df.resid 
+##    445.2    463.2   -212.6    425.2       35 
+## 
+## Scaled residuals: 
+##      Min       1Q   Median       3Q      Max 
+## -0.95403 -0.21021 -0.00504  0.16007  0.43396 
+## 
+## Random effects:
+##  Groups  Name        Variance Std.Dev.
+##  obs_id  (Intercept) 0.2892   0.5378  
+##  blockID (Intercept) 0.1755   0.4189  
+## Number of obs: 45, groups:  obs_id, 45; blockID, 18
+## 
+## Fixed effects:
+##                                 Estimate Std. Error z value Pr(&amp;gt;|z|)    
+## (Intercept)                      3.28902    0.22578  14.567  &amp;lt; 2e-16 ***
+## site_sysBoyd_silage              0.06262    0.32769   0.191  0.84846    
+## site_sysFuncke_grain             2.01960    0.44965   4.492 7.07e-06 ***
+## site_sysStout_grain             -0.38915    0.42852  -0.908  0.36381    
+## cc_trtnone                      -0.31789    0.26083  -1.219  0.22293    
+## site_sysBoyd_silage:cc_trtnone   1.26342    0.44048   2.868  0.00413 ** 
+## site_sysFuncke_grain:cc_trtnone  1.02944    0.49836   2.066  0.03886 *  
+## site_sysStout_grain:cc_trtnone   0.74297    0.48961   1.517  0.12915    
+## ---
+## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
+## 
+## Correlation of Fixed Effects:
+##             (Intr) st_sB_ st_sF_ st_sS_ cc_trt s_B_:_ s_F_:_
+## st_sysByd_s -0.450                                          
+## st_sysFnck_ -0.502  0.225                                   
+## st_sysStt_g -0.525  0.239  0.263                            
+## cc_trtnone  -0.565  0.392  0.284  0.298                     
+## st_sysBy_:_  0.335 -0.683 -0.168 -0.176 -0.592              
+## st_sysFn_:_  0.296 -0.204 -0.628 -0.155 -0.524  0.310       
+## st_sysSt_:_  0.301 -0.210 -0.151 -0.580 -0.533  0.316  0.279&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(g1a)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## Generalized linear mixed model fit by maximum likelihood (Laplace
 ##   Approximation) [glmerMod]
@@ -186,60 +238,15 @@ resid_panel(g1a)&lt;/code&gt;&lt;/pre&gt;
 ## st_sysBy_:_  0.344 -0.694 -0.176 -0.180 -0.609              
 ## st_sysFn_:_  0.307 -0.237 -0.625 -0.158 -0.533  0.324       
 ## st_sysSt_:_  0.316 -0.243 -0.162 -0.564 -0.547  0.333  0.292&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# now with the outlier - unpsurprisingly Funcke isn&amp;#39;t sig anymore
-g1b &amp;lt;- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat)
-
-resid_panel(g1b)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/weed_model_selection/index_files/figure-html/unnamed-chunk-13-2.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;summary(g1b)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## Generalized linear mixed model fit by maximum likelihood (Laplace
-##   Approximation) [glmerMod]
-##  Family: Negative Binomial(3.5535)  ( log )
-## Formula: totseeds ~ site_sys * cc_trt + (1 | blockID)
-##    Data: dat
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;performance::compare_performance(p1b, g1a)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # Comparison of Model Performance Indices
 ## 
-##      AIC      BIC   logLik deviance df.resid 
-##    464.0    482.2   -222.0    444.0       36 
-## 
-## Scaled residuals: 
-##     Min      1Q  Median      3Q     Max 
-## -1.2552 -0.6903 -0.1392  0.4758  1.9132 
-## 
-## Random effects:
-##  Groups  Name        Variance Std.Dev.
-##  blockID (Intercept) 0.2049   0.4526  
-## Number of obs: 46, groups:  blockID, 18
-## 
-## Fixed effects:
-##                                 Estimate Std. Error z value Pr(&amp;gt;|z|)    
-## (Intercept)                       3.4343     0.2356  14.575  &amp;lt; 2e-16 ***
-## site_sysBoyd_silage              -0.0162     0.3336  -0.049  0.96128    
-## site_sysFuncke_grain              2.3250     0.4259   5.459  4.8e-08 ***
-## site_sysStout_grain              -0.4587     0.4384  -1.046  0.29547    
-## cc_trtnone                       -0.3255     0.2648  -1.229  0.21901    
-## site_sysBoyd_silage:cc_trtnone    1.3514     0.4437   3.046  0.00232 ** 
-## site_sysFuncke_grain:cc_trtnone   0.6034     0.4690   1.286  0.19828    
-## site_sysStout_grain:cc_trtnone    0.7706     0.4854   1.587  0.11242    
-## ---
-## Signif. codes:  0 &amp;#39;***&amp;#39; 0.001 &amp;#39;**&amp;#39; 0.01 &amp;#39;*&amp;#39; 0.05 &amp;#39;.&amp;#39; 0.1 &amp;#39; &amp;#39; 1
-## 
-## Correlation of Fixed Effects:
-##             (Intr) st_sB_ st_sF_ st_sS_ cc_trt s_B_:_ s_F_:_
-## st_sysByd_s -0.458                                          
-## st_sysFnck_ -0.543  0.253                                   
-## st_sysStt_g -0.521  0.246  0.291                            
-## cc_trtnone  -0.566  0.447  0.307  0.295                     
-## st_sysBy_:_  0.339 -0.693 -0.185 -0.178 -0.609              
-## st_sysFn_:_  0.308 -0.252 -0.559 -0.169 -0.559  0.341       
-## st_sysSt_:_  0.311 -0.244 -0.168 -0.557 -0.547  0.333  0.304&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This has a similar problem to the Poisson model, our residuals don’t have equal variance across our predicted values…&lt;/p&gt;
-&lt;p&gt;Looks like we are back to our transformations of the response variable and usually regular linear mixed effects model.&lt;/p&gt;
-&lt;p&gt;Our decision boils down to:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The square root transformation has slightly better diagnostic plots, but is harder to interpret.&lt;/li&gt;
-&lt;li&gt;The log transformation has slightly worse diagnostic plots, but means and contrasts can be readily interpretable and back-transformed to the original scale.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;If one is more interested in the effect sizes among treatments then it make sense to use the log-transformation so that those effect sizes can be interpretted in a meaningful way. On the other hand, if effect sizes aren’t super important that square root transformation seems like a better option.&lt;/p&gt;
+## Model |     Type |    AIC |    BIC | R2_conditional | R2_marginal |  ICC | RMSE | SCORE_LOG | SCORE_SPHERICAL |   BF
+## --------------------------------------------------------------------------------------------------------------------
+## p1b   | glmerMod | 445.17 | 463.24 |           0.78 |        0.66 | 0.36 | 0.35 |     -2.82 |            0.14 |     
+## g1a   | glmerMod | 445.44 | 463.50 |           0.81 |        0.67 | 0.42 | 0.90 |     -4.49 |            0.12 | 0.88&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Both these models have very similar AICs, and they also have very similar p-values which is reassuring, since our interpretation of the data won’t change depending on the model we choose.&lt;/p&gt;
+&lt;p&gt;In the end we decided to go with the Poisson-observation-level-random-effect model (named here &lt;code&gt;p1b&lt;/code&gt;). If only because it is a little more straightforward than negative binomial models.&lt;/p&gt;
 </description>
     </item>
     

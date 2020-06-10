@@ -25,7 +25,8 @@ I've been inspired by other R packages that have created color palettes [based o
 For all the botany nerds out there I've decided to grab colors from two species in 4 different families. There are obviously WAY too many beautiful flowers to choose from. This is merely a starting point. 
 
 ```{r setup, include = FALSE}
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
 library(jpeg)
 library(grid)
 library(gridExtra)

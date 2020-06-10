@@ -18,6 +18,11 @@ weight = 30
   album = "gallery"
   image = "andge.jpg"
   caption = "Big bluestem or turkey foot, see the three pronged flower! (Andropogen gerardii)" 
+  
+[[gallery_item]]
+  album = "gallery"
+  image = "aquca.JPG"
+  caption = "Wild Columbine (Aquilegia canadensis)"   
 
 [[gallery_item]]
 album = "gallery"

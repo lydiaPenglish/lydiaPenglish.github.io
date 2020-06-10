@@ -13,7 +13,7 @@ subtitle: ''
 summary: ''
 authors: []
 lastmod: '2020-04-23T14:27:24-05:00'
-draft: true
+draft: false
 featured: no
 image:
   caption: ''
@@ -33,9 +33,13 @@ library(lmerTest)
 library(performance)
 ```
 
-This post explores the often agonizing decision-making process behind model selection. We will be using a real-life example, meaning this is an actual decision process that Gina Nichols and I waded through. The hope is that others who may struggle with the same sorts of basic stats decisions can take solace in our process.   
+This post explores the often agonizing decision-making process behind model selection. At least as an indecisive non-statistician I find the process to be slightly agaonizing. Let's just emphasize something again - I'm not a statistician and am continually learning! This post will probably be most helpful for other non-statisticians although I'm happy to take constructive feedback from anyone.  
 
-We're using data from [this project](/project/pfiweeds/). In very breif terms we're interested in the effect of cover crops on the weed seedbank. The data can be accessed from Gina Nichol's Github repository like so:
+I will be using a real-life example, meaning this is an actual decision process that Gina Nichols and I waded through as we prepped a manuscript. The hope is that others who may struggle with the same sorts of basic stats decisions can take solace in this process.   
+
+Gina and I are using data from [this project](/project/pfiweeds/). In very breif terms we're interested in the effect of cover crops on the weed seedbank of corn/soybean cropping systems. While cover crops are oft cited as a practice than can help decrease erosion or nutrient export, we are curious if using cover crops can help decrease the weed seedbank. This is especially important because of the increasing prevalence of herbicide resistent weeds across the Midwest (and beyond). 
+
+The data can be accessed from Gina Nichol's Github repository like so:
 
 `remotes::install_github("vanichols/PFIweeds2020")`
 
@@ -49,9 +53,10 @@ A couple other notes on the experimental layout:
   + Funcke Grain
   + Stout Grain
   
+  
   _FYI: Grain systems employ a two year rotation of corn and soybeans and sell both crops off as feed grain, ethanol grain, etc. The silage system also has a 2 year rotation of corn and soybeans, but in the corn year the crop is harvested earlier (while it's still green) and sold as silage (fermented cattle feed)_
   
-* There are two cover crop treatments (`cc_trt`): `none` and `cc_rye` (rye)
+* There are two cover crop treatments `cc_trt` = `none` and `cc_rye`= `rye`
 * There are 4-5 blocks per treatment, which will our random effect. 
 
 ```{r}
@@ -117,9 +122,9 @@ p1 + p2
 
 Ok now it's time to start fitting out models. Given the graphs above, our first thought was to run a lmer with a log-transformed response.
 
-(Here we are also examining whether there is any interaction between `site_sys` and `cc_trt`, and looks like there is.) 
+(Here we are also examining whether there is any interaction between `site_sys` and `cc_trt`, and looks like there is. We are therefore going to keep the interaction) 
 
-```{r}
+```{r, message = FALSE}
 
 m1 <- lmer(log(totseeds) ~ site_sys * cc_trt + (1|blockID), data = dat2)
 m2 <- lmer(log(totseeds) ~ site_sys + cc_trt + (1|blockID), data = dat2)
@@ -152,7 +157,7 @@ m1b <- lmer(sqrt(totseeds) ~ site_sys * cc_trt + (1|blockID), dat2)
 resid_panel(m1b)
 ```
 
-These diagnostic plots look pretty similar, although the square root transformation might be a little better...
+These diagnostic plots look pretty similar, although the square root transformation might be a little better. The problem with the square root transformation is that it renders the data pretty uninterpretable. 
 
 Since we are working with count data, however, we have other options in our stats toolbox - generalized linear models. The natural first option is a Poisson distribution with a log link function:
 
@@ -161,7 +166,7 @@ p1a <- glmer(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2,
             family = poisson(link = "log"))
 ```
 
-This model converged, awesome! But we should always check for overdispersion our Poisson models, which is when the variance >> mean. We are using the [performance](https://easystats.github.io/performance/) package for this since it makes checking for overdispersion really easy. 
+This model converged, awesome! But we should always check for overdispersion in our Poisson models, which is when the variance >> mean. We are using the [performance](https://easystats.github.io/performance/) package for this since it makes checking for overdispersion really easy. 
 
 ```{r}
 performance::check_overdispersion(p1a) 
@@ -193,9 +198,16 @@ dat2 <-
 
 p1b <- glmer(totseeds ~ site_sys*cc_trt + (1|blockID) + (1|obs_id), data = dat2, 
             family = poisson(link = "log"))
+```
 
+```{r}
 performance::check_overdispersion(p1b)
 
+# or 
+
+1 - pchisq(deviance(p1b), df.residual(p1b)) 
+r <- resid(p1b,type="pearson")
+1-pchisq(sum(r^2),df.residual(p1b))
 ```
 
 Adding our observation-level random effect fixed out overdispersion problem. Great! 
@@ -220,4 +232,10 @@ summary(p1b)
 summary(g1a)
 ```
 
+```{r}
+performance::compare_performance(p1b, g1a)
+```
+
 Both these models have very similar AICs, and they also have very similar p-values which is reassuring, since our interpretation of the data won't change depending on the model we choose. 
+
+In the end we decided to go with the Poisson-observation-level-random-effect model (named here `p1b`). If only because it is a little more straightforward than negative binomial models.
