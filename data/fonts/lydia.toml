@@ -2,7 +2,7 @@
 name = "lydia"
 
 # Optional Google font URL
-google_fonts = "Fira+Sans:300, 400, 500|Open+Sans:300,400|Roboto+Mono"
+google_fonts = "Fira+Sans:300, 400, 500|Open+Sans:300,400|Roboto+Mono|Lato"
 
 # Font families
 heading_font = "Fira Sans"

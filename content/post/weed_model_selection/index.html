@@ -24,27 +24,54 @@ projects: []
 
 
 
-<p>This post explores the often agonizing decision-making process behind model selection. At least as an indecisive non-statistician I find the process to be slightly agaonizing. Let’s just emphasize something again - I’m not a statistician and am continually learning! This post will probably be most helpful for other non-statisticians although I’m happy to take constructive feedback from anyone.</p>
-<p>I will be using a real-life example, meaning this is an actual decision process that Gina Nichols and I waded through as we prepped a manuscript. The hope is that others who may struggle with the same sorts of basic stats decisions can take solace in this process.</p>
-<p>Gina and I are using data from <a href="/project/pfiweeds/">this project</a>. In very breif terms we’re interested in the effect of cover crops on the weed seedbank of corn/soybean cropping systems. While cover crops are oft cited as a practice than can help decrease erosion or nutrient export, we are curious if using cover crops can help decrease the weed seedbank. This is especially important because of the increasing prevalence of herbicide resistent weeds across the Midwest (and beyond).</p>
-<p>The data can be accessed from Gina Nichol’s Github repository like so:</p>
+<div id="introduction" class="section level3">
+<h3>Introduction</h3>
+<p>Let’s talk about model selection! As a non-statistician, I find the process of choosing an appropriate statistical model to be slightly intimidating, even agonizing at times. In the hopes of demystifying this process for other non-statisticians, this post attempts to walk you through how <a href="https://vanichols.netlify.app/">Gina Nichols</a> and I decided on the appropriate models and stats for an upcoming manuscript. Constructive feedback is always welcome.</p>
+<p>Gina and I are using data from <a href="/project/pfiweeds/">this project</a>. In very brief terms we’re interested in the effect of cover crops on the weed seed bank of corn/soybean cropping systems. While cover crops are oft cited as a practice than can help decrease erosion or nutrient export from agricultural fields, we are curious if using cover crops can help decrease the weed seed bank. This is especially important because of the increasing prevalence of herbicide resistant weeds across the Midwest (and beyond).</p>
+</div>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<p>The data can be accessed from Gina Nichols’ Github repository like so:</p>
 <p><code>remotes::install_github("vanichols/PFIweeds2020")</code></p>
-<p>The raw data are in <code>pfi_ghobsraw</code>. These are observations from soil which Gina incubated in a greenhouse to grow weeds. We don’t need to clean the data very much, but we will do a couple steps to consolidate observations.</p>
+<p>The raw data are in the data-frame <code>pfi_ghobsraw</code>. These are observations from soil collected at each site which Gina then incubated in a greenhouse to grow weeds. We don’t need to clean the data very much, but we will do a couple steps to consolidate observations.</p>
 <p>A couple other notes on the experimental layout:</p>
 <ul>
-<li><p>There are four <code>site_sys</code>, which encompass three different farms and two different cropping systems</p>
+<li>There are four <code>site_sys</code>, which encompass three different farms and two different cropping systems
 <ul>
 <li>Boyd Grain</li>
 <li>Boyd Silage</li>
 <li>Funcke Grain</li>
 <li>Stout Grain</li>
+</ul></li>
 </ul>
-<p><em>FYI: Grain systems employ a two year rotation of corn and soybeans and sell both crops off as feed grain, ethanol grain, etc. The silage system also has a 2 year rotation of corn and soybeans, but in the corn year the crop is harvested earlier (while it’s still green) and sold as silage (fermented cattle feed)</em></p></li>
-<li><p>There are two cover crop treatments <code>cc_trt</code> = <code>none</code> and <code>cc_rye</code>= <code>rye</code></p></li>
-<li><p>There are 4-5 blocks per treatment, which will our random effect.</p></li>
+<p><br>
+<em>FYI: Grain systems employ a two year rotation of corn and soybeans and sell both crops off as feed grain, ethanol grain, etc. The silage system also has a 2 year rotation of corn and soybeans, but in the corn year the crop is harvested earlier (while it’s still green) and sold as silage (fermented cattle feed)</em></p>
+<ul>
+<li>There are two cover crop treatments <code>cc_trt</code> = <code>none</code> and <code>cc_rye</code>= <code>rye</code></li>
+<li>There are 4-5 blocks per treatment, which will be our random effect.</li>
 </ul>
-<pre class="r"><code>library(PFIweeds2020)
-data(&quot;pfi_ghobsraw&quot;)
+</div>
+<div id="library-loading-initial-data-visualization" class="section level3">
+<h3>Library loading &amp; initial data visualization</h3>
+<pre class="r"><code>library(dplyr)
+library(lme4)
+library(lmerTest)
+library(ggResidpanel)
+library(performance)
+library(ggplot2)
+library(patchwork)
+library(PFIweeds2020)
+theme_set(theme_bw())</code></pre>
+<p>A couple notes about the libraries we used:</p>
+<ul>
+<li>We are fitting models using <a href="https://arxiv.org/abs/1406.5823">lme4</a> and <a href="https://backend.orbit.dtu.dk/ws/portalfiles/portal/140635100/lmerTestJStatSoft2017.pdf">lmerTest</a> packages.</li>
+<li>We are using two different packages to examine model fit/diagnostics.
+<ul>
+<li><a href="https://CRAN.R-project.org/package=ggResidpanel">ggResidpanel</a> has much improved versions of model diagnostic plots. Would highly recommend!</li>
+<li><a href="https://CRAN.R-project.org/package=performance">performance</a> also has improved model diagnostic plots as well as simple ways of calculating R<sup>2</sup> for fixed &amp; random effects and checking for over-dispersion.</li>
+</ul></li>
+</ul>
+<pre class="r"><code>data(&quot;pfi_ghobsraw&quot;)
 
 # Quick data cleaning
 dat &lt;- 
@@ -73,13 +100,16 @@ head(dat)</code></pre>
 <p>We are interested in <code>totseeds</code> (total seeds) as a response variable, which is an integer value. In all of our mixed models our fixed effects are <code>site_sys</code> and <code>cc_trt</code> and our random effect is <code>blockID</code>.</p>
 <p>But before we get to modeling, let’s just quickly look at the data and see what we are working with.</p>
 <p><img src="/post/weed_model_selection/index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
-There is one point that is much higher than the rest, in the <code>Funcke_grain</code> cover crop treatment, which may be a little cause for concern…we’re going to make another dataset without it.</p>
+There is one point that is much higher than the rest, in the <code>Funcke_grain</code> cover crop treatment, which may be a little cause for concern…we’re going to make another data-set without it.</p>
 <pre class="r"><code>dat2 &lt;- dat %&gt;%
   filter(totseeds &lt; 700)</code></pre>
-<p>Let’s also plot the distribution of totseeds. It is pretty skewed. If we log-tranform the raw data we get a much nicer distribution and our large values are much less far apart than are small values.</p>
+<p>Let’s also plot the distribution of <code>totseeds</code>. It is pretty skewed. If we log-transform the raw data we get a much nicer distribution and our large values are much less far apart than our small values.</p>
 <p><img src="/post/weed_model_selection/index_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>Ok now it’s time to start fitting out models. Given the graphs above, our first thought was to run a lmer with a log-transformed response.</p>
-<p>(Here we are also examining whether there is any interaction between <code>site_sys</code> and <code>cc_trt</code>, and looks like there is. We are therefore going to keep the interaction)</p>
+</div>
+<div id="model-fitting" class="section level3">
+<h3>Model fitting</h3>
+<p>OK now it’s time to start fitting out models. Given the graphs above, our first thought was to run a <code>lmer</code> with a log-transformed response.</p>
+<p>(Here we are also examining whether there is any interaction between <code>site_sys</code> and <code>cc_trt</code>, and looks like there is. We are therefore going to keep the interaction in all the models going forward)</p>
 <pre class="r"><code>m1 &lt;- lmer(log(totseeds) ~ site_sys * cc_trt + (1|blockID), data = dat2)
 m2 &lt;- lmer(log(totseeds) ~ site_sys + cc_trt + (1|blockID), data = dat2)
 
@@ -94,7 +124,7 @@ anova(m1, m2) # keep interaction</code></pre>
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Before we dive into the summary values and statistical reporting lets check out our diagnostic plots:</p>
-<pre class="r"><code>resid_panel(m1)</code></pre>
+<pre class="r"><code>ggResidpanel::resid_panel(m1)</code></pre>
 <p><img src="/post/weed_model_selection/index_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
 <p>This doesn’t look bad, but perhaps it could look better…</p>
 <p>To stick within the normal-distribution framework we could also try another transformation. The square-root transformation can also work for count data.</p>
@@ -104,15 +134,16 @@ anova(m1, m2) # keep interaction</code></pre>
   ggtitle(&quot;Sqrt-transformed Data&quot;)+
   theme(plot.title.position = &quot;plot&quot;)</code></pre>
 <p><img src="/post/weed_model_selection/index_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
-<p>The data still look a little skewed, but that’s ok…</p>
+<p>The data still look a little skewed, but that’s OK…</p>
 <pre class="r"><code>m1b &lt;- lmer(sqrt(totseeds) ~ site_sys * cc_trt + (1|blockID), dat2)
 resid_panel(m1b)</code></pre>
 <p><img src="/post/weed_model_selection/index_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
-<p>These diagnostic plots look pretty similar, although the square root transformation might be a little better. The problem with the square root transformation is that it renders the data pretty uninterpretable.</p>
-<p>Since we are working with count data, however, we have other options in our stats toolbox - generalized linear models. The natural first option is a Poisson distribution with a log link function:</p>
+<p>These diagnostic plots look pretty similar, although the square root transformation might be a little better. The problem with the square root transformation is that it renders the data pretty uninterpretable and we’d like to be able to interpret our model estimates.</p>
+<p>Since we are working with count data, however, we have other options in our stats toolbox - generalized linear models. We don’t even need to load another package to do this, we just need to call <code>glmer</code> from the {lme4} package and specify which distribution we’re fitting.</p>
+<p>Our first attempt with <code>glmer</code> will be a Poisson distribution, which is meant for count data and often (but not always) uses a log link function.</p>
 <pre class="r"><code>p1a &lt;- glmer(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2, 
             family = poisson(link = &quot;log&quot;))</code></pre>
-<p>This model converged, awesome! But we should always check for overdispersion in our Poisson models, which is when the variance &gt;&gt; mean. We are using the <a href="https://easystats.github.io/performance/">performance</a> package for this since it makes checking for overdispersion really easy.</p>
+<p>It looks like our model successfully fit the data. But we should always check for over-dispersion in our Poisson models, which is when the variance &gt;&gt; mean.</p>
 <pre class="r"><code>performance::check_overdispersion(p1a) </code></pre>
 <pre><code>## # Overdispersion test
 ## 
@@ -120,22 +151,24 @@ resid_panel(m1b)</code></pre>
 ##   Pearson&#39;s Chi-Squared = 288.047
 ##                 p-value = &lt; 0.001</code></pre>
 <pre><code>## Overdispersion detected.</code></pre>
-<p>Just as an aside, you can also calcuate dispersion by hand by like:</p>
-<pre class="r"><code>1 - pchisq(deviance(p1a), df.residual(p1a)) </code></pre>
+<p>Just as an aside, you can also calculate dispersion by hand using one of these two methods:</p>
+<pre class="r"><code># option 1
+1 - pchisq(deviance(p1a), df.residual(p1a)) </code></pre>
 <pre><code>## [1] 0</code></pre>
-<pre class="r"><code>r &lt;- resid(p1a,type=&quot;pearson&quot;)
+<pre class="r"><code># option 2
+r &lt;- resid(p1a,type=&quot;pearson&quot;)
 1-pchisq(sum(r^2),df.residual(p1a))</code></pre>
 <pre><code>## [1] 0</code></pre>
-<p>Either way our p-value is very close to 0, so it looks like our data are overdispersed.</p>
-<p>Now we have two options if we want to continue down the glmer path. We could:</p>
+<p>Either way our p-value is very close to 0, so it looks like our data are over-dispersed.</p>
+<p>Now we have two options if we want to continue down the <code>glmer</code> path. We could:</p>
 <ol style="list-style-type: decimal">
-<li><p>Add an observation-level random effect to our Poisson model</p></li>
-<li><p>Switch to a negative binomial model</p></li>
+<li><p>Add an observation-level random effect to our Poisson model.</p></li>
+<li><p>Switch to a different distribution, like the negative binomial.</p></li>
 </ol>
-<p>Let’s start with option 1 and add an oberservation-level random effect.</p>
+<p>Let’s start with option 1 and add an observation-level random effect. To learn more about why this helps, see <a href="https://peerj.com/articles/616/">this article</a>.</p>
 <pre class="r"><code>dat2 &lt;- 
   dat2 %&gt;%
-  mutate(obs_id = paste(&quot;obs&quot;, 1:45, sep = &quot;_&quot;))
+  mutate(obs_id = paste(&quot;obs&quot;, 1:n(), sep = &quot;_&quot;))
 
 p1b &lt;- glmer(totseeds ~ site_sys*cc_trt + (1|blockID) + (1|obs_id), data = dat2, 
             family = poisson(link = &quot;log&quot;))</code></pre>
@@ -146,19 +179,12 @@ p1b &lt;- glmer(totseeds ~ site_sys*cc_trt + (1|blockID) + (1|obs_id), data = da
 ##   Pearson&#39;s Chi-Squared = 5.065
 ##                 p-value =     1</code></pre>
 <pre><code>## No overdispersion detected.</code></pre>
-<pre class="r"><code># or 
-
-1 - pchisq(deviance(p1b), df.residual(p1b)) </code></pre>
-<pre><code>## [1] 1</code></pre>
-<pre class="r"><code>r &lt;- resid(p1b,type=&quot;pearson&quot;)
-1-pchisq(sum(r^2),df.residual(p1b))</code></pre>
-<pre><code>## [1] 1</code></pre>
-<p>Adding our observation-level random effect fixed out overdispersion problem. Great!</p>
-<p>Let’s also try option 2 and fit the data to a negative-binomial model</p>
+<p>Adding our observation-level random effect fixed out over-dispersion problem. Great!</p>
+<p>But let’s also try option 2 and fit the data to a negative-binomial model.</p>
 <pre class="r"><code># option 2, negative binomial....
 g1a &lt;- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2)</code></pre>
-<p>Also converges, great!</p>
-<p>Let’s now compare our summary values:</p>
+<p>This model also converges, which is great! In my limited experience using negative binomial models this isn’t always true so this is a small victory.</p>
+<p>Let’s now compare the summary values of the two models:</p>
 <pre class="r"><code>summary(p1b)</code></pre>
 <pre><code>## Generalized linear mixed model fit by maximum likelihood (Laplace
 ##   Approximation) [glmerMod]
@@ -249,5 +275,16 @@ g1a &lt;- glmer.nb(totseeds ~ site_sys*cc_trt + (1|blockID), data = dat2)</code>
 ## --------------------------------------------------------------------------------------------------------------------
 ## p1b   | glmerMod | 445.17 | 463.24 |           0.78 |        0.66 | 0.36 | 0.35 |     -2.82 |            0.14 |     
 ## g1a   | glmerMod | 445.44 | 463.50 |           0.81 |        0.67 | 0.42 | 0.90 |     -4.49 |            0.12 | 0.88</code></pre>
-<p>Both these models have very similar AICs, and they also have very similar p-values which is reassuring, since our interpretation of the data won’t change depending on the model we choose.</p>
-<p>In the end we decided to go with the Poisson-observation-level-random-effect model (named here <code>p1b</code>). If only because it is a little more straightforward than negative binomial models.</p>
+<p>Both these models have very similar AICs, and they also have very similar estimates and p-values which is reassuring, since our interpretation of the data won’t change depending on the model we choose.</p>
+<p>In the end we decided to go with the Poisson-observation-level-random-effect model (named here <code>p1b</code>). Poisson models are slightly more simple than negative binomial and built for count data.</p>
+<div class="summary">
+<p>Recap of our models:</p>
+<ol style="list-style-type: lower-roman">
+<li>Log-transformation: decent fit but slight loss in interpretability</li>
+<li>Square-root transformation: slightly better fit (at least visually) but complete loss of interpretability</li>
+<li>Poisson generalized linear model: works but over-dispersed</li>
+<li>Poisson generalized linear model with observation-level random effect: fixes overdispersion and seems to fit well!</li>
+<li>Negative binomial generalized linear model: fits very similarly to Poisson, but slightly more complicated model.</li>
+</ol>
+</div>
+</div>

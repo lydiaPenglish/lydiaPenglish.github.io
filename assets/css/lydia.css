@@ -30,3 +30,15 @@
   background-position: center;
   text-align: center;
   }
+
+div.summary {
+    padding: 1em;
+    margin: 1em 0;
+    padding-left: 5px;
+    min-height: 120px;
+    color: #fff;
+    background-color: #ea7282;
+    border: solid 5px #F4B5BD;
+    font-family: 'Lato';
+  }  
+
