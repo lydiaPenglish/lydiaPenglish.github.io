@@ -1,12 +1,12 @@
 ---
 authors:
 - admin
-bio: Graduate student interested in ecology, sustainable agriculture, and data curation and visualization.
+bio: Interested in ecology, sustainable agriculture, and data curation and visualization.
 education:
   courses:
   - course: MS in Sustainable Agriculture and Ecology & Evolutionary Biology
     institution: Iowa State University
-    year: 2017 - present
+    year: 2020
   - course: BA in Biology
     institution: Carleton College
     year: 2013
@@ -18,9 +18,11 @@ interests:
 - Crafting
 name: Lydia English
 organizations:
+- name: Practical Farmers of Iowa
+  url: https://practicalfarmers.org/
 - name: Iowa State University
   url: "https://www.susag.iastate.edu"
-role: Graduate Research Assistant
+role: 
 social:
 - icon: envelope
   icon_pack: fas
@@ -40,5 +42,5 @@ user_groups:
 - Visitors
 ---
 
-Lydia English is a graduate research assistant in the department of Agronomy at Iowa State University. She currently works for [Dr. Matt Liebman](http://www.wallacechair.iastate.edu/). She is interested in diversifying agricultural landscapes by extending crop rotations and incorporating native habitat into farmscapes. She is affiliated with the [STRIPS project](https://www.nrem.iastate.edu/research/STRIPS/) at Iowa State University. 
+Lydia English is the strategic initiatives coordintor at [Practical Farmers of Iowa](https://practicalfarmers.org/) (PFI). She works to increase the number of acres of cover crops and small grains in Iowa and across the Midwest. More generally, she is interested in combining the principles of ecology and agriculture to create diversied cropping systems. Prior to working at PFI, Lydia was a graduate research assistant in the department of Agronomy at Iowa State University where she worked for [Dr. Matt Liebman](http://www.wallacechair.iastate.edu/). 
  
